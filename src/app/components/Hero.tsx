@@ -3,17 +3,19 @@ import { FaGithub } from "react-icons/fa";
 import { FaLinkedin } from "react-icons/fa";
 import { IoMdMail } from "react-icons/io";
 import { IoIosArrowDown } from "react-icons/io";
+import { Navbar } from './Navbar';
 
 export const Hero = () => {
   return (
-    <section id="hero" className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-white">
+    <section id="hero" className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray-950 to-gray-900">
+      <Navbar />
       <div className="max-w-4xl mx-auto px-6 text-center">
         <div className="mb-8">
-          <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-6 leading-tight">
+          <h1 className="text-5xl md:text-7xl font-bold text-gray-300 mb-6 leading-tight">
             Desarrollador
             <span className="block text-gray-600">Front End</span>
           </h1>
-          <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-xl md:text-2xl text-gray-400 mb-8 max-w-2xl mx-auto leading-relaxed">
             Especializado en React, creando experiencias digitales modernas y funcionales
           </p>
         </div>
@@ -42,7 +44,6 @@ export const Hero = () => {
             <IoMdMail />
           </a>
         </div>
-
         <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6">
           <a
             href="#projects"
@@ -52,12 +53,11 @@ export const Hero = () => {
           </a>
           <a
             href="#contact"
-            className="px-8 py-4 border-2 border-gray-900 text-gray-900 rounded-full hover:bg-gray-900 hover:text-white transition-all duration-300 font-medium hover:scale-105"
+            className="px-8 py-4 border-2 rounded-full bg-gray-900 text-white transition-all duration-300 font-medium hover:scale-105"
           >
             Contactar
           </a>
         </div>
-
         <div className="mt-16 animate-bounce">
           <a href="#about">
             <IoIosArrowDown className="text-gray-400 hover:text-gray-600 transition-colors" />
