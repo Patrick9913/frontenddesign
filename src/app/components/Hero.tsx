@@ -16,7 +16,7 @@ export const Hero = () => {
             <span className="block text-gray-600">Front End</span>
           </h1>
           <p className="text-xl md:text-2xl text-gray-400 mb-8 max-w-2xl mx-auto leading-relaxed">
-            Especializado en React, creando experiencias digitales modernas y funcionales
+            Especializado en React, Next.js y TypeScript. Creando experiencias digitales modernas y funcionales con más de 3 años de experiencia en desarrollo web.
           </p>
         </div>
 
@@ -25,20 +25,23 @@ export const Hero = () => {
             href="https://github.com/Patrick9913"
             target="_blank"
             rel="noopener noreferrer"
+            aria-label="Ver perfil de GitHub de Patrick Ordoñez"
             className="p-3 bg-gray-900 text-white rounded-full hover:bg-gray-800 transition-all duration-300 hover:scale-110"
           >
             <FaGithub />
           </a>
           <a
-            href="https://linkedin.com"
+            href="https://linkedin.com/in/patrick-ordonez"
             target="_blank"
             rel="noopener noreferrer"
+            aria-label="Ver perfil de LinkedIn de Patrick Ordoñez"
             className="p-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-all duration-300 hover:scale-110"
           >
             <FaLinkedin />
           </a>
           <a
             href="mailto:patrickyoel13@gmail.com"
+            aria-label="Enviar email a Patrick Ordoñez"
             className="p-3 bg-red-500 text-white rounded-full hover:bg-red-600 transition-all duration-300 hover:scale-110"
           >
             <IoMdMail />
