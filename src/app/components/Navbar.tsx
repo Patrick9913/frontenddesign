@@ -32,6 +32,7 @@ export const Navbar: React.FC = () => {
     const navItems = [
         { name: 'Inicio', href: '#hero' },
         { name: 'Sobre mí', href: '#about' },
+        { name: 'Formación', href: '#experience' },
         { name: 'Habilidades', href: '#skills' },
         { name: 'Proyectos', href: '#projects' },
         { name: 'Contacto', href: '#contact' },

@@ -15,25 +15,31 @@ export const About = () => {
         </div>
 
         <div className="grid md:grid-cols-2 gap-16 items-center">
-          <div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-6">
-              Desarrollador apasionado por crear experiencias digitales excepcionales
-            </h3>
-            <p className="text-gray-600 mb-6 leading-relaxed">
-              Con más de 3 años de experiencia en desarrollo front-end, me especializo en crear 
-              aplicaciones web modernas y responsivas utilizando las últimas tecnologías. 
-              Mi enfoque está en escribir código limpio, escalable y mantenible.
-            </p>
-            <p className="text-gray-600 mb-8 leading-relaxed">
-              Disfruto transformar ideas creativas en soluciones digitales funcionales, 
-              siempre buscando la mejor experiencia de usuario posible.
-            </p>
-            <a
-              href="/cv.pdf"
-              className="inline-block px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-all duration-300 font-medium"
-            >
-              Descargar CV
-            </a>
+          <div className="flex flex-col items-center md:items-start">
+            {/* Círculo para foto de perfil */}
+            <div className="w-48 h-48 rounded-full bg-gradient-to-br from-gray-300 to-gray-400 mb-8 flex items-center justify-center shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 relative overflow-hidden group">
+              <div className="absolute inset-0 bg-gradient-to-br from-gray-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="text-gray-500 text-6xl font-light z-10">PO</div>
+            </div>
+            
+            <div className="text-center md:text-left w-full">
+              
+              <p className="text-gray-600 mb-6 leading-relaxed">
+                Con más de 3 años de experiencia en desarrollo front-end, me especializo en crear 
+                aplicaciones web modernas y responsivas utilizando las últimas tecnologías. 
+                Mi enfoque está en escribir código limpio, escalable y mantenible.
+              </p>
+              <p className="text-gray-600 mb-8 leading-relaxed">
+                Disfruto transformar ideas creativas en soluciones digitales funcionales, 
+                siempre buscando la mejor experiencia de usuario posible.
+              </p>
+              <a
+                href="/cv.pdf"
+                className="inline-block px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-all duration-300 font-medium"
+              >
+                Descargar CV
+              </a>
+            </div>
           </div>
 
           <div className="grid gap-6">

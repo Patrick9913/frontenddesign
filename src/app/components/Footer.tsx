@@ -19,7 +19,7 @@ export const Footer = () => {
             </p>
             <div className="flex space-x-4">
               <a
-                href="https://github.com"
+                href="https://github.com/Patrick9913"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-gray-800 rounded-lg"
@@ -35,7 +35,7 @@ export const Footer = () => {
                 <FaLinkedin />
               </a>
               <a
-                href="mailto:tu@email.com"
+                href="mailto:patrickyoel13@gmail.com"
                 className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-gray-800 rounded-lg"
               >
                 <IoMdMail />

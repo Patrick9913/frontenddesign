@@ -38,7 +38,7 @@ export const Hero = () => {
             <FaLinkedin />
           </a>
           <a
-            href="mailto:tu@email.com"
+            href="mailto:patrickyoel13@gmail.com"
             className="p-3 bg-red-500 text-white rounded-full hover:bg-red-600 transition-all duration-300 hover:scale-110"
           >
             <IoMdMail />
