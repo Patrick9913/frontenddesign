@@ -1,0 +1,161 @@
+========================================
+TEMPLATE DE EMAILJS
+========================================
+
+Copia y pega esto en tu template de EmailJS:
+
+-----------------------------------
+SUBJECT (Asunto del correo):
+-----------------------------------
+
+Nuevo mensaje de portfolio: {{subject}}
+
+
+-----------------------------------
+CONTENT (Cuerpo del correo HTML):
+-----------------------------------
+
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px 10px 0 0;
+            text-align: center;
+        }
+        .content {
+            background: #f9fafb;
+            padding: 30px;
+            border-left: 4px solid #1f2937;
+            border-right: 4px solid #1f2937;
+        }
+        .info-row {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #3b82f6;
+        }
+        .label {
+            font-weight: bold;
+            color: #1f2937;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .value {
+            color: #4b5563;
+            margin-top: 5px;
+            font-size: 16px;
+        }
+        .message-box {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+        .footer {
+            background: #1f2937;
+            color: #9ca3af;
+            padding: 20px;
+            border-radius: 0 0 10px 10px;
+            text-align: center;
+            font-size: 12px;
+        }
+        .emoji {
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="emoji">📧</div>
+        <h1 style="margin: 10px 0;">Nuevo Mensaje de Contacto</h1>
+        <p style="margin: 0; opacity: 0.9;">Desde tu Portfolio Web</p>
+    </div>
+    
+    <div class="content">
+        <div class="info-row">
+            <div class="label">👤 Nombre del remitente</div>
+            <div class="value">{{from_name}}</div>
+        </div>
+        
+        <div class="info-row">
+            <div class="label">📧 Email de contacto</div>
+            <div class="value"><a href="mailto:{{from_email}}" style="color: #3b82f6; text-decoration: none;">{{from_email}}</a></div>
+        </div>
+        
+        <div class="info-row">
+            <div class="label">📋 Asunto</div>
+            <div class="value">{{subject}}</div>
+        </div>
+        
+        <div class="info-row" style="border-left: 4px solid #10b981;">
+            <div class="label">💬 Mensaje</div>
+            <div class="message-box">
+                <p style="margin: 0; white-space: pre-wrap;">{{message}}</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p style="margin: 5px 0;">⚡ Este mensaje fue enviado desde el formulario de contacto de tu portfolio</p>
+        <p style="margin: 5px 0;">🌐 Patrick Ordoñez - Desarrollador Front End</p>
+        <p style="margin: 15px 0 5px 0; opacity: 0.7;">Responde directamente a este correo para contactar al remitente</p>
+    </div>
+</body>
+</html>
+
+
+-----------------------------------
+TO EMAIL (Destinatario):
+-----------------------------------
+
+patrickyoel13@gmail.com
+
+
+-----------------------------------
+REPLY TO (Responder a):
+-----------------------------------
+
+{{from_email}}
+
+
+-----------------------------------
+FROM NAME (Nombre del remitente):
+-----------------------------------
+
+Portfolio - {{from_name}}
+
+
+========================================
+NOTA IMPORTANTE:
+========================================
+
+Cuando configures el template en EmailJS:
+
+1. En "To email" puedes poner directamente: patrickyoel13@gmail.com
+   O usar la variable: {{to_email}}
+
+2. En "Reply to" pon: {{from_email}}
+   Esto te permitirá responder directamente al correo del cliente
+
+3. En "From name" pon: Portfolio - {{from_name}}
+   Así verás de quién viene el mensaje
+
+4. Guarda y prueba el template antes de usar
+
+========================================
+

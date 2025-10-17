@@ -1,9 +1,11 @@
 'use client';
 import React, { useState } from 'react';
+import emailjs from '@emailjs/browser';
 import { IoMdMail } from "react-icons/io";
 import { RiSmartphoneFill } from "react-icons/ri";
 import { FaMapMarkedAlt } from "react-icons/fa";
 import { BsFillSendFill } from "react-icons/bs";
+import { AiOutlineLoading3Quarters } from "react-icons/ai";
 
 export const Contact = () => {
   const [formData, setFormData] = useState({
@@ -13,6 +15,9 @@ export const Contact = () => {
     message: '',
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
       ...formData,
@@ -20,12 +25,46 @@ export const Contact = () => {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
-    // Aquí implementarías la lógica de envío del formulario
-    alert('¡Mensaje enviado! Te contactaré pronto.');
-    setFormData({ name: '', email: '', subject: '', message: '' });
+    setIsSubmitting(true);
+    setSubmitStatus('idle');
+
+    try {
+      // Configuración de EmailJS
+      const serviceId = 'service_kjmlf1a';
+      const templateId = 'template_xf807za';
+      const publicKey = 'nIzwTNQpr1_X4EE_q';
+
+      const templateParams = {
+        from_name: formData.name,
+        from_email: formData.email,
+        subject: formData.subject,
+        message: formData.message,
+        to_email: 'patrickyoel13@gmail.com',
+      };
+
+      await emailjs.send(
+        serviceId,
+        templateId,
+        templateParams,
+        publicKey
+      );
+
+      setSubmitStatus('success');
+      setFormData({ name: '', email: '', subject: '', message: '' });
+      
+      // Ocultar mensaje de éxito después de 5 segundos
+      setTimeout(() => setSubmitStatus('idle'), 5000);
+    } catch (error) {
+      console.error('Error al enviar el mensaje:', error);
+      setSubmitStatus('error');
+      
+      // Ocultar mensaje de error después de 5 segundos
+      setTimeout(() => setSubmitStatus('idle'), 5000);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -169,12 +208,39 @@ export const Contact = () => {
                 ></textarea>
               </div>
 
+              {/* Mensajes de feedback */}
+              {submitStatus === 'success' && (
+                <div className="p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+                  ✅ ¡Mensaje enviado exitosamente! Te contactaré pronto.
+                </div>
+              )}
+
+              {submitStatus === 'error' && (
+                <div className="p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                  ❌ Error al enviar el mensaje. Por favor, intenta nuevamente o contáctame directamente por email.
+                </div>
+              )}
+
               <button
                 type="submit"
-                className="w-full px-8 py-4 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-all duration-300 font-medium flex items-center justify-center hover:scale-105"
+                disabled={isSubmitting}
+                className={`w-full px-8 py-4 bg-gray-900 text-white rounded-lg transition-all duration-300 font-medium flex items-center justify-center ${
+                  isSubmitting 
+                    ? 'opacity-50 cursor-not-allowed' 
+                    : 'hover:bg-gray-800 hover:scale-105'
+                }`}
               >
-                <BsFillSendFill size={20} className="mr-2" />
-                Enviar Mensaje
+                {isSubmitting ? (
+                  <>
+                    <AiOutlineLoading3Quarters size={20} className="mr-2 animate-spin" />
+                    Enviando...
+                  </>
+                ) : (
+                  <>
+                    <BsFillSendFill size={20} className="mr-2" />
+                    Enviar Mensaje
+                  </>
+                )}
               </button>
             </form>
           </div>
