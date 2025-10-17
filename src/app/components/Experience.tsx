@@ -18,7 +18,7 @@ export const Experience = () => {
     },
     {
       year: "2023",
-      title: "Carrera Desarrollo Web con orientación en React",
+      title: "Desarrollo Web orientado a React",
       icon: <FaReact className="text-cyan-500 text-2xl" />,
       description: "Especialización en React y desarrollo frontend avanzado"
     },
