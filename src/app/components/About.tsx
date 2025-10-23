@@ -19,7 +19,11 @@ export const About = () => {
             {/* Círculo para foto de perfil */}
             <div className="w-48 h-48 rounded-full bg-gradient-to-br from-gray-300 to-gray-400 mb-8 flex items-center justify-center shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 relative overflow-hidden group">
               <div className="absolute inset-0 bg-gradient-to-br from-gray-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <div className="text-gray-500 text-6xl font-light z-10">PO</div>
+              <img 
+                src="/robot.png" 
+                alt="Patrick Ordoñez - Desarrollador Frontend" 
+                className="w-32 h-32 object-contain z-10"
+              />
             </div>
             
             <div className="text-center md:text-left w-full">
