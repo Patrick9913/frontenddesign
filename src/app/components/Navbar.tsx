@@ -42,14 +42,8 @@ export const Navbar: React.FC = () => {
         <nav className="max-w-6xl mx-auto px-6 py-4 relative z-50">
             <div className="flex flex-row md:flex-col justify-between items-center">
                 <a href="#hero" className="flex items-center space-x-3 text-2xl font-bold text-gray-200 hover:text-gray-700 transition-colors">
-                    <img 
-                        src="/robot.png" 
-                        alt="Patrick Ordoñez Logo" 
-                        className="w-8 h-8 object-contain"
-                    />
                     <span>Patrick Ordoñez</span>
                 </a>
-            
             {/* Desktop Navigation */}
                 <div className="hidden md:flex md:mt-4 space-x-8">
                     {navItems.map((item) => (
