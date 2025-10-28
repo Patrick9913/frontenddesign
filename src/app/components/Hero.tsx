@@ -46,7 +46,7 @@ export const Hero = () => {
             <FaGithub />
           </a>
           <a
-            href="https://linkedin.com/in/patrick-ordonez"
+            href="https://www.linkedin.com/in/patrick-ord%C3%B3%C3%B1ez-14904221a/"
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Ver perfil de LinkedIn de Patrick Ordoñez"

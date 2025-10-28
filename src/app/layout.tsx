@@ -111,7 +111,7 @@ export default function RootLayout({
               "image": "https://patrick-portfolio.vercel.app/og-image.png",
               "sameAs": [
                 "https://github.com/Patrick9913",
-                "https://linkedin.com/in/patrick-ordonez"
+                "https://www.linkedin.com/in/patrick-ord%C3%B3%C3%B1ez-14904221a/"
               ],
               "address": {
                 "@type": "PostalAddress",
