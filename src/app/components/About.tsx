@@ -20,9 +20,9 @@ export const About = () => {
             <div className="w-48 h-48 rounded-full bg-gradient-to-br from-gray-300 to-gray-400 mb-8 flex items-center justify-center shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 relative overflow-hidden group">
               <div className="absolute inset-0 bg-gradient-to-br from-gray-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               <img 
-                src="/robot.png" 
+                src="/imagen2.jpg" 
                 alt="Patrick Ordoñez - Desarrollador Frontend" 
-                className="w-32 h-32 object-contain z-10"
+                className=" object-contain z-10"
               />
             </div>
             
@@ -37,12 +37,12 @@ export const About = () => {
                 Disfruto transformar ideas creativas en soluciones digitales funcionales, 
                 siempre buscando la mejor experiencia de usuario posible.
               </p>
-              <a
+              {/* <a
                 href="/cv.pdf"
                 className="inline-block px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-all duration-300 font-medium"
               >
                 Descargar CV
-              </a>
+              </a> */}
             </div>
           </div>
 

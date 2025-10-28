@@ -14,7 +14,10 @@ export const Skills = () => {
 
   const tools = [
     'VS Code', 'Figma', 'Postman', 'Chrome DevTools',
-    'npm/yarn', 'Webpack', 'Vite', 'Vercel'
+    'npm/yarn', 'Webpack', 'Vite', 'Vercel',
+    'ESLint', 'Prettier', 'Storybook', 'Jest',
+    'React DevTools', 'Redux DevTools', 'Insomnia', 'Docker',
+    'GitHub Actions', 'Netlify', 'Firebase', 'MongoDB'
   ];
 
   return (
@@ -59,22 +62,6 @@ export const Skills = () => {
                   <span className="font-medium text-gray-900">{tool}</span>
                 </div>
               ))}
-            </div>
-
-            <div className="mt-12 bg-white p-8 rounded-xl shadow-sm">
-              <h4 className="text-xl font-bold text-gray-900 mb-4">Experiencia</h4>
-              <div className="space-y-4">
-                <div className="border-l-4 border-gray-900 pl-4">
-                  <h5 className="font-semibold text-gray-900">Frontend Developer</h5>
-                  <p className="text-sm text-gray-600">2022 - Presente</p>
-                  <p className="text-gray-600 mt-1">Desarrollo de aplicaciones web con React y TypeScript</p>
-                </div>
-                <div className="border-l-4 border-gray-400 pl-4">
-                  <h5 className="font-semibold text-gray-900">Junior Developer</h5>
-                  <p className="text-sm text-gray-600">2021 - 2022</p>
-                  <p className="text-gray-600 mt-1">Aprendizaje y desarrollo de proyectos personales</p>
-                </div>
-              </div>
             </div>
           </div>
         </div>
