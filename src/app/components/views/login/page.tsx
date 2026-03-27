@@ -1,6 +1,6 @@
 import React from 'react'
 
-export const Login: React.FC = () => {
+const LoginPage: React.FC = () => {
     return (
         <section className='flex flex-col items-center justify-center h-screen'>
             <div className='flex flex-col items-center justify-center'>
@@ -9,3 +9,5 @@ export const Login: React.FC = () => {
         </section>
     )
 }
+
+export default LoginPage;
