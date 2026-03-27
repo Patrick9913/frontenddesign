@@ -68,7 +68,7 @@ export const Contact = () => {
   };
 
   return (
-    <section id="contact" className="py-20 bg-gray-50">
+    <section id="contact" className="py-20 bg-white/86 backdrop-blur-[1px]">
       <div className="max-w-6xl mx-auto px-6">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
@@ -204,7 +204,7 @@ export const Contact = () => {
                   value={formData.message}
                   onChange={handleChange}
                   className="w-full px-4 py-3 border text-gray-400 border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all resize-none"
-                  placeholder="Cuéntame sobre tu proyecto..."
+                  placeholder="Contame sobre tu proyecto..."
                 ></textarea>
               </div>
 

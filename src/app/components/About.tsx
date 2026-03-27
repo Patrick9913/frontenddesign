@@ -5,7 +5,7 @@ import { BiSolidCoffee } from "react-icons/bi";
 
 export const About = () => {
   return (
-    <section id="about" className="py-20 bg-white">
+    <section id="about" className="py-20 bg-white/92 backdrop-blur-[1px]">
       <div className="max-w-6xl mx-auto px-6">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
@@ -20,7 +20,7 @@ export const About = () => {
             <div className="w-48 h-48 rounded-full bg-gradient-to-br from-gray-300 to-gray-400 mb-8 flex items-center justify-center shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 relative overflow-hidden group">
               <div className="absolute inset-0 bg-gradient-to-br from-gray-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               <img 
-                src="/imagen2.jpg" 
+                src="/fotoperfil.jpg" 
                 alt="Patrick Ordoñez - Desarrollador Frontend" 
                 className=" object-contain z-10"
               />

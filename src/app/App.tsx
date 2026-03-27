@@ -12,7 +12,7 @@ export const App = () => {
     <>
       <Hero />
       <About />
-      <Experience />
+      {/* <Experience /> */}
       <Skills />
       <Projects />
       <Contact />
