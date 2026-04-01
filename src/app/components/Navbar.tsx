@@ -1,23 +1,19 @@
 'use client';
 
 import React, { useEffect, useState } from "react";
-import { AiOutlineMenu } from "react-icons/ai";
+import { createPortal } from "react-dom";
+import { HiOutlineMenuAlt3 } from "react-icons/hi";
 import { IoMdClose } from "react-icons/io";
 
 export const Navbar: React.FC = () => {
-
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [isScrolled, setIsScrolled] = useState(false);
+    const [mounted, setMounted] = useState(false);
+    const year = new Date().getFullYear();
 
     useEffect(() => {
-        const handleScroll = () => {
-        setIsScrolled(window.scrollY > 50);
-        };
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
+        setMounted(true);
     }, []);
 
-    // Prevenir scroll cuando el menú está abierto
     useEffect(() => {
         if (isMenuOpen) {
             document.body.style.overflow = 'hidden';
@@ -29,6 +25,15 @@ export const Navbar: React.FC = () => {
         };
     }, [isMenuOpen]);
 
+    useEffect(() => {
+        if (!isMenuOpen) return;
+        const onKey = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') setIsMenuOpen(false);
+        };
+        document.addEventListener('keydown', onKey);
+        return () => document.removeEventListener('keydown', onKey);
+    }, [isMenuOpen]);
+
     const navItems = [
         { name: 'Inicio', href: '#hero' },
         { name: 'Sobre mí', href: '#about' },
@@ -37,81 +42,122 @@ export const Navbar: React.FC = () => {
         { name: 'Proyectos', href: '#projects' },
         { name: 'Contacto', href: '#contact' },
     ];
+
     return (
         <>
-        <nav className="max-w-6xl mx-auto px-6 py-4 relative z-50">
+        <nav className="relative z-50 max-w-7xl mx-auto px-8 md:px-16 lg:px-24 py-4 font-sans">
             <div className="flex justify-between items-center w-full">
-                <a href="#hero" className="text-lg md:text-xl font-light tracking-widest text-white hover:text-gray-400 transition-colors uppercase">
+                <a href="#hero" className="text-lg md:text-xl font-light tracking-widest text-white hover:text-gray-400 transition-colors duration-300 uppercase">
                     Patrick Ordoñez
                 </a>
-            {/* Desktop Navigation */}
-                <div className="hidden md:flex space-x-10 items-center">
+                <div className="hidden md:flex md:space-x-10 md:items-center">
                     {navItems.map((item) => (
                     <a
                         key={item.name}
                         href={item.href}
-                        className="text-[10px] md:text-xs tracking-[0.25em] uppercase text-gray-400 hover:text-white transition-colors"
+                        className="text-[10px] md:text-xs tracking-[0.25em] uppercase text-gray-400 hover:text-white transition-colors duration-300"
                     >
                         {item.name}
                     </a>
                     ))}
                 </div>
 
-            {/* Mobile Menu Button - Fijo en la esquina superior derecha */}
-                <button
-                    className="md:hidden p-2 text-gray-200 hover:text-gray-100 transition-colors z-[60] fixed top-4 right-4 bg-gray-800 rounded-lg shadow-lg"
-                    onClick={() => setIsMenuOpen(!isMenuOpen)}
-                    aria-label="Toggle menu"
-                >
-                    {isMenuOpen ? <IoMdClose size={28} /> : <AiOutlineMenu size={28} />}
-                </button>
-            </div>
-      </nav>
-
-        {/* Overlay oscuro de fondo */}
-        {isMenuOpen && (
-            <div 
-                className="fixed inset-0 bg-black/70 z-40 md:hidden transition-opacity duration-300"
-                onClick={() => setIsMenuOpen(false)}
-            />
-        )}
-
-        {/* Mobile Navigation - Sidebar desde la derecha */}
-        <div className={`fixed top-0 right-0 h-full w-[280px] bg-gradient-to-b from-gray-900 to-gray-950 shadow-2xl z-50 md:hidden transform transition-transform duration-300 ease-in-out ${
-            isMenuOpen ? 'translate-x-0' : 'translate-x-full'
-        }`}>
-            <div className="flex flex-col h-full pt-20 px-6">
-                <div className="flex flex-col space-y-2">
-                    {navItems.map((item, index) => (
-                    <a
-                        key={item.name}
-                        href={item.href}
-                        className="text-gray-200 hover:text-white hover:bg-gray-800 transition-all px-4 py-4 rounded-lg text-lg font-medium border-b border-gray-800"
-                        onClick={() => setIsMenuOpen(false)}
-                        style={{ 
-                            animation: isMenuOpen ? `slideIn 0.3s ease-out ${index * 0.05}s forwards` : 'none',
-                            opacity: 0
-                        }}
+                {!isMenuOpen && (
+                    <button
+                        type="button"
+                        className="md:hidden fixed top-5 right-5 z-[1102] flex h-11 w-11 items-center justify-center border border-white/20 bg-black/45 text-white backdrop-blur-md transition-all duration-500 ease-[cubic-bezier(0.65,0.02,0.28,1)] hover:border-white/35 hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                        onClick={() => setIsMenuOpen(true)}
+                        aria-expanded={false}
+                        aria-controls="mobile-menu-panel"
+                        aria-label="Abrir menú"
                     >
-                        {item.name}
-                    </a>
-                    ))}
-                </div>
+                        <HiOutlineMenuAlt3 className="h-6 w-6" aria-hidden />
+                    </button>
+                )}
             </div>
-        </div>
+        </nav>
 
-        <style jsx>{`
-            @keyframes slideIn {
-                from {
-                    opacity: 0;
-                    transform: translateX(20px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateX(0);
-                }
-            }
-        `}</style>
+        {/* Portal a document.body: el Navbar vive dentro del Hero (z-10); sin portal el contenido
+            hermano del hero se pinta encima del panel y parece “transparente”. */}
+        {mounted
+            ? createPortal(
+                  <>
+                      <div
+                          className={`fixed inset-0 z-[1100] bg-black/80 transition-opacity duration-500 ease-out md:hidden ${
+                              isMenuOpen
+                                  ? 'pointer-events-auto opacity-100'
+                                  : 'pointer-events-none opacity-0'
+                          }`}
+                          onClick={() => setIsMenuOpen(false)}
+                          aria-hidden={!isMenuOpen}
+                      />
+
+                      <div
+                          id="mobile-menu-panel"
+                          role="dialog"
+                          aria-modal="true"
+                          aria-label="Menú de navegación"
+                          className={`fixed top-0 right-0 z-[1101] flex h-full w-[min(100%,18rem)] flex-col border-l border-white/10 font-sans shadow-[0_0_48px_-12px_rgba(0,0,0,0.85)] transition-transform duration-500 ease-[cubic-bezier(0.65,0.02,0.28,1)] md:hidden isolate ${
+                              isMenuOpen
+                                  ? 'translate-x-0'
+                                  : 'translate-x-full pointer-events-none'
+                          }`}
+                          style={{ backgroundColor: '#000000' }}
+                          onClick={(e) => e.stopPropagation()}
+                      >
+                          <div className="flex shrink-0 items-center justify-between gap-4 border-b border-white/10 bg-black px-6 pt-6 pb-5 md:px-8">
+                              <span className="text-[9px] font-light tracking-[0.4em] uppercase text-white/40">
+                                  Navegación
+                              </span>
+                              <button
+                                  type="button"
+                                  onClick={() => setIsMenuOpen(false)}
+                                  className="flex h-10 w-10 shrink-0 items-center justify-center border border-white/20 bg-black text-white transition-all duration-300 hover:border-white/40 hover:bg-neutral-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+                                  aria-label="Cerrar menú"
+                              >
+                                  <IoMdClose className="h-6 w-6" aria-hidden />
+                              </button>
+                          </div>
+                          <nav
+                              className="flex flex-1 flex-col overflow-y-auto bg-black px-8 py-6"
+                              aria-label="Móvil"
+                          >
+                              <ul className="flex flex-col">
+                                  {navItems.map((item, index) => (
+                                      <li
+                                          key={item.name}
+                                          className="border-b border-white/10 last:border-b-0"
+                                      >
+                                          <a
+                                              href={item.href}
+                                              className={`block bg-black py-5 text-[10px] tracking-[0.28em] uppercase text-gray-400 transition-all duration-500 hover:pl-1 hover:text-white ${
+                                                  isMenuOpen
+                                                      ? 'opacity-100 translate-x-0'
+                                                      : 'opacity-0 translate-x-3'
+                                              }`}
+                                              style={{
+                                                  transitionDelay: isMenuOpen
+                                                      ? `${80 + index * 45}ms`
+                                                      : '0ms',
+                                              }}
+                                              onClick={() => setIsMenuOpen(false)}
+                                          >
+                                              {item.name}
+                                          </a>
+                                      </li>
+                                  ))}
+                              </ul>
+                          </nav>
+                          <div className="mt-auto shrink-0 border-t border-white/10 bg-black px-8 py-6">
+                              <p className="text-[9px] font-light tracking-[0.25em] uppercase text-white/30">
+                                  Portfolio · {year}
+                              </p>
+                          </div>
+                      </div>
+                  </>,
+                  document.body
+              )
+            : null}
         </>
-    )
-}
+    );
+};
