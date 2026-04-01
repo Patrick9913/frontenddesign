@@ -40,18 +40,18 @@ export const Navbar: React.FC = () => {
     return (
         <>
         <nav className="max-w-6xl mx-auto px-6 py-4 relative z-50">
-            <div className="flex flex-row md:flex-col justify-between items-center">
-                <a href="#hero" className="text-2xl font-bold text-gray-200 hover:text-gray-700 transition-colors">
+            <div className="flex justify-between items-center w-full">
+                <a href="#hero" className="text-lg md:text-xl font-light tracking-widest text-white hover:text-gray-400 transition-colors uppercase">
                     Patrick Ordoñez
                 </a>
             
             {/* Desktop Navigation */}
-                <div className="hidden md:flex md:mt-4 space-x-8">
+                <div className="hidden md:flex space-x-10 items-center">
                     {navItems.map((item) => (
                     <a
                         key={item.name}
                         href={item.href}
-                        className="text-gray-300 hover:text-gray-100 transition-colors font-medium"
+                        className="text-[10px] md:text-xs tracking-[0.25em] uppercase text-gray-400 hover:text-white transition-colors"
                     >
                         {item.name}
                     </a>

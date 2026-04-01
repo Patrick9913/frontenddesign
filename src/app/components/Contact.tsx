@@ -68,86 +68,54 @@ export const Contact = () => {
   };
 
   return (
-    <section id="contact" className="py-20 bg-gray-50">
-      <div className="max-w-6xl mx-auto px-6">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-            Contacto
-          </h2>
-          <div className="w-24 h-1 bg-gray-900 mx-auto mb-6"></div>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            ¿Tienes un proyecto en mente? Me encantaría saber de ti
-          </p>
-        </div>
+    <section id="contact" className="py-32 bg-black text-white font-sans border-t border-white/10 relative">
+      <div className="max-w-7xl mx-auto px-8 md:px-16 lg:px-24">
+        
+        <div className="grid lg:grid-cols-2 gap-24 lg:gap-32">
+          
+          {/* Left Column - Contact Info */}
+          <div className="flex flex-col">
+            <span className="text-[9px] md:text-[10px] font-light tracking-[0.4em] uppercase text-white/40 mb-4 block">
+              Contacto
+            </span>
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-light tracking-[0.2em] text-white uppercase mb-12">
+              Hablemos
+            </h2>
 
-        <div className="grid md:grid-cols-2 gap-16">
-          <div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-8">Información de Contacto</h3>
+            <p className="text-xs md:text-sm font-light tracking-wide text-white/50 leading-relaxed mb-16 max-w-sm">
+              Si estás buscando integrar a alguien a tu equipo o simplemente quieres intercambiar ideas sobre diseño, desarrollo o tecnología, no dudes en escribirme.
+            </p>
             
-            <div className="space-y-6">
-              <div className="flex items-center">
-                <div className="w-12 h-12 bg-gray-900 rounded-full flex items-center justify-center mr-4">
-                  <IoMdMail  className="text-white" />
-                </div>
-                <div>
-                  <h4 className="font-semibold text-gray-900">Email</h4>
-                  <p className="text-gray-600">patrickyoel13@gmail.com</p>
-                </div>
+            <div className="grid gap-12">
+              <div>
+                <h4 className="text-[9px] font-medium tracking-[0.3em] uppercase text-white/30 mb-3">Email</h4>
+                <p className="text-xs md:text-sm font-light text-white/70 tracking-wide">patrickyoel13@gmail.com</p>
               </div>
 
-              <div className="flex items-center">
-                <div className="w-12 h-12 bg-gray-900 rounded-full flex items-center justify-center mr-4">
-                  <RiSmartphoneFill  className="text-white" />
-                </div>
-                <div>
-                  <h4 className="font-semibold text-gray-900">Teléfono</h4>
-                  <p className="text-gray-600">+54 11 4046 8176</p>
-                </div>
+              <div>
+                <h4 className="text-[9px] font-medium tracking-[0.3em] uppercase text-white/30 mb-3">Teléfono</h4>
+                <p className="text-xs md:text-sm font-light text-white/70 tracking-wide">+54 11 4046 8176</p>
               </div>
 
-              <div className="flex items-center">
-                <div className="w-12 h-12 bg-gray-900 rounded-full flex items-center justify-center mr-4">
-                  <FaMapMarkedAlt className="text-white" />
-                </div>
-                <div>
-                  <h4 className="font-semibold text-gray-900">Ubicación</h4>
-                  <p className="text-gray-600">Buenos Aires, Argentina</p>
+              <div>
+                <h4 className="text-[9px] font-medium tracking-[0.3em] uppercase text-white/30 mb-3">Ubicación</h4>
+                <p className="text-xs md:text-sm font-light text-white/70 tracking-wide">Buenos Aires, Argentina (Remoto)</p>
+              </div>
+
+              <div>
+                <h4 className="text-[9px] font-medium tracking-[0.3em] uppercase text-white/30 mb-3">Redes</h4>
+                <div className="flex gap-6">
+                  <a href="https://linkedin.com/in/patrick-ordonez" target="_blank" rel="noreferrer" className="text-xs md:text-sm font-light text-white/70 hover:text-white transition-colors tracking-wide">LinkedIn</a>
+                  <a href="https://github.com/Patrick9913" target="_blank" rel="noreferrer" className="text-xs md:text-sm font-light text-white/70 hover:text-white transition-colors tracking-wide">GitHub</a>
                 </div>
               </div>
-            </div>
-
-            <div className="mt-12 p-6 bg-white rounded-xl shadow-sm">
-              <h4 className="text-lg font-semibold text-gray-900 mb-4">
-                ¿Por qué trabajar conmigo?
-              </h4>
-              <ul className="space-y-3 text-gray-600">
-                <li className="flex items-center">
-                  <div className="w-2 h-2 bg-gray-900 rounded-full mr-3"></div>
-                  Comunicación clara y constante
-                </li>
-                <li className="flex items-center">
-                  <div className="w-2 h-2 bg-gray-900 rounded-full mr-3"></div>
-                  Entrega puntual de proyectos
-                </li>
-                <li className="flex items-center">
-                  <div className="w-2 h-2 bg-gray-900 rounded-full mr-3"></div>
-                  Código limpio y bien documentado
-                </li>
-                <li className="flex items-center">
-                  <div className="w-2 h-2 bg-gray-900 rounded-full mr-3"></div>
-                  Soporte post-lanzamiento
-                </li>
-              </ul>
             </div>
           </div>
 
-          <div className="bg-white p-8 rounded-xl shadow-lg">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                    Nombre *
-                  </label>
+          {/* Right Column - Form */}
+          <div className="relative pt-6 lg:pt-16">
+             <form onSubmit={handleSubmit} className="flex flex-col gap-12">
+                <div className="relative">
                   <input
                     type="text"
                     id="name"
@@ -155,14 +123,12 @@ export const Contact = () => {
                     required
                     value={formData.name}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border text-gray-400 border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
-                    placeholder="Tu nombre"
+                    className="w-full bg-transparent border-b border-white/10 pb-4 text-white font-light text-xs md:text-sm focus:outline-none focus:border-white/40 transition-colors placeholder-white/30"
+                    placeholder="Nombre Completo"
                   />
                 </div>
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                    Email *
-                  </label>
+                
+                <div className="relative">
                   <input
                     type="email"
                     id="email"
@@ -170,80 +136,57 @@ export const Contact = () => {
                     required
                     value={formData.email}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border text-gray-400 border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
-                    placeholder="tu@email.com"
+                    className="w-full bg-transparent border-b border-white/10 pb-4 text-white font-light text-xs md:text-sm focus:outline-none focus:border-white/40 transition-colors placeholder-white/30"
+                    placeholder="Correo Electrónico"
                   />
                 </div>
-              </div>
 
-              <div>
-                <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-2">
-                  Asunto *
-                </label>
-                <input
-                  type="text"
-                  id="subject"
-                  name="subject"
-                  required
-                  value={formData.subject}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border text-gray-400 border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
-                  placeholder="Asunto del mensaje"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
-                  Mensaje *
-                </label>
-                <textarea
-                  id="message"
-                  name="message"
-                  required
-                  rows={6}
-                  value={formData.message}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border text-gray-400 border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all resize-none"
-                  placeholder="Cuéntame sobre tu proyecto..."
-                ></textarea>
-              </div>
-
-              {/* Mensajes de feedback */}
-              {submitStatus === 'success' && (
-                <div className="p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
-                  ✅ ¡Mensaje enviado exitosamente! Te contactaré pronto.
+                <div className="relative">
+                  <textarea
+                    id="message"
+                    name="message"
+                    required
+                    rows={1}
+                    value={formData.message}
+                    onChange={handleChange}
+                    className="w-full bg-transparent border-b border-white/10 pb-16 text-white font-light text-xs md:text-sm focus:outline-none focus:border-white/40 transition-colors resize-none placeholder-white/30"
+                    placeholder="Tu Mensaje"
+                  ></textarea>
                 </div>
-              )}
 
-              {submitStatus === 'error' && (
-                <div className="p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-                  ❌ Error al enviar el mensaje. Por favor, intenta nuevamente o contáctame directamente por email.
-                </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className={`w-full px-8 py-4 bg-gray-900 text-white rounded-lg transition-all duration-300 font-medium flex items-center justify-center ${
-                  isSubmitting 
-                    ? 'opacity-50 cursor-not-allowed' 
-                    : 'hover:bg-gray-800 hover:scale-105'
-                }`}
-              >
-                {isSubmitting ? (
-                  <>
-                    <AiOutlineLoading3Quarters size={20} className="mr-2 animate-spin" />
-                    Enviando...
-                  </>
-                ) : (
-                  <>
-                    <BsFillSendFill size={20} className="mr-2" />
-                    Enviar Mensaje
-                  </>
+                {/* Feedback */}
+                {submitStatus === 'success' && (
+                  <div className="text-green-400 text-[10px] font-light tracking-[0.1em] uppercase">
+                    Mensaje enviado exitosamente.
+                  </div>
                 )}
-              </button>
-            </form>
+                {submitStatus === 'error' && (
+                  <div className="text-red-400 text-[10px] font-light tracking-[0.1em] uppercase">
+                    Ocurrió un error al enviar.
+                  </div>
+                )}
+
+                <div>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className={`inline-block px-10 py-4 border border-white/10 bg-transparent text-white/50 text-[9px] md:text-[10px] font-medium tracking-[0.3em] uppercase hover:bg-white/5 hover:text-white hover:border-white/30 transition-all duration-500 mt-4 ${
+                      isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
+                  >
+                    {isSubmitting ? (
+                      <span className="flex items-center gap-2">
+                        <AiOutlineLoading3Quarters size={12} className="animate-spin" />
+                        ENVIANDO
+                      </span>
+                    ) : (
+                      'ENVIAR MENSAJE'
+                    )}
+                  </button>
+                </div>
+             </form>
           </div>
+
         </div>
       </div>
     </section>

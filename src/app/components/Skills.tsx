@@ -1,84 +1,67 @@
 import React from 'react';
+import { FaReact } from 'react-icons/fa';
+import { SiTypescript, SiNextdotjs, SiTailwindcss, SiJavascript } from 'react-icons/si';
 
 export const Skills = () => {
-  const skills = [
-    { name: 'React', level: 95 },
-    { name: 'TypeScript', level: 90 },
-    { name: 'JavaScript', level: 95 },
-    { name: 'HTML/CSS', level: 95 },
-    { name: 'Tailwind CSS', level: 90 },
-    { name: 'Next.js', level: 85 },
-    { name: 'Node.js', level: 80 },
-    { name: 'Git/GitHub', level: 90 },
-  ];
-
-  const tools = [
-    'VS Code', 'Figma', 'Postman', 'Chrome DevTools',
-    'npm/yarn', 'Webpack', 'Vite', 'Vercel'
+  const scatteredSkills = [
+    { icon: <FaReact className="text-4xl md:text-5xl" />, name: 'React', posClass: 'top-[5%] left-[5%]', delay: '0s' },
+    { icon: <SiTypescript className="text-4xl md:text-5xl" />, name: 'TypeScript', posClass: 'top-[20%] left-[45%]', delay: '2s' },
+    { icon: <SiNextdotjs className="text-4xl md:text-5xl" />, name: 'Next.js', posClass: 'top-[45%] right-[5%]', delay: '1s' },
+    { icon: <SiTailwindcss className="text-4xl md:text-5xl" />, name: 'Tailwind CSS', posClass: 'top-[75%] left-[20%]', delay: '0.5s' },
+    { icon: <SiJavascript className="text-4xl md:text-5xl" />, name: 'JavaScript', posClass: 'top-[65%] right-[25%]', delay: '1.5s' },
   ];
 
   return (
-    <section id="skills" className="py-20 bg-gray-50">
-      <div className="max-w-6xl mx-auto px-6">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-            Habilidades
-          </h2>
-          <div className="w-24 h-1 bg-gray-900 mx-auto"></div>
-        </div>
+    <section id="skills" className="py-32 bg-black text-white font-sans border-t border-white/10 relative overflow-hidden">
 
-        <div className="grid md:grid-cols-2 gap-16">
-          <div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-8">Tecnologías</h3>
-            <div className="space-y-6">
-              {skills.map((skill) => (
-                <div key={skill.name} className="bg-white p-4 rounded-lg shadow-sm">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="font-medium text-gray-900">{skill.name}</span>
-                    <span className="text-sm text-gray-600">{skill.level}%</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div
-                      className="bg-gray-900 h-2 rounded-full transition-all duration-1000"
-                      style={{ width: `${skill.level}%` }}
-                    ></div>
-                  </div>
-                </div>
-              ))}
-            </div>
+      {/* Background ambient glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-white/5 blur-[150px] rounded-full pointer-events-none"></div>
+
+      <div className="max-w-7xl mx-auto px-8 md:px-16 lg:px-24 relative z-10">
+        <div className="grid lg:grid-cols-2 gap-16 lg:gap-8 items-center">
+
+          {/* Left: Text Content */}
+          <div className="z-10 relative">
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-light tracking-[0.2em] uppercase mb-8">
+              Habilidades
+            </h2>
+            <div className="w-12 h-[1px] bg-white/20 mb-10"></div>
+            <p className="text-sm md:text-base font-light text-white/50 leading-relaxed max-w-md tracking-wide">
+              Especializado en el ecosistema React moderno. Combino tecnologías sólidas con diseño meticuloso para construir interfaces fluidas, escalables y visualmente excepcionales. El rendimiento y la atención al detalle guián cada línea de código.
+            </p>
           </div>
 
-          <div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-8">Herramientas</h3>
-            <div className="grid grid-cols-2 gap-4">
-              {tools.map((tool) => (
-                <div
-                  key={tool}
-                  className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 text-center hover:scale-105"
-                >
-                  <span className="font-medium text-gray-900">{tool}</span>
+          {/* Right: Scattered Circles Map (Responsive Aspect Ratio) */}
+          <div className="relative w-full aspect-square max-w-md mx-auto lg:max-w-none">
+            {scatteredSkills.map((skill, index) => (
+              <div
+                key={index}
+                className={`absolute ${skill.posClass} w-24 h-24 md:w-32 md:h-32 rounded-full border border-white/10 bg-white/5 backdrop-blur-md flex items-center justify-center transition-all duration-500 hover:bg-white/10 hover:border-white/30 group`}
+                style={{ animation: `float 6s ease-in-out infinite`, animationDelay: skill.delay }}
+              >
+                <div className="text-white/40 group-hover:text-white transition-colors duration-500 group-hover:scale-110">
+                  {skill.icon}
                 </div>
-              ))}
-            </div>
 
-            <div className="mt-12 bg-white p-8 rounded-xl shadow-sm">
-              <h4 className="text-xl font-bold text-gray-900 mb-4">Experiencia</h4>
-              <div className="space-y-4">
-                <div className="border-l-4 border-gray-900 pl-4">
-                  <h5 className="font-semibold text-gray-900">Frontend Developer</h5>
-                  <p className="text-sm text-gray-600">2022 - Presente</p>
-                  <p className="text-gray-600 mt-1">Desarrollo de aplicaciones web con React y TypeScript</p>
-                </div>
-                <div className="border-l-4 border-gray-400 pl-4">
-                  <h5 className="font-semibold text-gray-900">Junior Developer</h5>
-                  <p className="text-sm text-gray-600">2021 - 2022</p>
-                  <p className="text-gray-600 mt-1">Aprendizaje y desarrollo de proyectos personales</p>
-                </div>
+                {/* Tooltip on hover */}
+                <span className="absolute -bottom-8 opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-[10px] font-light tracking-[0.2em] uppercase text-white/70">
+                  {skill.name}
+                </span>
               </div>
-            </div>
+            ))}
           </div>
+
         </div>
       </div>
+
+      <style dangerouslySetInnerHTML={{
+        __html: `
+        @keyframes float {
+          0% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-15px) rotate(3deg); }
+          100% { transform: translateY(0px) rotate(0deg); }
+        }
+      `}} />
     </section>
   );
 };
