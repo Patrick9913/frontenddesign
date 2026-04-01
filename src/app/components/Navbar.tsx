@@ -44,7 +44,6 @@ export const Navbar: React.FC = () => {
                 <a href="#hero" className="text-lg md:text-xl font-light tracking-widest text-white hover:text-gray-400 transition-colors uppercase">
                     Patrick Ordoñez
                 </a>
-            
             {/* Desktop Navigation */}
                 <div className="hidden md:flex space-x-10 items-center">
                     {navItems.map((item) => (

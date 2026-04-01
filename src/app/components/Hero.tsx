@@ -25,7 +25,8 @@ export const Hero = () => {
       {/* Navbar positioning */}
       <div className="relative z-10 w-full pt-4">
         <Navbar />
-      </div>      {/* Main Content Area */}
+      </div>
+      {/* Main Content Area */}
       <div className="relative z-10 flex-grow flex items-center w-full px-8 md:px-16 lg:px-24">
         <div className="w-full max-w-4xl mt-12 mb-24">
 
@@ -76,7 +77,7 @@ export const Hero = () => {
           <FaGithub size={24} />
         </a>
         <a
-          href="https://linkedin.com/in/patrick-ordonez"
+          href="https://www.linkedin.com/in/patrick-ord%C3%B3%C3%B1ez-14904221a/"
           target="_blank"
           rel="noopener noreferrer"
           aria-label="LinkedIn"

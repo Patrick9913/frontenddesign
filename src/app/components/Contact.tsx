@@ -1,10 +1,6 @@
 'use client';
 import React, { useState } from 'react';
 import emailjs from '@emailjs/browser';
-import { IoMdMail } from "react-icons/io";
-import { RiSmartphoneFill } from "react-icons/ri";
-import { FaMapMarkedAlt } from "react-icons/fa";
-import { BsFillSendFill } from "react-icons/bs";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
 
 export const Contact = () => {
@@ -105,7 +101,7 @@ export const Contact = () => {
               <div>
                 <h4 className="text-[9px] font-medium tracking-[0.3em] uppercase text-white/30 mb-3">Redes</h4>
                 <div className="flex gap-6">
-                  <a href="https://linkedin.com/in/patrick-ordonez" target="_blank" rel="noreferrer" className="text-xs md:text-sm font-light text-white/70 hover:text-white transition-colors tracking-wide">LinkedIn</a>
+                  <a href="https://www.linkedin.com/in/patrick-ord%C3%B3%C3%B1ez-14904221a/" target="_blank" rel="noreferrer" className="text-xs md:text-sm font-light text-white/70 hover:text-white transition-colors tracking-wide">LinkedIn</a>
                   <a href="https://github.com/Patrick9913" target="_blank" rel="noreferrer" className="text-xs md:text-sm font-light text-white/70 hover:text-white transition-colors tracking-wide">GitHub</a>
                 </div>
               </div>
@@ -138,6 +134,19 @@ export const Contact = () => {
                     onChange={handleChange}
                     className="w-full bg-transparent border-b border-white/10 pb-4 text-white font-light text-xs md:text-sm focus:outline-none focus:border-white/40 transition-colors placeholder-white/30"
                     placeholder="Correo Electrónico"
+                  />
+                </div>
+
+                <div className="relative">
+                  <input
+                    type="text"
+                    id="subject"
+                    name="subject"
+                    required
+                    value={formData.subject}
+                    onChange={handleChange}
+                    className="w-full bg-transparent border-b border-white/10 pb-4 text-white font-light text-xs md:text-sm focus:outline-none focus:border-white/40 transition-colors placeholder-white/30"
+                    placeholder="Asunto"
                   />
                 </div>
 

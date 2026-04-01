@@ -34,7 +34,7 @@ export const Footer = () => {
                 <FaGithub size={20} />
               </a>
               <a
-                href="https://linkedin.com/in/patrick-ordonez"
+                href="https://www.linkedin.com/in/patrick-ord%C3%B3%C3%B1ez-14904221a/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-white hover:scale-110 transition-all duration-300"
