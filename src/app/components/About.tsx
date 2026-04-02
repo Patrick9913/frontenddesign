@@ -74,20 +74,20 @@ export const About = () => {
           {/* Columna derecha: rectángulos superpuestos (wireone atrás / wiretwo delante) */}
           <div className="relative w-full max-w-lg mx-auto lg:max-w-none lg:mx-0 lg:justify-self-end aspect-[4/5] min-h-[280px] sm:min-h-[340px] lg:min-h-[380px] lg:aspect-[5/6]">
             {/* wireone: escala en el marco (no zoom interno); reposo B/N → color al hover */}
-            <div className="group/wireone absolute top-0 left-0 w-[58%] sm:w-[56%] h-[78%] z-[1] border border-white/10 overflow-hidden shadow-[0_24px_48px_-12px_rgba(0,0,0,0.5)] origin-bottom-left scale-[0.988] transition-[transform,box-shadow,border-color] duration-[2800ms] ease-[cubic-bezier(0.65,0.02,0.28,1)] hover:scale-100 hover:shadow-[0_28px_56px_-16px_rgba(0,0,0,0.52)] hover:border-white/14 motion-reduce:scale-100 motion-reduce:transition-none">
+            <div className="group/wireone absolute top-0 left-0 w-[58%] sm:w-[56%] h-[78%] z-[1] border border-white/10 overflow-hidden shadow-[0_24px_48px_-12px_rgba(0,0,0,0.5)] origin-bottom-left scale-100 transition-all duration-500 ease-in-out hover:scale-[1.015] hover:shadow-[0_28px_56px_-16px_rgba(0,0,0,0.52)] hover:border-white/14 motion-reduce:scale-100 motion-reduce:transition-none">
               <img
                 src="/wireone.png"
                 alt=""
-                className="w-full h-full object-cover object-center grayscale contrast-[1.02] transition-[filter] duration-[3200ms] ease-[cubic-bezier(0.65,0.02,0.28,1)] group-hover/wireone:grayscale-0 group-hover/wireone:contrast-100 motion-reduce:grayscale-0 motion-reduce:transition-none"
+                className="w-full h-full object-cover object-center grayscale contrast-[1.02] transition-[filter] duration-500 ease-in-out group-hover/wireone:grayscale-0 group-hover/wireone:contrast-100 motion-reduce:grayscale-0 motion-reduce:transition-none"
                 loading="lazy"
               />
             </div>
             {/* wiretwo: misma lógica; origen abajo-derecha para que el scale se sienta natural */}
-            <div className="group/wiretwo absolute bottom-0 right-0 w-[58%] sm:w-[56%] h-[72%] z-[2] border border-white/15 overflow-hidden shadow-[0_24px_48px_-12px_rgba(0,0,0,0.45)] origin-bottom-right scale-[0.988] transition-[transform,box-shadow,border-color] duration-[2800ms] ease-[cubic-bezier(0.65,0.02,0.28,1)] hover:scale-100 hover:shadow-[0_28px_56px_-16px_rgba(0,0,0,0.48)] hover:border-white/18 motion-reduce:scale-100 motion-reduce:transition-none">
+            <div className="group/wiretwo absolute bottom-0 right-0 w-[58%] sm:w-[56%] h-[72%] z-[2] border border-white/15 overflow-hidden shadow-[0_24px_48px_-12px_rgba(0,0,0,0.45)] origin-bottom-right scale-100 transition-all duration-500 ease-in-out hover:scale-[1.015] hover:shadow-[0_28px_56px_-16px_rgba(0,0,0,0.48)] hover:border-white/18 motion-reduce:scale-100 motion-reduce:transition-none">
               <img
                 src="/wiretwo.png"
                 alt=""
-                className="w-full h-full object-cover object-center grayscale contrast-[1.02] transition-[filter] duration-[3200ms] ease-[cubic-bezier(0.65,0.02,0.28,1)] group-hover/wiretwo:grayscale-0 group-hover/wiretwo:contrast-100 motion-reduce:grayscale-0 motion-reduce:transition-none"
+                className="w-full h-full object-cover object-center grayscale contrast-[1.02] transition-[filter] duration-500 ease-in-out group-hover/wiretwo:grayscale-0 group-hover/wiretwo:contrast-100 motion-reduce:grayscale-0 motion-reduce:transition-none"
                 loading="lazy"
               />
             </div>

@@ -4,11 +4,46 @@ import { SiTypescript, SiNextdotjs, SiTailwindcss, SiJavascript } from 'react-ic
 
 export const Skills = () => {
   const scatteredSkills = [
-    { icon: <FaReact className="text-4xl md:text-5xl" />, name: 'React', posClass: 'top-[5%] left-[5%]', delay: '0s' },
-    { icon: <SiTypescript className="text-4xl md:text-5xl" />, name: 'TypeScript', posClass: 'top-[20%] left-[45%]', delay: '2s' },
-    { icon: <SiNextdotjs className="text-4xl md:text-5xl" />, name: 'Next.js', posClass: 'top-[45%] right-[5%]', delay: '1s' },
-    { icon: <SiTailwindcss className="text-4xl md:text-5xl" />, name: 'Tailwind CSS', posClass: 'top-[75%] left-[20%]', delay: '0.5s' },
-    { icon: <SiJavascript className="text-4xl md:text-5xl" />, name: 'JavaScript', posClass: 'top-[65%] right-[25%]', delay: '1.5s' },
+    {
+      icon: <FaReact className="text-4xl md:text-5xl" />,
+      name: 'React',
+      posClass: 'top-[5%] left-[5%]',
+      delay: '0s',
+      hoverClass: 'hover:bg-cyan-500/15 hover:border-cyan-400/60 hover:shadow-[0_0_30px_rgba(34,211,238,0.35)]',
+      iconHoverClass: 'group-hover:text-cyan-300',
+    },
+    {
+      icon: <SiTypescript className="text-4xl md:text-5xl" />,
+      name: 'TypeScript',
+      posClass: 'top-[20%] left-[45%]',
+      delay: '2s',
+      hoverClass: 'hover:bg-blue-500/15 hover:border-blue-400/60 hover:shadow-[0_0_30px_rgba(96,165,250,0.35)]',
+      iconHoverClass: 'group-hover:text-blue-300',
+    },
+    {
+      icon: <SiNextdotjs className="text-4xl md:text-5xl" />,
+      name: 'Next.js',
+      posClass: 'top-[45%] right-[5%]',
+      delay: '1s',
+      hoverClass: 'hover:bg-zinc-200/10 hover:border-zinc-200/50 hover:shadow-[0_0_30px_rgba(244,244,245,0.25)]',
+      iconHoverClass: 'group-hover:text-zinc-100',
+    },
+    {
+      icon: <SiTailwindcss className="text-4xl md:text-5xl" />,
+      name: 'Tailwind CSS',
+      posClass: 'top-[75%] left-[20%]',
+      delay: '0.5s',
+      hoverClass: 'hover:bg-sky-500/15 hover:border-sky-400/60 hover:shadow-[0_0_30px_rgba(56,189,248,0.35)]',
+      iconHoverClass: 'group-hover:text-sky-300',
+    },
+    {
+      icon: <SiJavascript className="text-4xl md:text-5xl" />,
+      name: 'JavaScript',
+      posClass: 'top-[65%] right-[25%]',
+      delay: '1.5s',
+      hoverClass: 'hover:bg-yellow-400/15 hover:border-yellow-300/60 hover:shadow-[0_0_30px_rgba(253,224,71,0.35)]',
+      iconHoverClass: 'group-hover:text-yellow-300',
+    },
   ];
 
   return (
@@ -36,10 +71,10 @@ export const Skills = () => {
             {scatteredSkills.map((skill, index) => (
               <div
                 key={index}
-                className={`absolute ${skill.posClass} w-24 h-24 md:w-32 md:h-32 rounded-full border border-white/10 bg-white/5 backdrop-blur-md flex items-center justify-center transition-all duration-500 hover:bg-white/10 hover:border-white/30 group`}
+                className={`absolute ${skill.posClass} ${skill.hoverClass} w-24 h-24 md:w-32 md:h-32 rounded-full border border-white/10 bg-white/5 backdrop-blur-md flex items-center justify-center transition-all duration-500 group`}
                 style={{ animation: `float 6s ease-in-out infinite`, animationDelay: skill.delay }}
               >
-                <div className="text-white/40 group-hover:text-white transition-colors duration-500 group-hover:scale-110">
+                <div className={`text-white/40 ${skill.iconHoverClass} transition-all duration-500 group-hover:scale-110`}>
                   {skill.icon}
                 </div>
 
