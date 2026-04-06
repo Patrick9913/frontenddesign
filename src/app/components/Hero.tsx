@@ -13,7 +13,7 @@ export const Hero = () => {
       {/* Background Image Setup */}
       <div
         className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-70"
-        style={{ backgroundImage: "url('/secondbacks.jpg')" }}
+        style={{ backgroundImage: "url('/secondback.jpg')" }}
       ></div>
 
       {/* Dark gradient overlay to ensure text is highly readable and adds depth */}
