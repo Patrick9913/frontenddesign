@@ -32,23 +32,14 @@ export const About = () => {
           {/* Columna izquierda: solo copy alineado a la izquierda */}
           <div className="flex flex-col gap-8 text-left min-w-0 lg:pr-4">
             <p className="text-lg md:text-xl lg:text-2xl font-light text-gray-300 leading-relaxed">
-              Llevo más de cuatro años experimentando con interfaces visuales de
-              distintos tipos: desde lo sobrio hasta lo más expresivo, siempre
-              con la mirada puesta en cómo se ve y cómo se siente al usarlas.
+              Mi perfil se construye en la intersección exacta entre la estructura analítica y la experiencia visual. Como estudiante de Ciencia de Datos y desarrollador web, entiendo la lógica profunda detrás del software, pero me apasiona obsesivamente cómo ese código se ve y se siente al usarlo.
             </p>
             <div className="space-y-6">
               <p className="text-base text-gray-400 leading-relaxed font-light tracking-wide">
-                El diseño es lo que más me motiva: espacio en blanco,
-                tipografía, color, ritmo y pequeños detalles que hacen que una
-                pantalla se entienda al instante. Me gusta construir piezas
-                limpias, cuidadas y coherentes, donde la forma acompaña al
-                mensaje.
+                A través de formación universitaria, cursos intensivos y años de aprendizaje autodidacta, he cultivado un enfoque donde el diseño es el pilar central. Me motiva el uso estratégico del espacio, la tipografía y el ritmo para crear interfaces limpias y coherentes, logrando que la estética siempre acompañe al mensaje.
               </p>
               <p className="text-base text-gray-400 leading-relaxed font-light tracking-wide">
-                Una buena interfaz visual no es un adorno; es parte de la
-                historia que quieres contar. Cuando la estética y el movimiento
-                están alineados con el contenido, la experiencia se vuelve más
-                clara, memorable y humana.
+                Creo firmemente que una buena interfaz no es un simple recurso cosmético; es la capa humana que traduce sistemas y datos complejos. Cuando la precisión técnica y el diseño visual están perfectamente alineados, la experiencia se vuelve intuitiva, memorable y clara.
               </p>
             </div>
             <div className="flex flex-col gap-3 pt-2">

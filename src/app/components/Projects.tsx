@@ -71,7 +71,7 @@ export const Projects = () => {
   const current = projects[currentProject];
 
   return (
-    <section id="projects" className="min-h-[100dvh] lg:h-screen w-full relative overflow-hidden bg-black font-sans border-t border-white/10 flex flex-col items-center justify-center">
+    <section id="projects" className="min-h-[800px] lg:min-h-screen w-full relative overflow-hidden bg-black font-sans border-t border-white/10 flex flex-col items-center justify-center">
       
       {/* Absolute Centered Header directly matching the user's reference */}
       <div className="absolute top-8 md:top-24 left-1/2 -translate-x-1/2 z-30 text-center flex flex-col items-center w-full px-6 pointer-events-none">
@@ -97,7 +97,7 @@ export const Projects = () => {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-8 md:px-16 lg:px-24 h-full flex flex-col justify-center py-32 lg:py-0">
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-8 md:px-16 lg:px-24 h-full flex flex-col justify-center pt-40 pb-32 lg:pt-48 lg:pb-24 mt-12 md:mt-0">
         
         {/* Desktop & Mobile responsive grid */}
         <div className="grid md:grid-cols-2 gap-12 lg:gap-20 items-center w-full">

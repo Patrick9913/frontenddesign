@@ -1,108 +1,73 @@
 import React from 'react';
-import { FaGraduationCap, FaCode, FaReact, FaDatabase } from "react-icons/fa";
-import { SiTypescript, SiNextdotjs } from "react-icons/si";
 
 export const Experience = () => {
-  const experiences = [
+  const formation = [
     {
-      year: "2023",
-      title: "Curso Desarrollo Web",
-      icon: <FaCode className="text-blue-600 text-2xl" />,
-      description: "Fundamentos de desarrollo web moderno"
+      id: "01",
+      title: "Ciencia de Datos",
+      institution: "Universidad de Buenos Aires (UBA)",
+      period: "Actualidad",
+      description: "Formación académica enfocada en el pensamiento lógico, análisis estructural y desarrollo algorítmico profundo. Una base sólida para la resolución de problemas complejos."
     },
     {
-      year: "2023",
-      title: "Curso JavaScript",
-      icon: <FaCode className="text-yellow-500 text-2xl" />,
-      description: "JavaScript moderno y ES6+"
+      id: "02",
+      title: "Desarrollo de Software",
+      institution: "Coderhouse",
+      period: "Completado",
+      description: "Cursos intensivos enfocados en desarrollo web y programación. Práctica directa sobre el ecosistema moderno y la construcción de proyectos funcionales."
     },
     {
-      year: "2023",
-      title: "Desarrollo Web orientado a React",
-      icon: <FaReact className="text-cyan-500 text-2xl" />,
-      description: "Especialización en React y desarrollo frontend avanzado"
-    },
-    {
-      year: "2023",
-      title: "Base de datos Firebase y SQL",
-      icon: <FaDatabase className="text-orange-600 text-2xl" />,
-      description: "Gestión de bases de datos NoSQL y SQL"
-    },
-    {
-      year: "2024",
-      title: "TypeScript",
-      icon: <SiTypescript className="text-blue-700 text-2xl" />,
-      description: "TypeScript avanzado para desarrollo tipado y escalable"
-    },
-    {
-      year: "2024",
-      title: "NextJS",
-      icon: <SiNextdotjs className="text-black text-2xl" />,
-      description: "Framework de React para aplicaciones web modernas con SSR"
+      id: "03",
+      title: "Formación Autodidacta",
+      institution: "Desarrollo Visual y Técnico",
+      period: "Múltiples años",
+      description: "Años de exploración independiente y aprendizaje continuo en tecnologías, experiencia de usuario y diseño de interfaces. Construyendo mi propio criterio a través de la práctica."
     }
   ];
 
   return (
-    <section id="experience" className="py-20 bg-gradient-to-br from-gray-50 to-white">
-      <div className="max-w-6xl mx-auto px-6">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+    <section id="experience" className="py-32 lg:py-48 bg-black w-full relative border-t border-white/10 text-white font-sans overflow-hidden">
+      
+      {/* Background Image Setup */}
+      <div
+        className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-20"
+        style={{ backgroundImage: "url('/newbackimage.jpg')" }}
+      ></div>
+
+      <div className="max-w-7xl mx-auto px-8 md:px-16 lg:px-24 relative z-10">
+        
+        <header className="mb-20 md:mb-32">
+          <h2 className="text-3xl md:text-5xl lg:text-6xl font-light tracking-[0.2em] text-white uppercase mt-4 md:mt-0">
             Formación
           </h2>
-          <div className="w-24 h-1 bg-gray-900 mx-auto"></div>
+          <div className="w-8 md:w-12 h-[1px] bg-white/20 mt-8"></div>
+        </header>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-16 md:gap-8 lg:gap-16">
+          {formation.map((item) => (
+            <div 
+              key={item.id} 
+              className="relative group border-t border-white/10 pt-8"
+            >
+              <span className="block text-[10px] md:text-xs font-light tracking-[0.3em] uppercase text-white/40 mb-6 group-hover:text-white/80 transition-colors duration-500">
+                {item.id} — {item.period}
+              </span>
+              
+              <h3 className="text-xl md:text-2xl font-light tracking-wide mb-3 text-white group-hover:text-gray-200 transition-colors duration-500 line-clamp-2">
+                {item.title}
+              </h3>
+              
+              <h4 className="text-xs font-medium tracking-[0.1em] text-gray-400 mb-6 uppercase">
+                {item.institution}
+              </h4>
+              
+              <p className="text-sm md:text-base text-gray-500 font-light leading-relaxed tracking-wide">
+                {item.description}
+              </p>
+            </div>
+          ))}
         </div>
-
-        <div className="relative">
-          {/* Línea vertical en el centro (solo visible en desktop) */}
-          <div className="hidden md:block absolute left-1/2 transform -translate-x-1/2 h-full w-1 bg-gray-300"></div>
-
-          <div className="space-y-12">
-            {experiences.map((exp, index) => (
-              <div
-                key={index}
-                className={`flex flex-col md:flex-row items-center gap-8 ${
-                  index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'
-                }`}
-              >
-                {/* Contenido */}
-                <div className={`w-full md:w-5/12 ${index % 2 === 0 ? 'md:text-right' : 'md:text-left'}`}>
-                  <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
-                    <div className="flex items-center gap-3 mb-3 justify-center md:justify-start">
-                      {index % 2 !== 0 && <div className="md:hidden">{exp.icon}</div>}
-                      <span className="text-sm font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
-                        {exp.year}
-                      </span>
-                      {index % 2 === 0 && <div className="md:hidden">{exp.icon}</div>}
-                    </div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">
-                      {exp.title}
-                    </h3>
-                    <p className="text-gray-600">
-                      {exp.description}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Círculo central con icono */}
-                <div className="hidden md:flex w-2/12 justify-center relative z-10">
-                  <div className="w-16 h-16 bg-white border-4 border-gray-300 rounded-full flex items-center justify-center shadow-lg">
-                    {exp.icon}
-                  </div>
-                </div>
-
-                {/* Espacio vacío en el otro lado */}
-                <div className="hidden md:block w-5/12"></div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Ícono de graduación al final */}
-        <div className="flex justify-center mt-16">
-          <div className="w-20 h-20 bg-gradient-to-br from-blue-600 to-cyan-500 rounded-full flex items-center justify-center shadow-xl">
-            <FaGraduationCap className="text-white text-3xl" />
-          </div>
-        </div>
+        
       </div>
     </section>
   );

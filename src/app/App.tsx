@@ -5,13 +5,14 @@ import Skills from "./components/Skills";
 import Projects from "./components/Projects";
 import Contact from "./components/Contact";
 import Footer from "./components/Footer";
+import Experience from "./components/Experience";
 
 export const App = () => {
   return (
     <>
       <Hero />
       <About />
-      {/* <Experience /> */}
+      <Experience />
       <Skills />
       <Projects />
       <Contact />
