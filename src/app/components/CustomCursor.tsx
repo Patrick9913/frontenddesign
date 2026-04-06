@@ -91,7 +91,7 @@ export const CustomCursor = () => {
       {/* El punto sólido central que sigue al mouse sin delay */}
       <div
         ref={cursorDotRef}
-        className={`fixed top-0 left-0 w-2 h-2 bg-white rounded-full pointer-events-none z-[9999] mix-blend-difference transition-all duration-300 ${
+        className={`fixed top-0 left-0 w-2 h-2 bg-white rounded-full pointer-events-none z-[9999] mix-blend-difference transition-opacity duration-300 ${
           isHovering ? "opacity-0" : "opacity-100"
         }`}
       />
@@ -99,7 +99,7 @@ export const CustomCursor = () => {
       {/* El anillo que tiene un retraso (easing) */}
       <div
         ref={cursorOutlineRef}
-        className={`fixed top-0 left-0 rounded-full pointer-events-none z-[9998] mix-blend-difference transition-all duration-300 ease-out flex items-center justify-center ${
+        className={`fixed top-0 left-0 rounded-full pointer-events-none z-[9998] mix-blend-difference transition-[width,height,background-color,border-color] duration-300 ease-out flex items-center justify-center ${
           isHovering 
             ? "w-16 h-16 bg-white border-transparent mix-blend-difference" 
             : "w-8 h-8 border-[1px] border-white/50 bg-transparent"
