@@ -1,7 +1,23 @@
 "use client";
 
 import React, { useState } from "react";
-import { HiOutlineDownload } from "react-icons/hi";
+
+const SECTION_INDEX = "[ 01 ]";
+
+const COPY = {
+  overline: "Sobre mí",
+  title: {
+    line1: "CÓDIGO QUE",
+    accent: "RESPIRA",
+    line2: "DISEÑO",
+  },
+  lead:
+    "Mi perfil se construye en la intersección exacta entre la estructura analítica y la experiencia visual. Como estudiante de Ciencia de Datos y desarrollador web, entiendo la lógica profunda detrás del software, pero me apasiona obsesivamente cómo ese código se ve y se siente al usarlo.",
+  paragraphs: [
+    "A través de formación universitaria, cursos intensivos y años de aprendizaje autodidacta, he cultivado un enfoque donde el diseño es el pilar central. Me motiva el uso estratégico del espacio, la tipografía y el ritmo para crear interfaces limpias y coherentes, logrando que la estética siempre acompañe al mensaje.",
+    "Creo firmemente que una buena interfaz no es un simple recurso cosmético; es la capa humana que traduce sistemas y datos complejos. Cuando la precisión técnica y el diseño visual están perfectamente alineados, la experiencia se vuelve intuitiva, memorable y clara.",
+  ],
+} as const;
 
 export const About = () => {
   const [showCvNotice, setShowCvNotice] = useState(false);
@@ -14,46 +30,71 @@ export const About = () => {
   return (
     <section
       id="about"
-      className="py-32 bg-black text-white font-sans relative border-t border-white/10"
+      className="py-32 lg:py-48 bg-black text-[#F0F0F0] font-sans border-t border-white/[0.08]"
     >
       <div className="max-w-7xl mx-auto px-8 md:px-16 lg:px-24">
-        {/* Título (línea decorativa tipo wireframe + encabezado existente) */}
-        <header className="mb-14 md:mb-16 lg:mb-20">
-          <div className="flex items-center gap-3 md:gap-4 mb-8 max-w-2xl">
+        <header className="mb-20 md:mb-28 lg:mb-32">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-8 md:mb-10">
+            <span className="font-mono text-[10px] md:text-xs font-light tracking-[0.25em] uppercase text-white/50">
+              {SECTION_INDEX}
+            </span>
+            <span className="text-[10px] md:text-xs font-light tracking-[0.25em] uppercase text-white/50">
+              {COPY.overline}
+            </span>
           </div>
-          <h2 className="text-5xl md:text-7xl lg:text-8xl font-light tracking-wide text-white leading-[1.1] text-left">
-            CÓDIGO QUE <br />
-            <span className="font-medium text-gray-300">RESPIRA</span> DISEÑO
+
+          <h2 className="text-5xl md:text-7xl lg:text-8xl font-light tracking-[-0.02em] text-[#F0F0F0] leading-[1.05] max-w-4xl">
+            {COPY.title.line1}
+            <br />
+            <span className="font-medium text-white/50">{COPY.title.accent}</span>{" "}
+            {COPY.title.line2}
           </h2>
+
+          <div
+            className="w-8 md:w-12 h-px bg-white/[0.08] mt-8 md:mt-10"
+            aria-hidden
+          />
         </header>
 
-        {/* Dos columnas: texto izquierda · composición imágenes derecha */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 lg:gap-20 xl:gap-24 lg:items-center">
-          {/* Columna izquierda: solo copy alineado a la izquierda */}
-          <div className="flex flex-col gap-8 text-left min-w-0 lg:pr-4">
-            <p className="text-lg md:text-xl lg:text-2xl font-light text-gray-300 leading-relaxed">
-              Mi perfil se construye en la intersección exacta entre la estructura analítica y la experiencia visual. Como estudiante de Ciencia de Datos y desarrollador web, entiendo la lógica profunda detrás del software, pero me apasiona obsesivamente cómo ese código se ve y se siente al usarlo.
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-8 xl:gap-12 lg:items-center">
+          <div className="lg:col-span-5 flex flex-col gap-10 md:gap-12 text-left min-w-0">
+            <p className="text-base md:text-lg font-light text-[#F0F0F0] leading-[1.75] tracking-wide">
+              {COPY.lead}
             </p>
-            <div className="space-y-6">
-              <p className="text-base text-gray-400 leading-relaxed font-light tracking-wide">
-                A través de formación universitaria, cursos intensivos y años de aprendizaje autodidacta, he cultivado un enfoque donde el diseño es el pilar central. Me motiva el uso estratégico del espacio, la tipografía y el ritmo para crear interfaces limpias y coherentes, logrando que la estética siempre acompañe al mensaje.
-              </p>
-              <p className="text-base text-gray-400 leading-relaxed font-light tracking-wide">
-                Creo firmemente que una buena interfaz no es un simple recurso cosmético; es la capa humana que traduce sistemas y datos complejos. Cuando la precisión técnica y el diseño visual están perfectamente alineados, la experiencia se vuelve intuitiva, memorable y clara.
-              </p>
+
+            <div className="space-y-8 border-t border-white/[0.08] pt-10">
+              {COPY.paragraphs.map((paragraph, index) => (
+                <div key={index} className="flex gap-6 md:gap-8">
+                  <span
+                    className="shrink-0 font-mono text-[10px] font-light tracking-[0.2em] text-white/50 pt-1"
+                    aria-hidden
+                  >
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <p className="text-sm md:text-base font-light text-white/50 leading-[1.75] tracking-wide transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:text-white/80">
+                    {paragraph}
+                  </p>
+                </div>
+              ))}
             </div>
-            <div className="flex flex-col gap-3 pt-2">
+
+            <div className="flex flex-col gap-4 pt-4 border-t border-white/[0.08]">
               <a
                 href="/cv.pdf"
                 onClick={handleCvClick}
-                className="group inline-flex w-fit items-center gap-6 px-10 py-5 border border-white/20 text-white text-xs md:text-sm font-light tracking-[0.2em] uppercase hover:bg-white hover:text-black transition-all duration-500"
+                className="group inline-flex w-fit items-center gap-4 px-8 py-4 border border-white/20 bg-transparent text-[10px] md:text-xs font-light tracking-[0.2em] uppercase text-white/50 rounded-none transition-[color,border-color] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:text-[#F0F0F0] hover:border-white/40"
               >
                 Descargar CV
-                <HiOutlineDownload className="text-2xl group-hover:-translate-y-1 transition-transform" />
+                <span
+                  className="text-base transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1"
+                  aria-hidden
+                >
+                  →
+                </span>
               </a>
               {showCvNotice && (
                 <p
-                  className="text-xs md:text-sm font-light tracking-wide text-gray-500"
+                  className="font-mono text-[10px] md:text-xs font-light tracking-[0.15em] uppercase text-white/25"
                   role="status"
                 >
                   Currículum actualizándose.
@@ -62,23 +103,20 @@ export const About = () => {
             </div>
           </div>
 
-          {/* Columna derecha: rectángulos superpuestos (wireone atrás / wiretwo delante) */}
-          <div className="relative w-full max-w-lg mx-auto lg:max-w-none lg:mx-0 lg:justify-self-end aspect-[4/5] min-h-[280px] sm:min-h-[340px] lg:min-h-[380px] lg:aspect-[5/6]">
-            {/* wireone: escala en el marco (no zoom interno); reposo B/N → color al hover */}
-            <div className="group/wireone absolute top-0 left-0 w-[58%] sm:w-[56%] h-[78%] z-[1] border border-white/10 overflow-hidden shadow-[0_24px_48px_-12px_rgba(0,0,0,0.5)] origin-bottom-left scale-100 transition-all duration-500 ease-in-out hover:scale-[1.015] hover:shadow-[0_28px_56px_-16px_rgba(0,0,0,0.52)] hover:border-white/14 motion-reduce:scale-100 motion-reduce:transition-none">
+          <div className="lg:col-span-6 lg:col-start-7 relative w-full max-w-md mx-auto lg:max-w-none lg:mx-0 aspect-[4/5] min-h-[280px] sm:min-h-[340px] lg:min-h-[400px]">
+            <div className="absolute top-0 left-0 w-[58%] sm:w-[56%] h-[78%] z-[1] border border-white/[0.08] overflow-hidden">
               <img
                 src="/wireone.png"
-                alt=""
-                className="w-full h-full object-cover object-center grayscale contrast-[1.02] transition-[filter] duration-500 ease-in-out group-hover/wireone:grayscale-0 group-hover/wireone:contrast-100 motion-reduce:grayscale-0 motion-reduce:transition-none"
+                alt="Composición visual — capa posterior"
+                className="w-full h-full object-cover object-center grayscale contrast-[1.02] transition-[filter,transform] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:grayscale-0 hover:scale-[1.02] motion-reduce:grayscale-0 motion-reduce:scale-100 motion-reduce:transition-none"
                 loading="lazy"
               />
             </div>
-            {/* wiretwo: misma lógica; origen abajo-derecha para que el scale se sienta natural */}
-            <div className="group/wiretwo absolute bottom-0 right-0 w-[58%] sm:w-[56%] h-[72%] z-[2] border border-white/15 overflow-hidden shadow-[0_24px_48px_-12px_rgba(0,0,0,0.45)] origin-bottom-right scale-100 transition-all duration-500 ease-in-out hover:scale-[1.015] hover:shadow-[0_28px_56px_-16px_rgba(0,0,0,0.48)] hover:border-white/18 motion-reduce:scale-100 motion-reduce:transition-none">
+            <div className="absolute bottom-0 right-0 w-[58%] sm:w-[56%] h-[72%] z-[2] border border-white/[0.08] overflow-hidden">
               <img
                 src="/wiretwo.png"
-                alt=""
-                className="w-full h-full object-cover object-center grayscale contrast-[1.02] transition-[filter] duration-500 ease-in-out group-hover/wiretwo:grayscale-0 group-hover/wiretwo:contrast-100 motion-reduce:grayscale-0 motion-reduce:transition-none"
+                alt="Composición visual — capa frontal"
+                className="w-full h-full object-cover object-center grayscale contrast-[1.02] transition-[filter,transform] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:grayscale-0 hover:scale-[1.02] motion-reduce:grayscale-0 motion-reduce:scale-100 motion-reduce:transition-none"
                 loading="lazy"
               />
             </div>

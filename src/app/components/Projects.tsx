@@ -1,228 +1,234 @@
-'use client'
-import React, { useState, useEffect } from 'react';
-import { FaGithub } from "react-icons/fa";
-import { GoLinkExternal } from "react-icons/go";
-import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
+"use client";
+
+import React, { useState, useEffect, useCallback } from "react";
+
+const SECTION_INDEX = "[ 04 ]";
+
+const COPY = {
+  overline: "Demos",
+  title: "DEMOS",
+  accent: "REPRESENTATIVAS",
+} as const;
+
+const DEMOS = [
+  {
+    id: "01",
+    title: "Estudio Jurídico",
+    subtitle: "Landing Page Comercial",
+    description:
+      "Sitio web profesional para estudio jurídico con más de 20 años de experiencia. Arquitectura limpia e informativa diseñada para la conversión y generación de confianza.",
+    image: "/juridico.png",
+    technologies: ["React", "Next.js", "TypeScript", "Tailwind CSS"],
+    github: "https://github.com/Patrick9913/landingmodelthree",
+    live: "https://landingmodelthree.vercel.app/",
+  },
+  {
+    id: "02",
+    title: "Street Collection",
+    subtitle: "E-commerce",
+    description:
+      "Tienda online de ropa urbana con catálogo interactivo, promociones y sistema headless. Diseño minimalista enfocado en la exposición visual del producto.",
+    image: "/ecommerce.png",
+    technologies: ["React", "Next.js", "TypeScript", "Tailwind CSS"],
+    github: "https://github.com/Patrick9913/landingmodeltwo",
+    live: "https://landingmodeltwo.vercel.app/",
+  },
+  {
+    id: "03",
+    title: "ConsultoraPro",
+    subtitle: "Business Landing",
+    description:
+      "Landing page B2B para consultora empresarial especializada en estrategia, optimización de procesos y desarrollo de equipos de alto rendimiento.",
+    image: "/consultora.png",
+    technologies: ["React", "Next.js", "TypeScript", "Tailwind CSS"],
+    github: "https://github.com/Patrick9913/landingmodelone",
+    live: "https://landingmodelone.vercel.app/",
+  },
+  {
+    id: "04",
+    title: "Escuela Margarita",
+    subtitle: "Portal Institucional",
+    description:
+      "Plataforma web para institución educativa centenaria. Incluye información académica, modalidades, historia y contacto administrable.",
+    image: "/escuela.png",
+    technologies: ["React", "Next.js", "TypeScript", "Tailwind CSS"],
+    github: "https://github.com/Patrick9913/margaweb",
+    live: "https://margaweb.vercel.app/",
+  },
+] as const;
 
 export const Projects = () => {
-  const [currentProject, setCurrentProject] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const total = DEMOS.length;
 
-  const projects = [
-    {
-      id: 1,
-      title: 'Estudio Jurídico',
-      subtitle: 'Landing Page Comercial',
-      description: 'Sitio web profesional para estudio jurídico con más de 20 años de experiencia. Arquitectura limpia e informativa diseñada para la conversión y generación de confianza.',
-      image: '/juridico.png',
-      technologies: ['React', 'Next.js', 'TypeScript', 'Tailwind CSS'],
-      github: 'https://github.com/Patrick9913/landingmodelthree',
-      live: 'https://landingmodelthree.vercel.app/',
-    },
-    {
-      id: 2,
-      title: 'Street Collection',
-      subtitle: 'E-commerce',
-      description: 'Tienda online de ropa urbana con catálogo interactivo, promociones y sistema headless. Diseño minimalista enfocado en la exposición visual del producto.',
-      image: '/ecommerce.png',
-      technologies: ['React', 'Next.js', 'TypeScript', 'Tailwind CSS'],
-      github: 'https://github.com/Patrick9913/landingmodeltwo',
-      live: 'https://landingmodeltwo.vercel.app/',
-    },
-    {
-      id: 3,
-      title: 'ConsultoraPro',
-      subtitle: 'Business Landing',
-      description: 'Landing page B2B para consultora empresarial especializada en estrategia, optimización de procesos y desarrollo de equipos de alto rendimiento.',
-      image: '/consultora.png',
-      technologies: ['React', 'Next.js', 'TypeScript', 'Tailwind CSS'],
-      github: 'https://github.com/Patrick9913/landingmodelone',
-      live: 'https://landingmodelone.vercel.app/',
-    },
-    {
-      id: 4,
-      title: 'Escuela Margarita',
-      subtitle: 'Portal Institucional',
-      description: 'Plataforma web para institución educativa centenaria. Incluye información académica, modalidades, historia y contacto administrable.',
-      image: '/escuela.png',
-      technologies: ['React', 'Next.js', 'TypeScript', 'Tailwind CSS'],
-      github: 'https://github.com/Patrick9913/margaweb',
-      live: 'https://margaweb.vercel.app/',
-    },
-  ];
+  const next = useCallback(() => {
+    setCurrentIndex((prev) => (prev + 1) % total);
+  }, [total]);
 
-  const nextProject = () => {
-    setCurrentProject((prev) => (prev + 1) % projects.length);
+  const prev = useCallback(() => {
+    setCurrentIndex((prev) => (prev - 1 + total) % total);
+  }, [total]);
+
+  const goTo = (index: number) => {
+    setCurrentIndex(index);
   };
 
-  const prevProject = () => {
-    setCurrentProject((prev) => (prev - 1 + projects.length) % projects.length);
-  };
-
-  const goToProject = (index: number) => {
-    setCurrentProject(index);
-  };
-
-  // Auto-play carrusel
   useEffect(() => {
-    const interval = setInterval(nextProject, 7000);
+    const interval = setInterval(next, 7000);
     return () => clearInterval(interval);
-  }, []);
+  }, [next]);
 
-  const current = projects[currentProject];
+  const current = DEMOS[currentIndex];
 
   return (
-    <section id="projects" className="min-h-[800px] lg:min-h-screen w-full relative overflow-hidden bg-black font-sans border-t border-white/10 flex flex-col items-center justify-center">
-      
-      {/* Absolute Centered Header directly matching the user's reference */}
-      <div className="absolute top-8 md:top-24 left-1/2 -translate-x-1/2 z-30 text-center flex flex-col items-center w-full px-6 pointer-events-none">
-        <h2 className="text-2xl md:text-4xl lg:text-5xl font-light tracking-[0.2em] text-white uppercase mt-4 md:mt-0">
-          Demos representativas
-        </h2>
-        <div className="w-8 md:w-12 h-[1px] bg-white/20 mt-4 md:mt-8"></div>
-      </div>
-
-      {/* Carrusel Container */}
-      <div className="absolute inset-0 z-0">
-        {/* Background Image transitioning */}
-        <div className="absolute inset-0">
-          <img
-            key={`img-${currentProject}`}
-            src={current.image}
-            alt={current.title}
-            className="w-full h-full object-cover opacity-20 animate-[slideInBackground_1s_ease-out]"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent"></div>
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/60 opacity-80"></div>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-8 md:px-16 lg:px-24 h-full flex flex-col justify-center pt-40 pb-32 lg:pt-48 lg:pb-24 mt-12 md:mt-0">
-        
-        {/* Desktop & Mobile responsive grid */}
-        <div className="grid md:grid-cols-2 gap-12 lg:gap-20 items-center w-full">
-          
-          {/* Project Info */}
-          <div key={`info-${currentProject}`} className="text-white animate-[fadeInLeft_0.8s_ease-out]">
-            <span className="block text-[9px] md:text-xs font-light tracking-[0.3em] uppercase text-white/50 mb-3 md:mb-4 w-full">
-              {current.subtitle}
+    <section
+      id="projects"
+      className="py-32 lg:py-48 bg-black text-[#F0F0F0] font-sans border-t border-white/[0.08]"
+    >
+      <div className="max-w-7xl mx-auto px-8 md:px-16 lg:px-24">
+        <header className="mb-16 md:mb-20 lg:mb-24">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-8 md:mb-10">
+            <span className="font-mono text-[10px] md:text-xs font-light tracking-[0.25em] uppercase text-white/50">
+              {SECTION_INDEX}
             </span>
-            <h3 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-light tracking-wide mb-6 leading-[1.1]">
-              {current.title}
-            </h3>
-            
-            <p className="text-xs md:text-base text-gray-400 mb-8 md:mb-10 leading-relaxed font-light tracking-wide max-w-lg">
-              {current.description}
-            </p>
-            
-            <div className="flex flex-wrap gap-2 md:gap-3 mb-10 md:mb-12 cursor-default">
-              {current.technologies.map((tech) => (
-                <span
-                  key={tech}
-                  className="px-3 py-1.5 md:px-4 md:py-2 bg-transparent text-white/70 text-[9px] md:text-[10px] uppercase font-light tracking-[0.1em] border border-white/10"
-                >
-                  {tech}
+            <span className="text-[10px] md:text-xs font-light tracking-[0.25em] uppercase text-white/50">
+              {COPY.overline}
+            </span>
+          </div>
+
+          <h2 className="text-4xl md:text-6xl lg:text-7xl font-light tracking-[-0.02em] text-[#F0F0F0] leading-[1.05] uppercase">
+            {COPY.title}
+            <br />
+            <span className="font-medium text-white/50">{COPY.accent}</span>
+          </h2>
+
+          <div className="w-8 md:w-12 h-px bg-white/[0.08] mt-8 md:mt-10" aria-hidden />
+        </header>
+
+        <div className="border-t border-white/[0.08] pt-12 md:pt-16 lg:pt-20">
+          <div
+            key={currentIndex}
+            className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 xl:gap-20 items-center project-content-in"
+          >
+            {/* Info del proyecto */}
+            <div className="lg:col-span-5 flex flex-col order-2 lg:order-1">
+              <div className="flex items-baseline justify-between gap-4 mb-6 md:mb-8">
+                <span className="font-mono text-[10px] md:text-xs font-light tracking-[0.2em] uppercase text-white/50">
+                  {current.id}
                 </span>
-              ))}
+                <span className="font-mono text-[10px] md:text-xs font-light tracking-[0.15em] uppercase text-white/25">
+                  {current.subtitle}
+                </span>
+              </div>
+
+              <h3 className="text-3xl md:text-4xl lg:text-5xl font-light tracking-[-0.02em] text-[#F0F0F0] leading-[1.1] mb-6 md:mb-8">
+                {current.title}
+              </h3>
+
+              <p className="text-sm md:text-base font-light text-white/50 leading-[1.75] tracking-wide max-w-lg mb-8 md:mb-10">
+                {current.description}
+              </p>
+
+              <ul className="flex flex-wrap gap-2 md:gap-3 mb-10 md:mb-12" role="list">
+                {current.technologies.map((tech) => (
+                  <li key={tech}>
+                    <span className="inline-block font-mono text-[10px] font-light tracking-[0.15em] uppercase text-white/40 border border-white/[0.08] px-3 py-2">
+                      {tech}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 pt-6 border-t border-white/[0.08]">
+                <a
+                  href={current.github}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group inline-flex w-fit items-center gap-4 px-8 py-4 bg-[#F0F0F0] text-black text-[10px] md:text-xs font-medium tracking-[0.2em] uppercase rounded-none transition-opacity duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:opacity-90"
+                >
+                  Ver Código
+                  <span
+                    className="text-base transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1"
+                    aria-hidden
+                  >
+                    →
+                  </span>
+                </a>
+                <a
+                  href={current.live}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex w-fit items-center gap-4 px-8 py-4 border border-white/20 bg-transparent text-[10px] md:text-xs font-light tracking-[0.2em] uppercase text-white/50 rounded-none transition-[color,border-color] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:text-[#F0F0F0] hover:border-white/40"
+                >
+                  Ver Demo
+                  <span className="text-base" aria-hidden>
+                    ↗
+                  </span>
+                </a>
+              </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
-              <a
-                href={current.github}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group flex items-center justify-center gap-3 px-6 py-3.5 md:px-8 md:py-4 bg-white text-black text-[10px] md:text-xs font-medium tracking-[0.2em] uppercase hover:bg-gray-200 transition-all duration-300"
-              >
-                Ver Código
-                <FaGithub size={16} className="group-hover:scale-110 transition-transform" />
-              </a>
-              <a
-                href={current.live}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group flex items-center justify-center gap-3 px-6 py-3.5 md:px-8 md:py-4 border border-white/20 text-white text-[10px] md:text-xs font-light tracking-[0.2em] uppercase hover:bg-white/10 hover:border-white transition-all duration-300"
-              >
-                Ver Demo
-                <GoLinkExternal size={16} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-              </a>
+            {/* Panel visual */}
+            <div className="lg:col-span-6 lg:col-start-7 order-1 lg:order-2">
+              <div className="border border-white/[0.08] overflow-hidden">
+                <img
+                  src={current.image}
+                  alt={current.title}
+                  className="w-full h-56 sm:h-72 md:h-80 lg:h-[420px] object-cover object-top grayscale transition-[filter,transform] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:grayscale-0 hover:scale-[1.02] motion-reduce:grayscale-0 motion-reduce:scale-100"
+                />
+              </div>
             </div>
           </div>
 
-          {/* Project Image Panel */}
-          <div key={`panel-${currentProject}`} className="hidden md:block relative animate-[fadeInRight_0.8s_ease-out]">
-            <div className="relative border border-white/10 overflow-hidden group">
-              <img
-                src={current.image}
-                alt={current.title}
-                className="w-full h-80 lg:h-[450px] object-cover object-top opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-80 group-hover:opacity-0 transition-opacity duration-700"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Navigation Controls (Bottom area) */}
-      <div className="absolute bottom-12 left-0 right-0 z-20 flex flex-col md:flex-row items-center justify-between px-8 md:px-16 lg:px-24 pointer-events-none">
-        
-        {/* Project Counter */}
-        <div className="text-white mb-6 md:mb-0 hidden md:block">
-          <span className="text-xs font-light tracking-[0.3em] uppercase text-white/50">
-            0{currentProject + 1} <span className="mx-2">/</span> 0{projects.length}
-          </span>
-        </div>
-
-        {/* Dots & Nav */}
-        <div className="flex items-center gap-12 pointer-events-auto">
-          <button
-            onClick={prevProject}
-            className="text-white/50 hover:text-white transition-colors duration-300 p-2"
-            aria-label="Proyecto anterior"
+          {/* Navegación del carrusel */}
+          <nav
+            className="mt-12 md:mt-16 pt-8 border-t border-white/[0.08] flex flex-col md:flex-row md:items-center md:justify-between gap-8"
+            aria-label="Navegación de demos"
           >
-            <IoIosArrowBack size={24} />
-          </button>
-          
-          <div className="flex space-x-3">
-            {projects.map((_, index) => (
+            <span className="font-mono text-[10px] md:text-xs font-light tracking-[0.2em] uppercase text-white/50">
+              {current.id} / {String(total).padStart(2, "0")}
+            </span>
+
+            <div className="flex items-center justify-between md:justify-end gap-8 md:gap-12">
               <button
-                key={index}
-                onClick={() => goToProject(index)}
-                aria-label={`Ir al proyecto ${index + 1}`}
-                className={`w-1 transition-all duration-500 rounded-full ${
-                  index === currentProject
-                    ? 'h-6 bg-white'
-                    : 'h-2 bg-white/30 hover:bg-white/50'
-                }`}
-              />
-            ))}
-          </div>
+                type="button"
+                onClick={prev}
+                className="font-mono text-[10px] md:text-xs font-light tracking-[0.2em] uppercase text-white/40 transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:text-[#F0F0F0]"
+                aria-label="Demo anterior"
+              >
+                ← Anterior
+              </button>
 
-          <button
-            onClick={nextProject}
-            className="text-white/50 hover:text-white transition-colors duration-300 p-2"
-            aria-label="Siguiente proyecto"
-          >
-            <IoIosArrowForward size={24} />
-          </button>
+              <div className="flex items-center gap-3" role="tablist" aria-label="Seleccionar demo">
+                {DEMOS.map((demo, index) => (
+                  <button
+                    key={demo.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={index === currentIndex}
+                    aria-label={`Ir a ${demo.title}`}
+                    onClick={() => goTo(index)}
+                    className={`h-px transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                      index === currentIndex
+                        ? "w-10 bg-[#F0F0F0]"
+                        : "w-6 bg-white/25 hover:bg-white/50"
+                    }`}
+                  />
+                ))}
+              </div>
+
+              <button
+                type="button"
+                onClick={next}
+                className="font-mono text-[10px] md:text-xs font-light tracking-[0.2em] uppercase text-white/40 transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:text-[#F0F0F0]"
+                aria-label="Siguiente demo"
+              >
+                Siguiente →
+              </button>
+            </div>
+          </nav>
         </div>
       </div>
-
-      {/* Inline animations for slider transitions */}
-      <style dangerouslySetInnerHTML={{
-        __html: `
-        @keyframes slideInBackground {
-          from { opacity: 0; transform: scale(1.05); }
-          to { opacity: 0.2; transform: scale(1); }
-        }
-        @keyframes fadeInLeft {
-          from { opacity: 0; transform: translateX(-20px); }
-          to { opacity: 1; transform: translateX(0); }
-        }
-        @keyframes fadeInRight {
-          from { opacity: 0; transform: translateX(20px); }
-          to { opacity: 1; transform: translateX(0); }
-        }
-      `}} />
     </section>
   );
 };
