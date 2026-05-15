@@ -10,7 +10,7 @@ const COPY = {
   title: "HABLEMOS",
   accent: "AHORA",
   lead:
-    "Si estás buscando integrar a alguien a tu equipo o simplemente quieres intercambiar ideas sobre diseño, desarrollo o tecnología, no dudes en escribirme.",
+    "Si estás buscando integrar a alguien a tu equipo o simplemente querés intercambiar ideas sobre diseño, desarrollo o tecnología, no dudes en escribirme.",
 } as const;
 
 type ContactDetail = {
