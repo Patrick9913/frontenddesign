@@ -5,10 +5,13 @@ import dynamic from "next/dynamic";
 import { HeroDarkSideHint } from "./HeroDarkSideHint";
 import { HeroExploreCallout } from "./HeroExploreCallout";
 import { HeroIntroPanel } from "./HeroIntroPanel";
+import { HeroSuspenseMoonAudio } from "./HeroSuspenseMoonAudio";
 import { Navbar } from "./Navbar";
 import { getHeroScrollPhases, HERO_SCROLL_COMPLETE, HERO_SCROLL_VH, useHeroScroll } from "./moon-scene/useHeroScroll";
+import { useHeroGameStart } from "./moon-scene/useHeroGameStart";
 
 const SHOW_NAVBAR = false;
+const SHOW_INTRO_PANEL = false;
 
 const MoonHeroScene = dynamic(() => import("./moon-scene/MoonHeroScene"), {
   ssr: false,
@@ -19,17 +22,24 @@ export const Hero = () => {
   const sectionRef = useRef<HTMLElement>(null);
   const scrollProgress = useHeroScroll(sectionRef);
   const [reducedMotion, setReducedMotion] = useState(false);
+  const { progress: gameStartProgress, active: gameStartActive, loading, start: startGame, visuals: gameStartVisuals } =
+    useHeroGameStart();
 
   useEffect(() => {
     setReducedMotion(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
   }, []);
 
   const { phase2Raw } = getHeroScrollPhases(scrollProgress);
-  const showScrollHint = !reducedMotion && scrollProgress < 0.1;
-  const showDarkSideHint = !reducedMotion && phase2Raw > 0.08 && scrollProgress < HERO_SCROLL_COMPLETE - 0.04;
-  const showExploreCallout = !reducedMotion && scrollProgress >= HERO_SCROLL_COMPLETE - 0.06;
+  const showScrollHint = !reducedMotion && scrollProgress < 0.1 && !gameStartActive;
+  const showDarkSideHint =
+    !reducedMotion && !gameStartActive && phase2Raw > 0.08 && scrollProgress < HERO_SCROLL_COMPLETE - 0.04;
+  const showExploreCallout =
+    !reducedMotion &&
+    ((scrollProgress >= HERO_SCROLL_COMPLETE - 0.06 && !gameStartActive) ||
+      (gameStartActive && gameStartProgress < 0.86));
   const sceneScrollProgress = reducedMotion ? 0 : scrollProgress;
   const introScrollProgress = reducedMotion ? 1 : scrollProgress;
+  const darkenOpacity = gameStartActive || loading ? gameStartVisuals.darken : 0;
 
   return (
     <section
@@ -58,10 +68,49 @@ export const Hero = () => {
           aria-hidden
         />
 
-        <HeroIntroPanel scrollProgress={introScrollProgress} reducedMotion={reducedMotion} />
+        {SHOW_INTRO_PANEL ? (
+          <HeroIntroPanel scrollProgress={introScrollProgress} reducedMotion={reducedMotion} />
+        ) : null}
         {showDarkSideHint ? <HeroDarkSideHint scrollProgress={scrollProgress} /> : null}
         {showExploreCallout ? (
-          <HeroExploreCallout scrollProgress={scrollProgress} reducedMotion={reducedMotion} />
+          <HeroExploreCallout
+            scrollProgress={scrollProgress}
+            reducedMotion={reducedMotion}
+            gameStartProgress={gameStartProgress}
+            loading={loading}
+            onStartGame={startGame}
+          />
+        ) : null}
+
+        {gameStartActive ? (
+          <div
+            className="pointer-events-none absolute inset-0 z-[28] bg-black"
+            style={{ opacity: darkenOpacity }}
+            aria-hidden
+          />
+        ) : null}
+
+        {gameStartVisuals.showLoading ? (
+          <div
+            className="pointer-events-none absolute bottom-[18%] left-[7%] z-[35] md:bottom-[16%] md:left-[8%]"
+            style={{ opacity: gameStartVisuals.loadingOpacity }}
+            aria-live="polite"
+          >
+            <div className="flex items-center gap-3.5">
+              <span className="hero-loading-spinner" aria-hidden />
+              <span className="hero-loading-label font-mono text-xs font-light uppercase tracking-[0.32em] text-amber-100/65 md:text-sm">
+                Cargando
+              </span>
+            </div>
+          </div>
+        ) : null}
+
+        {!reducedMotion ? (
+          <HeroSuspenseMoonAudio
+            scrollProgress={scrollProgress}
+            reducedMotion={reducedMotion}
+            gameStartProgress={gameStartProgress}
+          />
         ) : null}
 
         <div className="pointer-events-none relative z-10 flex h-full flex-col">
