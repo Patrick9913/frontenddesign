@@ -8,8 +8,10 @@ type HeroExploreCalloutProps = {
   scrollProgress: number;
   reducedMotion?: boolean;
   gameStartProgress?: number;
+  marsTravelProgress?: number;
   loading?: boolean;
   onStartGame?: () => void;
+  onLoadGame?: () => void;
 };
 
 /** Origen aproximado del cluster de luces en la vista final del lado oscuro. */
@@ -98,8 +100,10 @@ export function HeroExploreCallout({
   scrollProgress,
   reducedMotion = false,
   gameStartProgress = 0,
+  marsTravelProgress = 0,
   loading = false,
   onStartGame,
+  onLoadGame,
 }: HeroExploreCalloutProps) {
   const gradientId = useId().replace(/:/g, "");
   const [entered, setEntered] = useState(false);
@@ -136,6 +140,14 @@ export function HeroExploreCallout({
     event.preventDefault();
     onStartGame?.();
   };
+
+  const handleLoad = (event: MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    onLoadGame?.();
+  };
+
+  const menuFade =
+    marsTravelProgress > 0 ? Math.max(0, 1 - marsTravelProgress * 5) : 1;
 
   return (
     <div
@@ -224,20 +236,33 @@ export function HeroExploreCallout({
         </div>
       </div>
 
-      {gameStartProgress <= 0.01 ? (
-        <button
-          type="button"
-          onClick={handleStart}
-          className="hero-explore-label pointer-events-auto absolute bottom-[18%] left-[7%] border border-amber-100/20 bg-black/45 px-5 py-3.5 backdrop-blur-sm transition-colors hover:border-amber-100/40 hover:bg-black/60 md:bottom-[16%] md:left-[8%]"
+      {gameStartProgress <= 0.01 && marsTravelProgress <= 0.01 ? (
+        <div
+          className="pointer-events-auto absolute bottom-[18%] left-[7%] flex flex-col gap-2.5 md:bottom-[16%] md:left-[8%]"
           style={{
-            opacity: labelOpacity,
+            opacity: labelOpacity * menuFade,
             transform: reducedMotion ? undefined : `translateY(${(1 - labelOpacity) * 12}px)`,
           }}
         >
-          <span className="font-mono text-[10px] font-light uppercase tracking-[0.32em] text-amber-100/90">
-            Nueva Partida
-          </span>
-        </button>
+          <button
+            type="button"
+            onClick={handleStart}
+            className="hero-explore-label border border-amber-100/20 bg-black/45 px-5 py-3.5 backdrop-blur-sm transition-colors hover:border-amber-100/40 hover:bg-black/60"
+          >
+            <span className="font-mono text-[10px] font-light uppercase tracking-[0.32em] text-amber-100/90">
+              Nueva Partida
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={handleLoad}
+            className="hero-explore-label border border-amber-100/15 bg-black/35 px-5 py-3 backdrop-blur-sm transition-colors hover:border-amber-100/35 hover:bg-black/55"
+          >
+            <span className="font-mono text-[10px] font-light uppercase tracking-[0.32em] text-amber-100/75">
+              Cargar Partida
+            </span>
+          </button>
+        </div>
       ) : null}
     </div>
   );

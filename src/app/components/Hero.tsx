@@ -4,11 +4,13 @@ import React, { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { HeroDarkSideHint } from "./HeroDarkSideHint";
 import { HeroExploreCallout } from "./HeroExploreCallout";
+import { HeroMarsReturnButton } from "./HeroMarsReturnButton";
 import { HeroIntroPanel } from "./HeroIntroPanel";
 import { HeroSuspenseMoonAudio } from "./HeroSuspenseMoonAudio";
 import { Navbar } from "./Navbar";
 import { getHeroScrollPhases, HERO_SCROLL_COMPLETE, HERO_SCROLL_VH, useHeroScroll } from "./moon-scene/useHeroScroll";
 import { useHeroGameStart } from "./moon-scene/useHeroGameStart";
+import { useHeroMarsTravel } from "./moon-scene/useHeroMarsTravel";
 
 const SHOW_NAVBAR = false;
 const SHOW_INTRO_PANEL = false;
@@ -24,19 +26,34 @@ export const Hero = () => {
   const [reducedMotion, setReducedMotion] = useState(false);
   const { progress: gameStartProgress, active: gameStartActive, loading, start: startGame, visuals: gameStartVisuals } =
     useHeroGameStart();
+  const {
+    progress: marsTravelProgress,
+    active: marsTravelActive,
+    returning: marsReturning,
+    atMars,
+    start: startMarsTravel,
+    returnToMoon,
+  } = useHeroMarsTravel();
 
   useEffect(() => {
     setReducedMotion(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
   }, []);
 
   const { phase2Raw } = getHeroScrollPhases(scrollProgress);
-  const showScrollHint = !reducedMotion && scrollProgress < 0.1 && !gameStartActive;
+  const showScrollHint =
+    !reducedMotion && scrollProgress < 0.1 && !gameStartActive && !marsTravelActive;
   const showDarkSideHint =
-    !reducedMotion && !gameStartActive && phase2Raw > 0.08 && scrollProgress < HERO_SCROLL_COMPLETE - 0.04;
+    !reducedMotion &&
+    !gameStartActive &&
+    !marsTravelActive &&
+    phase2Raw > 0.08 &&
+    scrollProgress < HERO_SCROLL_COMPLETE - 0.04;
   const showExploreCallout =
     !reducedMotion &&
-    ((scrollProgress >= HERO_SCROLL_COMPLETE - 0.06 && !gameStartActive) ||
-      (gameStartActive && gameStartProgress < 0.86));
+    !atMars &&
+    ((scrollProgress >= HERO_SCROLL_COMPLETE - 0.06 && !gameStartActive && !marsTravelActive) ||
+      (gameStartActive && gameStartProgress < 0.86) ||
+      (marsTravelActive && marsTravelProgress < 0.2 && !marsReturning));
   const sceneScrollProgress = reducedMotion ? 0 : scrollProgress;
   const introScrollProgress = reducedMotion ? 1 : scrollProgress;
   const darkenOpacity = gameStartActive || loading ? gameStartVisuals.darken : 0;
@@ -54,7 +71,10 @@ export const Hero = () => {
       >
         <div className="pointer-events-none absolute inset-0 z-0">
           {!reducedMotion ? (
-            <MoonHeroScene scrollProgress={sceneScrollProgress} />
+            <MoonHeroScene
+              scrollProgress={sceneScrollProgress}
+              marsTravelProgress={marsTravelProgress}
+            />
           ) : (
             <div
               className="h-full w-full bg-[radial-gradient(circle_at_18%_50%,#4a4a4e_0%,#1a1a1e_18%,#000_52%)]"
@@ -77,9 +97,15 @@ export const Hero = () => {
             scrollProgress={scrollProgress}
             reducedMotion={reducedMotion}
             gameStartProgress={gameStartProgress}
+            marsTravelProgress={marsTravelProgress}
             loading={loading}
             onStartGame={startGame}
+            onLoadGame={startMarsTravel}
           />
+        ) : null}
+
+        {!reducedMotion ? (
+          <HeroMarsReturnButton visible={atMars} onReturnToMoon={returnToMoon} />
         ) : null}
 
         {gameStartActive ? (

@@ -1,19 +1,36 @@
 import * as THREE from "three";
 import { offsetToSpherical, sphericalToOffset } from "./useMoonOrbitControl";
+import { SUN_POSITION, getPlanetLightDirection, sunWorld } from "./sunLighting";
 
-export const SUN_POSITION: [number, number, number] = [8.5, 0.45, 3.2];
-export const MOON_CENTER = new THREE.Vector3(-0.5, 0, 0);
+export { SUN_POSITION };
+
+/** Distancia Sol ↔ Luna — separación claramente perceptible. */
+export const MOON_SUN_DISTANCE = 44;
+
+const MOON_AXIS_UNIT = new THREE.Vector3(-9, -0.45, -3.2).normalize();
+export const MOON_CENTER = MOON_AXIS_UNIT.clone().multiplyScalar(MOON_SUN_DISTANCE);
 export const MOON_RADIUS = 1.55;
-export const MOON_POSITION: [number, number, number] = [-0.5, 0, 0];
+export const MOON_POSITION: [number, number, number] = [
+  MOON_CENTER.x,
+  MOON_CENTER.y,
+  MOON_CENTER.z,
+];
 
-const sunWorld = new THREE.Vector3(...SUN_POSITION);
 const worldUp = new THREE.Vector3(0, 1, 0);
+const towardSunFromMoon = getPlanetLightDirection(MOON_CENTER, new THREE.Vector3());
+
+/** Encuadre fase 1: cámara cerca de la Luna, mirando hacia el Sol lejano. */
+export const PHASE1_LOOK_AT = MOON_CENTER.clone().addScaledVector(towardSunFromMoon, 1.12);
+export const PHASE1_LOOK_AT_X = PHASE1_LOOK_AT.x - 0.24;
+export const PHASE1_CAMERA_X = PHASE1_LOOK_AT.x;
+export const PHASE1_CAMERA_Z_NEAR = MOON_CENTER.z + 5.4;
+export const PHASE1_CAMERA_Z_FAR = MOON_CENTER.z + 7.65;
 
 /**
  * Distancia cámara ↔ centro lunar en la vista final (eje Luna→Sol invertido).
  * Más alto = luna más pequeña y más margen para ver el sol en el borde.
  */
-export const DARK_SIDE_CAMERA_DISTANCE = 5.75;
+export const DARK_SIDE_CAMERA_DISTANCE = 6.4;
 
 /** Desplazamiento lateral en planta (perpendicular al eje Luna–Sol). 0 = alineación perfecta. */
 export const DARK_SIDE_PLAN_OFFSET = 0.28;
@@ -31,7 +48,7 @@ export const ORBIT_PATH_TRIM = 0.58;
 export const ORBIT_PATH_END = 0.8207;
 
 export function getMoonSunDirection(target = new THREE.Vector3()) {
-  return target.copy(sunWorld).sub(MOON_CENTER).normalize();
+  return getPlanetLightDirection(MOON_CENTER, target);
 }
 
 export type DarkSideView = {

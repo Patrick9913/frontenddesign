@@ -14,6 +14,8 @@ export type MoonOrbitOffset = {
   elevation: number;
 };
 
+export type PlanetOrbitTarget = "moon" | "mars" | null;
+
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
@@ -34,14 +36,24 @@ export function sphericalToOffset(radius: number, azimuth: number, elevation: nu
   );
 }
 
-export function useMoonOrbitControl(reducedMotion: boolean) {
+export function usePlanetOrbitControl(reducedMotion: boolean, target: PlanetOrbitTarget) {
   const { gl } = useThree();
   const offset = useRef<MoonOrbitOffset>({ azimuth: 0, elevation: 0 });
   const dragging = useRef(false);
   const lastPointer = useRef({ x: 0, y: 0 });
+  const activeTarget = useRef<PlanetOrbitTarget>(target);
 
   useEffect(() => {
-    if (reducedMotion) return;
+    if (activeTarget.current !== target) {
+      activeTarget.current = target;
+      offset.current.azimuth = 0;
+      offset.current.elevation = 0;
+      dragging.current = false;
+    }
+  }, [target]);
+
+  useEffect(() => {
+    if (reducedMotion || target === null) return;
 
     const canvas = gl.domElement;
 
@@ -137,14 +149,19 @@ export function useMoonOrbitControl(reducedMotion: boolean) {
       window.removeEventListener("mouseup", onMouseUp);
       canvas.style.cursor = "";
     };
-  }, [gl, reducedMotion]);
+  }, [gl, reducedMotion, target]);
 
   useFrame(() => {
-    if (dragging.current || reducedMotion) return;
+    if (dragging.current || reducedMotion || target === null) return;
 
     offset.current.azimuth = THREE.MathUtils.lerp(offset.current.azimuth, 0, ORBIT_RETURN_LERP);
     offset.current.elevation = THREE.MathUtils.lerp(offset.current.elevation, 0, ORBIT_RETURN_LERP);
   });
 
   return offset;
+}
+
+/** @deprecated Usa usePlanetOrbitControl con target explícito. */
+export function useMoonOrbitControl(reducedMotion: boolean) {
+  return usePlanetOrbitControl(reducedMotion, "moon");
 }
