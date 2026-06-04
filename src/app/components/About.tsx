@@ -1,23 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-
-const SECTION_INDEX = "[ 01 ]";
-
-const COPY = {
-  overline: "Sobre mí",
-  title: {
-    line1: "CÓDIGO QUE",
-    accent: "RESPIRA",
-    line2: "DISEÑO",
-  },
-  lead:
-    "Mi perfil se construye en la intersección exacta entre la estructura analítica y la experiencia visual. Como estudiante de Ciencia de Datos y desarrollador web, entiendo la lógica profunda detrás del software, pero me apasiona obsesivamente cómo ese código se ve y se siente al usarlo.",
-  paragraphs: [
-    "A través de formación universitaria, cursos intensivos y años de aprendizaje autodidacta, he cultivado un enfoque donde el diseño es el pilar central. Me motiva el uso estratégico del espacio, la tipografía y el ritmo para crear interfaces limpias y coherentes, logrando que la estética siempre acompañe al mensaje.",
-    "Creo firmemente que una buena interfaz no es un simple recurso cosmético; es la capa humana que traduce sistemas y datos complejos. Cuando la precisión técnica y el diseño visual están perfectamente alineados, la experiencia se vuelve intuitiva, memorable y clara.",
-  ],
-} as const;
+import { ABOUT_COPY, ABOUT_SECTION_INDEX } from "../content/aboutContent";
 
 export const About = () => {
   const [showCvNotice, setShowCvNotice] = useState(false);
@@ -29,41 +13,38 @@ export const About = () => {
 
   return (
     <section
-      id="about"
-      className="py-32 lg:py-48 bg-black text-[#F0F0F0] font-sans border-t border-white/[0.08]"
+      id="about-fallback"
+      className="py-32 lg:py-48 bg-black text-[#F0F0F0] font-sans border-t border-white/[0.08] hidden motion-reduce:block"
     >
       <div className="max-w-7xl mx-auto px-8 md:px-16 lg:px-24">
         <header className="mb-20 md:mb-28 lg:mb-32">
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-8 md:mb-10">
             <span className="font-mono text-[10px] md:text-xs font-light tracking-[0.25em] uppercase text-white/50">
-              {SECTION_INDEX}
+              {ABOUT_SECTION_INDEX}
             </span>
             <span className="text-[10px] md:text-xs font-light tracking-[0.25em] uppercase text-white/50">
-              {COPY.overline}
+              {ABOUT_COPY.overline}
             </span>
           </div>
 
           <h2 className="text-5xl md:text-7xl lg:text-8xl font-light tracking-[-0.02em] text-[#F0F0F0] leading-[1.05] max-w-4xl">
-            {COPY.title.line1}
+            {ABOUT_COPY.title.line1}
             <br />
-            <span className="font-medium text-white/50">{COPY.title.accent}</span>{" "}
-            {COPY.title.line2}
+            <span className="font-medium text-white/50">{ABOUT_COPY.title.accent}</span>{" "}
+            {ABOUT_COPY.title.line2}
           </h2>
 
-          <div
-            className="w-8 md:w-12 h-px bg-white/[0.08] mt-8 md:mt-10"
-            aria-hidden
-          />
+          <div className="w-8 md:w-12 h-px bg-white/[0.08] mt-8 md:mt-10" aria-hidden />
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-8 xl:gap-12 lg:items-center">
           <div className="lg:col-span-5 flex flex-col gap-10 md:gap-12 text-left min-w-0">
             <p className="text-base md:text-lg font-light text-[#F0F0F0] leading-[1.75] tracking-wide">
-              {COPY.lead}
+              {ABOUT_COPY.lead}
             </p>
 
             <div className="space-y-8 border-t border-white/[0.08] pt-10">
-              {COPY.paragraphs.map((paragraph, index) => (
+              {ABOUT_COPY.paragraphs.map((paragraph, index) => (
                 <div key={index} className="flex gap-6 md:gap-8">
                   <span
                     className="shrink-0 font-mono text-[10px] font-light tracking-[0.2em] text-white/50 pt-1"
@@ -108,7 +89,7 @@ export const About = () => {
               <img
                 src="/wireone.png"
                 alt="Composición visual — capa posterior"
-                className="w-full h-full object-cover object-center grayscale contrast-[1.02] transition-[filter,transform] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:grayscale-0 hover:scale-[1.02] motion-reduce:grayscale-0 motion-reduce:scale-100 motion-reduce:transition-none"
+                className="w-full h-full object-cover object-center grayscale contrast-[1.02]"
                 loading="lazy"
               />
             </div>
@@ -116,7 +97,7 @@ export const About = () => {
               <img
                 src="/wiretwo.png"
                 alt="Composición visual — capa frontal"
-                className="w-full h-full object-cover object-center grayscale contrast-[1.02] transition-[filter,transform] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:grayscale-0 hover:scale-[1.02] motion-reduce:grayscale-0 motion-reduce:scale-100 motion-reduce:transition-none"
+                className="w-full h-full object-cover object-center grayscale contrast-[1.02]"
                 loading="lazy"
               />
             </div>
