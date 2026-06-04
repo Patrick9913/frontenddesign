@@ -3,10 +3,6 @@
 import { useFrame } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
-import { SUN_POSITION } from "./sunLighting";
-
-export { SUN_POSITION };
-
 const SUN_DISC_SIZE = 3.1;
 
 const FLARE_SPECS = [
@@ -110,27 +106,25 @@ export function IncandescentSun({ reducedMotion }: { reducedMotion: boolean }) {
   });
 
   return (
-    <group position={SUN_POSITION}>
-      <group ref={groupRef}>
-        <mesh renderOrder={9}>
-          <planeGeometry args={[SUN_DISC_SIZE, SUN_DISC_SIZE]} />
-          <shaderMaterial
-            ref={shaderRef}
-            uniforms={sunUniforms}
-            vertexShader={sunVertexShader}
-            fragmentShader={sunFragmentShader}
-            transparent
-            toneMapped={false}
-            blending={THREE.AdditiveBlending}
-            depthWrite={false}
-            side={THREE.DoubleSide}
-          />
-        </mesh>
+    <group ref={groupRef}>
+      <mesh renderOrder={9}>
+        <planeGeometry args={[SUN_DISC_SIZE, SUN_DISC_SIZE]} />
+        <shaderMaterial
+          ref={shaderRef}
+          uniforms={sunUniforms}
+          vertexShader={sunVertexShader}
+          fragmentShader={sunFragmentShader}
+          transparent
+          toneMapped={false}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
 
-        {FLARE_SPECS.map((flare, index) => (
-          <LensFlareGhost key={`${flare.x}-${flare.y}-${index}`} {...flare} />
-        ))}
-      </group>
+      {FLARE_SPECS.map((flare, index) => (
+        <LensFlareGhost key={`${flare.x}-${flare.y}-${index}`} {...flare} />
+      ))}
     </group>
   );
 }

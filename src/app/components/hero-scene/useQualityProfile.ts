@@ -33,6 +33,8 @@ export function useQualityProfile(): QualityProfile {
 const stableGlConfig = {
   antialias: false,
   alpha: false,
+  depth: true,
+  stencil: false,
   powerPreference: "high-performance" as WebGLPowerPreference,
   toneMapping: THREE.ACESFilmicToneMapping,
   toneMappingExposure: 1,
@@ -42,7 +44,7 @@ if (typeof window !== "undefined") {
   stableGlConfig.antialias = detectQuality() === "high";
 }
 
-/** Atributos WebGL fijados al cargar el módulo en cliente — no cambian tras crear el contexto. */
+/** Atributos WebGL fijados al cargar el módulo en cliente — alpha explícito para postprocessing. */
 export function getStableGlConfig() {
   return stableGlConfig;
 }

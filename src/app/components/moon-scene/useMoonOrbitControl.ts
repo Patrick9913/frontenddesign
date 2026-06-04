@@ -84,7 +84,7 @@ export function usePlanetOrbitControl(reducedMotion: boolean, target: PlanetOrbi
     const stopDrag = () => {
       if (!dragging.current) return;
       dragging.current = false;
-      canvas.style.cursor = "";
+      canvas.style.cursor = "default";
     };
 
     const onPointerDown = (event: PointerEvent) => {
@@ -147,7 +147,7 @@ export function usePlanetOrbitControl(reducedMotion: boolean, target: PlanetOrbi
       canvas.removeEventListener("mousedown", onMouseDown, { capture: true });
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", onMouseUp);
-      canvas.style.cursor = "";
+      canvas.style.cursor = "default";
     };
   }, [gl, reducedMotion, target]);
 

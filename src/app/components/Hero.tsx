@@ -4,6 +4,8 @@ import React, { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { HeroDarkSideHint } from "./HeroDarkSideHint";
 import { HeroExploreCallout } from "./HeroExploreCallout";
+import { HeroFlyModeToggle } from "./HeroFlyModeToggle";
+import { HeroMoonLorePanel } from "./HeroMoonLorePanel";
 import { HeroMarsReturnButton } from "./HeroMarsReturnButton";
 import { HeroIntroPanel } from "./HeroIntroPanel";
 import { HeroSuspenseMoonAudio } from "./HeroSuspenseMoonAudio";
@@ -24,6 +26,8 @@ export const Hero = () => {
   const sectionRef = useRef<HTMLElement>(null);
   const scrollProgress = useHeroScroll(sectionRef);
   const [reducedMotion, setReducedMotion] = useState(false);
+  const [flyMode, setFlyMode] = useState(false);
+  const [moonLoreOpen, setMoonLoreOpen] = useState(false);
   const { progress: gameStartProgress, active: gameStartActive, loading, start: startGame, visuals: gameStartVisuals } =
     useHeroGameStart();
   const {
@@ -39,6 +43,39 @@ export const Hero = () => {
     setReducedMotion(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
   }, []);
 
+  useEffect(() => {
+    if (!flyMode) return;
+
+    const section = sectionRef.current;
+    const preventScrollKeys = (event: KeyboardEvent) => {
+      if (event.code === "Space" || event.code === "ArrowUp" || event.code === "ArrowDown") {
+        event.preventDefault();
+      }
+    };
+
+    const preventWheel = (event: WheelEvent) => {
+      event.preventDefault();
+    };
+
+    const lockScroll = () => {
+      document.body.style.overflow = "hidden";
+    };
+
+    const unlockScroll = () => {
+      document.body.style.overflow = "";
+    };
+
+    lockScroll();
+    window.addEventListener("keydown", preventScrollKeys, { capture: true });
+    section?.addEventListener("wheel", preventWheel, { passive: false });
+
+    return () => {
+      unlockScroll();
+      window.removeEventListener("keydown", preventScrollKeys, { capture: true });
+      section?.removeEventListener("wheel", preventWheel);
+    };
+  }, [flyMode]);
+
   const { phase2Raw } = getHeroScrollPhases(scrollProgress);
   const showScrollHint =
     !reducedMotion && scrollProgress < 0.1 && !gameStartActive && !marsTravelActive;
@@ -51,9 +88,12 @@ export const Hero = () => {
   const showExploreCallout =
     !reducedMotion &&
     !atMars &&
+    !moonLoreOpen &&
     ((scrollProgress >= HERO_SCROLL_COMPLETE - 0.06 && !gameStartActive && !marsTravelActive) ||
       (gameStartActive && gameStartProgress < 0.86) ||
       (marsTravelActive && marsTravelProgress < 0.2 && !marsReturning));
+  const canInspectMoon =
+    !reducedMotion && !flyMode && !marsTravelActive && !gameStartActive && !atMars;
   const sceneScrollProgress = reducedMotion ? 0 : scrollProgress;
   const introScrollProgress = reducedMotion ? 1 : scrollProgress;
   const darkenOpacity = gameStartActive || loading ? gameStartVisuals.darken : 0;
@@ -69,11 +109,16 @@ export const Hero = () => {
         className="sticky top-0 h-screen w-full overflow-hidden"
         onContextMenu={(event) => event.preventDefault()}
       >
-        <div className="pointer-events-none absolute inset-0 z-0">
+        <div className="absolute inset-0 z-0 pointer-events-auto">
           {!reducedMotion ? (
             <MoonHeroScene
               scrollProgress={sceneScrollProgress}
               marsTravelProgress={marsTravelProgress}
+              flyMode={flyMode}
+              onFlyModeExit={() => setFlyMode(false)}
+              moonLoreOpen={moonLoreOpen}
+              moonInspectable={canInspectMoon}
+              onMoonLoreOpen={() => setMoonLoreOpen(true)}
             />
           ) : (
             <div
@@ -105,7 +150,28 @@ export const Hero = () => {
         ) : null}
 
         {!reducedMotion ? (
-          <HeroMarsReturnButton visible={atMars} onReturnToMoon={returnToMoon} />
+          <>
+            <HeroFlyModeToggle
+              active={flyMode}
+              onToggle={() => {
+                setFlyMode((prev) => !prev);
+                if (!flyMode) setMoonLoreOpen(false);
+              }}
+              reducedMotion={reducedMotion}
+            />
+            <HeroMarsReturnButton visible={atMars} onReturnToMoon={returnToMoon} />
+            <HeroMoonLorePanel
+              open={moonLoreOpen}
+              onClose={() => setMoonLoreOpen(false)}
+              reducedMotion={reducedMotion}
+            />
+          </>
+        ) : null}
+
+        {canInspectMoon && !moonLoreOpen ? (
+          <p className="pointer-events-none absolute bottom-[10%] right-[7%] z-[20] max-w-[11rem] text-right font-mono text-[9px] font-light uppercase leading-relaxed tracking-[0.24em] text-white/30 md:bottom-[12%] md:right-[8%]">
+            Clic en la Luna · dossier · botón derecho para girar vista
+          </p>
         ) : null}
 
         {gameStartActive ? (

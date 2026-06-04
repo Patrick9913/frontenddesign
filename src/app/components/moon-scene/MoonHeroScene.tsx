@@ -1,21 +1,19 @@
 "use client";
 
-import { useTexture } from "@react-three/drei";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import {
-  Bloom,
-  ChromaticAberration,
-  EffectComposer,
-  Noise,
-  Vignette,
-} from "@react-three/postprocessing";
+import { Outlines, useTexture } from "@react-three/drei";
+import { Canvas, useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
+import { Bloom, ChromaticAberration, Noise, Vignette } from "@react-three/postprocessing";
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { BlendFunction } from "postprocessing";
 import * as THREE from "three";
 import { getStableGlConfig, useQualityProfile, type QualityProfile } from "../hero-scene/useQualityProfile";
+import { GlCanvasLifecycle } from "./GlCanvasLifecycle";
+import { SafeEffectComposer } from "./SafeEffectComposer";
 import { useScenePointer } from "../hero-scene/useScenePointer";
 import { MYSTERY_LIGHTS, mysteryLightSurfacePosition } from "./moonDarkSideLights";
-import { IncandescentSun, SUN_POSITION } from "./IncandescentSun";
+import { MarsAsteroid } from "./MarsAsteroid";
+import { SunLightProvider, useSunLightContext } from "./SunLightContext";
+import { SunLightSource } from "./SunLightSource";
 import { getPlanetLightDirection } from "./sunLighting";
 import {
   MARS_CENTER,
@@ -47,7 +45,10 @@ import {
   PHASE1_LOOK_AT,
   PHASE1_LOOK_AT_X,
 } from "./moonCameraPath";
+import { MOON_LORE_CAMERA, MOON_LORE_FOV, MOON_LORE_LOOK_AT } from "./moonLoreView";
 import { getHeroScrollPhases } from "./useHeroScroll";
+import { HeroFlyControls } from "./useHeroFlyControls";
+import { useRightDragCameraLook } from "./useRightDragCameraLook";
 import {
   offsetToSpherical,
   sphericalToOffset,
@@ -74,6 +75,23 @@ const darkSideOffset = getDarkSideCameraOffset();
 const arcCameraScratch = new THREE.Vector3();
 const phase1EndCamScratch = new THREE.Vector3();
 const CHROMATIC_ABERRATION_OFFSET: [number, number] = [0.0042, 0.0015];
+
+/** Contorno al hover — fino y tenue para Luna y Marte. */
+function PlanetHoverOutline({ visible }: { visible: boolean }) {
+  if (!visible) return null;
+
+  return (
+    <Outlines
+      color="#fff8f2"
+      thickness={0.0075}
+      screenspace
+      opacity={0.34}
+      angle={Math.PI}
+      transparent
+      toneMapped={false}
+    />
+  );
+}
 
 function applyHardTerminator(
   material: THREE.MeshStandardMaterial,
@@ -144,6 +162,7 @@ function PlanetSurfaceMaterial({
 }) {
   const materialRef = useRef<THREE.MeshStandardMaterial>(null);
   const lightDirection = useRef(new THREE.Vector3());
+  const { registerMaterial } = useSunLightContext();
 
   useEffect(() => {
     const material = materialRef.current;
@@ -151,19 +170,13 @@ function PlanetSurfaceMaterial({
     getPlanetLightDirection(planetCenter, lightDirection.current);
     applyHardTerminator(material, cacheKey, lightDirection.current, uniformName);
     material.needsUpdate = true;
-  }, [cacheKey, map, planetCenter, uniformName]);
 
-  useFrame(() => {
-    const material = materialRef.current;
-    getPlanetLightDirection(planetCenter, lightDirection.current);
-    const uniformKey = material?.userData.lightUniform as typeof uniformName | undefined;
-    const shader = material?.userData.shader as
-      | { uniforms: Record<string, { value: THREE.Vector3 }> }
-      | undefined;
-    if (shader && uniformKey) {
-      shader.uniforms[uniformKey].value.copy(lightDirection.current);
-    }
-  });
+    return registerMaterial({
+      material,
+      planetCenter,
+      uniformName,
+    });
+  }, [cacheKey, map, planetCenter, uniformName, registerMaterial]);
 
   return (
     <meshStandardMaterial
@@ -185,25 +198,9 @@ function MoonSurfaceMaterial({ map }: { map: THREE.Texture }) {
       map={map}
       bumpScale={0.15}
       planetCenter={MOON_CENTER}
-      cacheKey="moon-hard-terminator-v4-sun-center"
+      cacheKey="moon-hard-terminator-v5-sun-unified"
       uniformName="uMoonLightDir"
     />
-  );
-}
-
-/** Luz direccional desde el Sol (origen) hacia la escena. */
-function SunDirectionalLight() {
-  const lightRef = useRef<THREE.DirectionalLight>(null);
-
-  useEffect(() => {
-    const light = lightRef.current;
-    if (!light) return;
-    light.target.position.copy(MOON_CENTER);
-    light.target.updateMatrixWorld();
-  }, []);
-
-  return (
-    <directionalLight ref={lightRef} position={SUN_POSITION} intensity={7.5} color="#ffffff" />
   );
 }
 
@@ -275,24 +272,14 @@ function MysteryLightPoint({
   );
 }
 
-function DarkSideMysteryLights({
-  phase2,
-  reducedMotion,
-}: {
-  phase2: number;
-  reducedMotion: boolean;
-}) {
-  const visibility = THREE.MathUtils.clamp((phase2 - 0.1) / 0.55, 0, 1);
-
-  if (visibility <= 0.001) return null;
-
+function DarkSideMysteryLights({ reducedMotion }: { reducedMotion: boolean }) {
   return (
     <group>
       {MYSTERY_LIGHTS.map((light) => (
         <MysteryLightPoint
           key={`${light.direction.join("-")}-${light.delay}`}
           {...light}
-          visibility={visibility}
+          visibility={1}
           reducedMotion={reducedMotion}
         />
       ))}
@@ -303,10 +290,19 @@ function DarkSideMysteryLights({
 /** ~110 s por vuelta completa — rotación marciana lenta y visible. */
 const MARS_ROTATION_SPEED = 0.057;
 
-function MarsMesh({ quality, reducedMotion }: { quality: QualityProfile; reducedMotion: boolean }) {
+function MarsMesh({
+  quality,
+  reducedMotion,
+  outlineOnHover = true,
+}: {
+  quality: QualityProfile;
+  reducedMotion: boolean;
+  outlineOnHover?: boolean;
+}) {
   const meshRef = useRef<THREE.Mesh>(null);
   const colorMap = useTexture("/textures/mars_color.jpg");
   const segments = quality === "high" ? 160 : 112;
+  const [hovered, setHovered] = useState(false);
 
   useEffect(() => {
     configureTexture(colorMap, 16);
@@ -318,31 +314,75 @@ function MarsMesh({ quality, reducedMotion }: { quality: QualityProfile; reduced
   });
 
   return (
-    <mesh ref={meshRef}>
+    <mesh
+      onPointerOver={(event) => {
+        if (!outlineOnHover || reducedMotion) return;
+        event.stopPropagation();
+        setHovered(true);
+      }}
+      onPointerOut={(event) => {
+        event.stopPropagation();
+        setHovered(false);
+      }}
+    >
       <sphereGeometry args={[MARS_RADIUS, segments, segments]} />
       <PlanetSurfaceMaterial
         map={colorMap}
         bumpScale={0.2}
         planetCenter={MARS_CENTER}
-        cacheKey="mars-hard-terminator-v2-sun-center"
+        cacheKey="mars-hard-terminator-v3-sun-unified"
         uniformName="uMarsLightDir"
       />
+      <PlanetHoverOutline visible={outlineOnHover && hovered && !reducedMotion} />
     </mesh>
   );
 }
 
-function MoonMesh({ quality }: { quality: QualityProfile }) {
+function MoonMesh({
+  quality,
+  selectable,
+  onSelect,
+}: {
+  quality: QualityProfile;
+  selectable: boolean;
+  onSelect?: () => void;
+}) {
+  const { gl } = useThree();
   const colorMap = useTexture("/textures/moon_color.jpg");
   const segments = quality === "high" ? 192 : 128;
+  const [hovered, setHovered] = useState(false);
+  const showOutline = selectable && hovered;
 
   useEffect(() => {
     configureTexture(colorMap, 16);
   }, [colorMap]);
 
+  const handlePointerOver = (event: ThreeEvent<PointerEvent>) => {
+    if (!selectable) return;
+    event.stopPropagation();
+    setHovered(true);
+    gl.domElement.style.cursor = "pointer";
+  };
+
+  const handlePointerOut = (event: ThreeEvent<PointerEvent>) => {
+    event.stopPropagation();
+    setHovered(false);
+    gl.domElement.style.cursor = "default";
+  };
+
   return (
-    <mesh>
+    <mesh
+      onClick={(event) => {
+        if (!selectable) return;
+        event.stopPropagation();
+        onSelect?.();
+      }}
+      onPointerOver={handlePointerOver}
+      onPointerOut={handlePointerOut}
+    >
       <sphereGeometry args={[MOON_RADIUS, segments, segments]} />
       <MoonSurfaceMaterial map={colorMap} />
+      <PlanetHoverOutline visible={showOutline} />
     </mesh>
   );
 }
@@ -355,15 +395,33 @@ function MoonSceneContent({
   reducedMotion,
   scrollProgress,
   marsTravelProgress = 0,
+  flyMode = false,
+  onFlyModeExit,
+  effectsEnabled = true,
+  moonLoreOpen = false,
+  onMoonLoreOpen,
+  moonInspectable = false,
 }: {
   quality: QualityProfile;
   reducedMotion: boolean;
   scrollProgress: number;
   marsTravelProgress?: number;
+  flyMode?: boolean;
+  onFlyModeExit?: () => void;
+  effectsEnabled?: boolean;
+  moonLoreOpen?: boolean;
+  onMoonLoreOpen?: () => void;
+  moonInspectable?: boolean;
 }) {
   const pointer = useScenePointer();
+  const flyNavigation = flyMode && !reducedMotion;
+  const marsTravel = marsTravelProgress > 0.001;
+  const moonSelectable =
+    moonInspectable && !marsTravel && !reducedMotion && typeof onMoonLoreOpen === "function";
   const orbitTarget: PlanetOrbitTarget =
-    marsTravelProgress >= MARS_ORBIT_READY
+    flyNavigation || moonLoreOpen
+    ? null
+    : marsTravelProgress >= MARS_ORBIT_READY
       ? "mars"
       : marsTravelProgress > 0.001
         ? null
@@ -382,11 +440,39 @@ function MoonSceneContent({
   const chromaScale = (1 - phase1 * 0.35) * (1 - phase2 * 0.25);
   const bloomThreshold = THREE.MathUtils.lerp(0.82, 0.28, phase2);
 
+  const moonLoreLookScratch = useRef(MOON_LORE_LOOK_AT.clone());
+  const moonLoreViewSynced = useRef(false);
+
+  useRightDragCameraLook(
+    moonLoreOpen && !marsTravel && marsTravelProgress < MARS_ORBIT_READY,
+    reducedMotion
+  );
+
+  useEffect(() => {
+    if (!moonLoreOpen) moonLoreViewSynced.current = false;
+  }, [moonLoreOpen]);
+
   useFrame((state, delta) => {
     const cam = state.camera as THREE.PerspectiveCamera;
     const damp = 1 - Math.exp(-5.5 * delta);
-    const marsTravel = marsTravelProgress > 0.001;
     const marsOrbitReady = marsTravelProgress >= MARS_ORBIT_READY;
+
+    if (moonLoreOpen && !marsTravel && !marsOrbitReady) {
+      const loreDamp = 1 - Math.exp(-4.2 * delta);
+      cam.position.lerp(MOON_LORE_CAMERA, loreDamp);
+      cam.fov = THREE.MathUtils.lerp(cam.fov, MOON_LORE_FOV, loreDamp);
+      cam.updateProjectionMatrix();
+
+      if (!moonLoreViewSynced.current) {
+        cam.position.copy(MOON_LORE_CAMERA);
+        cam.lookAt(moonLoreLookScratch.current.copy(MOON_LORE_LOOK_AT));
+        moonLoreViewSynced.current = true;
+      }
+
+      return;
+    }
+
+    if (flyNavigation) return;
 
     if (marsOrbitReady) {
       relativeOffset.current.copy(MARS_VIEW_CAMERA).sub(MARS_CENTER);
@@ -491,26 +577,38 @@ function MoonSceneContent({
   });
 
   return (
-    <>
+    <SunLightProvider marsTravelProgress={marsTravelProgress}>
+      <HeroFlyControls
+        enabled={flyNavigation && !moonLoreOpen}
+        reducedMotion={reducedMotion}
+        onRequestExit={onFlyModeExit}
+      />
       <SceneExposure target={1.22} />
       <color attach="background" args={["#000000"]} />
 
       <ambientLight intensity={0} />
-      <SunDirectionalLight />
-      <IncandescentSun reducedMotion={reducedMotion} />
+      <SunLightSource reducedMotion={reducedMotion} />
 
       <Suspense fallback={null}>
         <group position={MARS_POSITION}>
-          <MarsMesh quality={quality} reducedMotion={reducedMotion} />
+          <MarsMesh
+            quality={quality}
+            reducedMotion={reducedMotion}
+            outlineOnHover={!marsTravel}
+          />
+          <MarsAsteroid
+            reducedMotion={reducedMotion}
+            visible={marsTravelProgress > 0.12}
+          />
         </group>
         <group position={MOON_POSITION}>
-          <MoonMesh quality={quality} />
-          <DarkSideMysteryLights phase2={phase2} reducedMotion={reducedMotion} />
+          <MoonMesh quality={quality} selectable={moonSelectable} onSelect={onMoonLoreOpen} />
+          <DarkSideMysteryLights reducedMotion={reducedMotion} />
         </group>
       </Suspense>
 
-      {quality === "high" ? (
-        <EffectComposer multisampling={0}>
+      {effectsEnabled && quality === "high" ? (
+        <SafeEffectComposer multisampling={0}>
           <Bloom
             luminanceThreshold={bloomThreshold}
             luminanceSmoothing={0.88}
@@ -529,9 +627,9 @@ function MoonSceneContent({
           />
           <Noise blendFunction={BlendFunction.OVERLAY} opacity={0.018} />
           <Vignette offset={0.28} darkness={0.65} eskil={false} />
-        </EffectComposer>
-      ) : (
-        <EffectComposer multisampling={0}>
+        </SafeEffectComposer>
+      ) : effectsEnabled ? (
+        <SafeEffectComposer multisampling={0}>
           <Bloom
             luminanceThreshold={THREE.MathUtils.lerp(0.85, 0.32, phase2)}
             intensity={0.45 * (1 - phase1 * 0.3) + phase2 * 0.35}
@@ -548,49 +646,67 @@ function MoonSceneContent({
             modulationOffset={0.18}
           />
           <Vignette offset={0.3} darkness={0.62} eskil={false} />
-        </EffectComposer>
-      )}
-    </>
+        </SafeEffectComposer>
+      ) : null}
+    </SunLightProvider>
   );
 }
 
 export default function MoonHeroScene({
   scrollProgress = 0,
   marsTravelProgress = 0,
+  flyMode = false,
+  onFlyModeExit,
+  moonLoreOpen = false,
+  onMoonLoreOpen,
+  moonInspectable = false,
 }: {
   scrollProgress?: number;
   marsTravelProgress?: number;
+  flyMode?: boolean;
+  onFlyModeExit?: () => void;
+  moonLoreOpen?: boolean;
+  onMoonLoreOpen?: () => void;
+  moonInspectable?: boolean;
 }) {
-  const [ready, setReady] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
+  const [glReady, setGlReady] = useState(false);
   const quality = useQualityProfile();
-  const glConfig = getStableGlConfig();
 
   useEffect(() => {
-    setReady(true);
     setReducedMotion(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
   }, []);
 
-  if (!ready) {
-    return <div className="absolute inset-0 bg-black" aria-hidden />;
-  }
-
   return (
-    <Canvas
-      className="pointer-events-auto absolute inset-0 h-full w-full touch-none"
-      style={{ width: "100%", height: "100%", cursor: "default" }}
-      camera={{ position: [CAMERA_X, 0, CAMERA_Z_NEAR], fov: CAMERA_FOV_NEAR, near: 0.1, far: 480 }}
-      gl={glConfig}
-      dpr={quality === "high" ? [1, 2] : [1, 1.25]}
-      frameloop="always"
-      onContextMenu={(event) => event.preventDefault()}
-    >
-      <MoonSceneContent
-        quality={quality}
-        reducedMotion={reducedMotion}
-        scrollProgress={reducedMotion ? 0 : scrollProgress}
-        marsTravelProgress={reducedMotion ? 0 : marsTravelProgress}
-      />
-    </Canvas>
+    <div className="absolute inset-0">
+      {!glReady ? <div className="absolute inset-0 bg-black" aria-hidden /> : null}
+      <Canvas
+        className="pointer-events-auto absolute inset-0 h-full w-full touch-none"
+        style={{
+          width: "100%",
+          height: "100%",
+          ...(flyMode ? {} : { cursor: "default" }),
+        }}
+        camera={{ position: [CAMERA_X, 0, CAMERA_Z_NEAR], fov: CAMERA_FOV_NEAR, near: 0.1, far: 480 }}
+        gl={getStableGlConfig()}
+        dpr={quality === "high" ? [1, 2] : [1, 1.25]}
+        frameloop="always"
+        onContextMenu={(event) => event.preventDefault()}
+      >
+        <GlCanvasLifecycle onGlReady={setGlReady} />
+        <MoonSceneContent
+          quality={quality}
+          reducedMotion={reducedMotion}
+          scrollProgress={reducedMotion ? 0 : scrollProgress}
+          marsTravelProgress={reducedMotion ? 0 : marsTravelProgress}
+          flyMode={flyMode}
+          onFlyModeExit={onFlyModeExit}
+          moonLoreOpen={moonLoreOpen}
+          onMoonLoreOpen={onMoonLoreOpen}
+          moonInspectable={moonInspectable}
+          effectsEnabled={glReady}
+        />
+      </Canvas>
+    </div>
   );
 }
