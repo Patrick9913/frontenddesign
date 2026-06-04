@@ -13,8 +13,8 @@ export const About = () => {
 
   return (
     <section
-      id="about-fallback"
-      className="py-32 lg:py-48 bg-black text-[#F0F0F0] font-sans border-t border-white/[0.08] hidden motion-reduce:block"
+      id="about"
+      className="py-32 lg:py-48 bg-black text-[#F0F0F0] font-sans border-t border-white/[0.08]"
     >
       <div className="max-w-7xl mx-auto px-8 md:px-16 lg:px-24">
         <header className="mb-20 md:mb-28 lg:mb-32">
