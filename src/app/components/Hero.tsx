@@ -1,5 +1,6 @@
 import React from "react";
 import { Navbar } from "./Navbar";
+import { HeroBackground } from "./HeroBackground";
 
 const SECTION_INDEX = "[ 00 ]";
 
@@ -29,13 +30,8 @@ export const Hero = () => {
       id="hero"
       className="relative min-h-screen w-full flex flex-col bg-black text-[#F0F0F0] overflow-hidden font-sans"
     >
-      {/* Imagen de fondo: escala de grises, sin gradientes decorativos */}
-      <div
-        className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat grayscale opacity-45"
-        style={{ backgroundImage: "url('/secondback.jpg')" }}
-        aria-hidden
-      />
-      <div className="absolute inset-0 z-0 bg-black/78" aria-hidden />
+      <HeroBackground />
+      <div className="absolute inset-0 z-[1] bg-black/62" aria-hidden />
 
       <div className="relative z-10 w-full pt-4">
         <Navbar />
