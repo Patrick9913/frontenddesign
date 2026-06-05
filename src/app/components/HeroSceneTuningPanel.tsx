@@ -1,8 +1,57 @@
 "use client";
 
-import { useSceneTuning, type DestroyerId } from "./moon-scene/SceneTuningContext";
+import type { ReactNode } from "react";
+import { getDefaultDestroyerPosition } from "./moon-scene/escortDefaults";
+import {
+  DEFAULT_DESTROYERS,
+  useSceneTuning,
+  type DestroyerId,
+} from "./moon-scene/SceneTuningContext";
+import { useFleetCommand } from "./moon-scene/fleetCommandContext";
 
 const AXIS_LABELS = ["X", "Y", "Z"] as const;
+
+function CategoryResetButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="shrink-0 border border-white/10 px-2 py-0.5 font-mono text-[8px] uppercase tracking-[0.16em] text-white/40 transition-colors hover:border-amber-100/30 hover:text-amber-100/75"
+    >
+      Reset
+    </button>
+  );
+}
+
+function TuningCategory({
+  title,
+  onReset,
+  children,
+  bordered = false,
+}: {
+  title: string;
+  onReset: () => void;
+  children: ReactNode;
+  bordered?: boolean;
+}) {
+  return (
+    <div
+      className={
+        bordered
+          ? "space-y-4 rounded border border-white/10 bg-black/20 p-3"
+          : "space-y-3"
+      }
+    >
+      <div className="flex items-center justify-between gap-2">
+        <p className="font-mono text-[9px] font-light uppercase tracking-[0.22em] text-amber-100/55">
+          {title}
+        </p>
+        <CategoryResetButton onClick={onReset} />
+      </div>
+      {children}
+    </div>
+  );
+}
 
 type SliderRowProps = {
   label: string;
@@ -17,7 +66,7 @@ type SliderRowProps = {
 function SliderRow({ label, values, min, max, step, unit = "°", onChange }: SliderRowProps) {
   return (
     <div className="space-y-2">
-      <p className="font-mono text-[9px] font-light uppercase tracking-[0.22em] text-amber-100/55">
+      <p className="font-mono text-[9px] font-light uppercase tracking-[0.22em] text-white/40">
         {label}
       </p>
       {AXIS_LABELS.map((axisLabel, axis) => (
@@ -55,7 +104,7 @@ type ScaleSliderProps = {
 function ScaleSlider({ label, value, min, max, step, suffix = "×", onChange }: ScaleSliderProps) {
   return (
     <label className="block space-y-2">
-      <p className="font-mono text-[9px] font-light uppercase tracking-[0.22em] text-amber-100/55">
+      <p className="font-mono text-[9px] font-light uppercase tracking-[0.22em] text-white/40">
         {label}
       </p>
       <div className="flex items-center gap-2">
@@ -69,7 +118,7 @@ function ScaleSlider({ label, value, min, max, step, suffix = "×", onChange }: 
           className="h-1 flex-1 cursor-pointer accent-cyan-200/80"
         />
         <span className="w-12 text-right font-mono text-[9px] tabular-nums text-white/50">
-          {value.toFixed(step < 1 ? 1 : 2)}
+          {value.toFixed(step < 0.001 ? 4 : step < 1 ? 1 : 2)}
           {suffix}
         </span>
       </div>
@@ -82,14 +131,21 @@ function DestroyerSection({
   title,
   active,
   onSelect,
+  onReset,
+  onRemove,
+  canRemove,
 }: {
   id: DestroyerId;
   title: string;
   active: boolean;
   onSelect: () => void;
+  onReset: () => void;
+  onRemove: () => void;
+  canRemove: boolean;
 }) {
   const { destroyers, setDestroyerPosition, setDestroyerScale } = useSceneTuning();
-  const tuning = destroyers[id];
+  const tuning = destroyers.find((destroyer) => destroyer.id === id);
+  if (!tuning) return null;
 
   return (
     <div
@@ -97,19 +153,33 @@ function DestroyerSection({
         active ? "border-cyan-200/35 bg-cyan-950/25" : "border-white/10 bg-black/20"
       }`}
     >
-      <button
-        type="button"
-        onClick={onSelect}
-        className="mb-3 w-full text-left font-mono text-[9px] font-light uppercase tracking-[0.22em] text-amber-100/75 hover:text-cyan-100/90"
-      >
-        {title} {active ? "· seleccionado" : ""}
-      </button>
+      <div className="mb-3 flex items-center justify-between gap-2">
+        <button
+          type="button"
+          onClick={onSelect}
+          className="text-left font-mono text-[9px] font-light uppercase tracking-[0.22em] text-amber-100/75 hover:text-cyan-100/90"
+        >
+          {title} {active ? "· seleccionado" : ""}
+        </button>
+        <div className="flex items-center gap-2">
+          {canRemove ? (
+            <button
+              type="button"
+              onClick={onRemove}
+              className="border border-white/10 px-2 py-0.5 font-mono text-[8px] uppercase tracking-[0.16em] text-white/40 transition-colors hover:border-red-300/30 hover:text-red-200/75"
+            >
+              Quitar
+            </button>
+          ) : null}
+          <CategoryResetButton onClick={onReset} />
+        </div>
+      </div>
       <div className="space-y-4">
         <SliderRow
-          label="Posición (local)"
+          label="Posición (escena)"
           values={tuning.position}
-          min={-4}
-          max={4}
+          min={-8}
+          max={8}
           step={0.02}
           unit=""
           onChange={(axis, value) => setDestroyerPosition(id, axis, value)}
@@ -134,20 +204,70 @@ export function HeroSceneTuningPanel() {
     destroyers,
     selectedDestroyerId,
     cameraFov,
+    chromaticOffset,
+    chromaticIntensity,
+    chromaticModulation,
     setDeathStarRotationDeg,
     setSunOffset,
     setCameraFov,
+    setChromaticOffset,
+    setChromaticIntensity,
+    setChromaticModulation,
     setSelectedDestroyerId,
+    addDestroyer,
+    removeDestroyer,
     resetTuning,
+    resetDeathStarRotation,
+    resetSunOffset,
+    resetCameraFov,
+    resetChromaticAberration,
+    resetDestroyer,
+    resetDestroyers,
   } = useSceneTuning();
+  const {
+    setRuntimePosition,
+    clearDestination,
+    registerDestroyerRuntime,
+    unregisterDestroyerRuntime,
+    resetRuntime,
+  } = useFleetCommand();
+
+  const resetDestroyerWithFleet = (id: DestroyerId) => {
+    resetDestroyer(id);
+    const preset = DEFAULT_DESTROYERS.find((destroyer) => destroyer.id === id);
+    const position = preset?.position ?? getDefaultDestroyerPosition(id);
+    setRuntimePosition(id, [...position] as [number, number, number]);
+    clearDestination(id);
+  };
+
+  const handleAddDestroyer = () => {
+    const created = addDestroyer();
+    registerDestroyerRuntime(created.id, [...created.position] as [number, number, number]);
+  };
+
+  const handleRemoveDestroyer = (id: DestroyerId) => {
+    removeDestroyer(id);
+    unregisterDestroyerRuntime(id);
+  };
+
+  const handleResetDestroyers = () => {
+    resetDestroyers();
+    resetRuntime();
+  };
 
   const copySceneValues = async () => {
+    const destroyerLines = destroyers.map(
+      (destroyer, index) =>
+        `DESTROYER_${index + 1}: id ${destroyer.id}, pos [${destroyer.position.map((v) => v.toFixed(2)).join(", ")}], scale ${destroyer.scale.toFixed(2)}`
+    );
     const snippet = [
       `DEATH_STAR_ROTATION_DEG: [${deathStarRotationDeg.join(", ")}]`,
       `SUN_OFFSET: [${sunOffset.map((v) => v.toFixed(2)).join(", ")}]`,
       `CAMERA_FOV: ${cameraFov.toFixed(1)}`,
-      `DESTROYER_0: pos [${destroyers[0].position.map((v) => v.toFixed(2)).join(", ")}], scale ${destroyers[0].scale.toFixed(2)}`,
-      `DESTROYER_1: pos [${destroyers[1].position.map((v) => v.toFixed(2)).join(", ")}], scale ${destroyers[1].scale.toFixed(2)}`,
+      `CHROMATIC_OFFSET: [${chromaticOffset.map((v) => v.toFixed(4)).join(", ")}]`,
+      `CHROMATIC_INTENSITY: ${chromaticIntensity.toFixed(2)}`,
+      `CHROMATIC_MODULATION: ${chromaticModulation.toFixed(2)}`,
+      ...destroyerLines,
     ].join("\n");
 
     try {
@@ -158,14 +278,14 @@ export function HeroSceneTuningPanel() {
   };
 
   return (
-    <aside className="pointer-events-auto absolute bottom-[10%] left-[7%] z-[38] max-h-[min(78vh,40rem)] w-[min(20rem,calc(100vw-2rem))] overflow-y-auto border border-amber-100/20 bg-black/78 p-4 shadow-[0_0_40px_-12px_rgba(255,200,140,0.25)] backdrop-blur-md md:bottom-[12%] md:left-[8%] md:p-5">
+    <aside className="pointer-events-auto absolute left-4 top-[4.25rem] z-[38] max-h-[min(72vh,36rem)] w-[min(20rem,calc(100vw-2.5rem))] overflow-y-auto border border-amber-100/20 bg-black/82 p-4 shadow-[0_0_40px_-12px_rgba(255,200,140,0.25)] backdrop-blur-md md:left-6 md:top-[4.75rem] md:p-5">
       <div className="mb-4 flex items-start justify-between gap-3">
         <div>
           <p className="font-mono text-[9px] font-light uppercase tracking-[0.28em] text-amber-100/45">
-            Ajuste de escena
+            Opciones del modo foto
           </p>
           <h2 className="mt-1 font-mono text-[11px] font-light uppercase tracking-[0.2em] text-amber-100/90">
-            Composición
+            Ajuste de escena
           </h2>
         </div>
         <div className="flex gap-2">
@@ -178,60 +298,132 @@ export function HeroSceneTuningPanel() {
           </button>
           <button
             type="button"
-            onClick={resetTuning}
+            onClick={() => {
+              resetTuning();
+              resetRuntime();
+            }}
             className="border border-white/10 px-2 py-1 font-mono text-[8px] uppercase tracking-[0.18em] text-white/45 transition-colors hover:border-amber-100/30 hover:text-amber-100/75"
+            title="Restablecer toda la escena"
           >
-            Reset
+            Reset todo
           </button>
         </div>
       </div>
 
       <p className="mb-4 font-mono text-[8px] leading-relaxed tracking-[0.14em] text-white/35">
-        Arrastra los destructores en la escena o usa los sliders. Mueve el sol para cambiar la
-        dirección de la luz.
+        Los destructores son independientes de la Death Star. Arrástralos en la escena o usa los
+        sliders.
       </p>
 
       <div className="space-y-5">
-        <SliderRow
-          label="Rotación Death Star"
-          values={deathStarRotationDeg}
-          min={-180}
-          max={180}
-          step={1}
-          onChange={setDeathStarRotationDeg}
-        />
-        <SliderRow
-          label="Dirección luz (sol)"
-          values={sunOffset}
-          min={-24}
-          max={24}
-          step={0.5}
-          unit=""
-          onChange={setSunOffset}
-        />
+        <TuningCategory title="Death Star" onReset={resetDeathStarRotation}>
+          <SliderRow
+            label="Rotación"
+            values={deathStarRotationDeg}
+            min={-180}
+            max={180}
+            step={1}
+            onChange={setDeathStarRotationDeg}
+          />
+        </TuningCategory>
 
-        <ScaleSlider
-          label="FOV cámara"
-          value={cameraFov}
-          min={18}
-          max={75}
-          step={0.5}
-          suffix="°"
-          onChange={setCameraFov}
-        />
+        <TuningCategory title="Iluminación" onReset={resetSunOffset}>
+          <SliderRow
+            label="Dirección luz (sol)"
+            values={sunOffset}
+            min={-24}
+            max={24}
+            step={0.5}
+            unit=""
+            onChange={setSunOffset}
+          />
+        </TuningCategory>
 
-        <DestroyerSection
-          id={0}
-          title="Destructor A"
-          active={selectedDestroyerId === 0}
-          onSelect={() => setSelectedDestroyerId(0)}
-        />
-        <DestroyerSection
-          id={1}
-          title="Destructor B"
-          active={selectedDestroyerId === 1}
-          onSelect={() => setSelectedDestroyerId(1)}
-        />
+        <TuningCategory title="Cámara" onReset={resetCameraFov}>
+          <ScaleSlider
+            label="FOV"
+            value={cameraFov}
+            min={18}
+            max={75}
+            step={0.5}
+            suffix="°"
+            onChange={setCameraFov}
+          />
+        </TuningCategory>
+
+        <TuningCategory
+          title="Aberración cromática"
+          onReset={resetChromaticAberration}
+          bordered
+        >
+          <ScaleSlider
+            label="Intensidad global"
+            value={chromaticIntensity}
+            min={0}
+            max={3}
+            step={0.05}
+            suffix="×"
+            onChange={setChromaticIntensity}
+          />
+          <ScaleSlider
+            label="Offset X"
+            value={chromaticOffset[0]}
+            min={0}
+            max={0.02}
+            step={0.0001}
+            suffix=""
+            onChange={(value) => setChromaticOffset(0, value)}
+          />
+          <ScaleSlider
+            label="Offset Y"
+            value={chromaticOffset[1]}
+            min={0}
+            max={0.01}
+            step={0.0001}
+            suffix=""
+            onChange={(value) => setChromaticOffset(1, value)}
+          />
+          <ScaleSlider
+            label="Modulación radial"
+            value={chromaticModulation}
+            min={0}
+            max={1}
+            step={0.01}
+            suffix=""
+            onChange={setChromaticModulation}
+          />
+        </TuningCategory>
+
+        <TuningCategory title="Destructores" onReset={handleResetDestroyers} bordered>
+          <button
+            type="button"
+            onClick={handleAddDestroyer}
+            className="w-full border border-cyan-200/25 bg-cyan-950/30 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.2em] text-cyan-100/80 transition-colors hover:border-cyan-100/40 hover:bg-cyan-900/35 hover:text-cyan-50"
+          >
+            + Agregar destructor
+          </button>
+
+          {destroyers.length === 0 ? (
+            <p className="font-mono text-[9px] tracking-[0.12em] text-white/35">
+              No hay destructores en escena. Usa el botón de arriba para añadir uno.
+            </p>
+          ) : null}
+
+          <div className="space-y-3">
+            {destroyers.map((destroyer, index) => (
+              <DestroyerSection
+                key={destroyer.id}
+                id={destroyer.id}
+                title={`Destructor ${index + 1}`}
+                active={selectedDestroyerId === destroyer.id}
+                onSelect={() => setSelectedDestroyerId(destroyer.id)}
+                onReset={() => resetDestroyerWithFleet(destroyer.id)}
+                onRemove={() => handleRemoveDestroyer(destroyer.id)}
+                canRemove
+              />
+            ))}
+          </div>
+        </TuningCategory>
       </div>
     </aside>
   );
