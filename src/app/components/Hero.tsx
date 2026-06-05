@@ -9,7 +9,9 @@ import { HeroMoonLorePanel } from "./HeroMoonLorePanel";
 import { HeroMarsReturnButton } from "./HeroMarsReturnButton";
 import { HeroIntroPanel } from "./HeroIntroPanel";
 import { HeroSuspenseMoonAudio } from "./HeroSuspenseMoonAudio";
+import { HeroSceneTuningPanel } from "./HeroSceneTuningPanel";
 import { Navbar } from "./Navbar";
+import { SceneTuningProvider } from "./moon-scene/SceneTuningContext";
 import { getHeroScrollPhases, HERO_SCROLL_COMPLETE, HERO_SCROLL_VH, useHeroScroll } from "./moon-scene/useHeroScroll";
 import { useHeroGameStart } from "./moon-scene/useHeroGameStart";
 import { useHeroMarsTravel } from "./moon-scene/useHeroMarsTravel";
@@ -22,7 +24,7 @@ const MoonHeroScene = dynamic(() => import("./moon-scene/MoonHeroScene"), {
   loading: () => <div className="absolute inset-0 bg-black" aria-hidden />,
 });
 
-export const Hero = () => {
+export const Hero = ({ uiVisible = true }: { uiVisible?: boolean }) => {
   const sectionRef = useRef<HTMLElement>(null);
   const scrollProgress = useHeroScroll(sectionRef);
   const [reducedMotion, setReducedMotion] = useState(false);
@@ -86,19 +88,19 @@ export const Hero = () => {
     phase2Raw > 0.08 &&
     scrollProgress < HERO_SCROLL_COMPLETE - 0.04;
   const showExploreCallout =
+    uiVisible &&
     !reducedMotion &&
     !atMars &&
     !moonLoreOpen &&
     ((scrollProgress >= HERO_SCROLL_COMPLETE - 0.06 && !gameStartActive && !marsTravelActive) ||
       (gameStartActive && gameStartProgress < 0.86) ||
       (marsTravelActive && marsTravelProgress < 0.2 && !marsReturning));
-  const canInspectMoon =
-    !reducedMotion && !flyMode && !marsTravelActive && !gameStartActive && !atMars;
   const sceneScrollProgress = reducedMotion ? 0 : scrollProgress;
   const introScrollProgress = reducedMotion ? 1 : scrollProgress;
   const darkenOpacity = gameStartActive || loading ? gameStartVisuals.darken : 0;
 
   return (
+    <SceneTuningProvider layoutEditEnabled={uiVisible && !reducedMotion && !flyMode}>
     <section
       ref={sectionRef}
       id="hero"
@@ -117,7 +119,7 @@ export const Hero = () => {
               flyMode={flyMode}
               onFlyModeExit={() => setFlyMode(false)}
               moonLoreOpen={moonLoreOpen}
-              moonInspectable={canInspectMoon}
+              moonInspectable={false}
               onMoonLoreOpen={() => setMoonLoreOpen(true)}
             />
           ) : (
@@ -133,10 +135,10 @@ export const Hero = () => {
           aria-hidden
         />
 
-        {SHOW_INTRO_PANEL ? (
+        {SHOW_INTRO_PANEL && uiVisible ? (
           <HeroIntroPanel scrollProgress={introScrollProgress} reducedMotion={reducedMotion} />
         ) : null}
-        {showDarkSideHint ? <HeroDarkSideHint scrollProgress={scrollProgress} /> : null}
+        {uiVisible && showDarkSideHint ? <HeroDarkSideHint scrollProgress={scrollProgress} /> : null}
         {showExploreCallout ? (
           <HeroExploreCallout
             scrollProgress={scrollProgress}
@@ -149,8 +151,9 @@ export const Hero = () => {
           />
         ) : null}
 
-        {!reducedMotion ? (
+        {uiVisible && !reducedMotion ? (
           <>
+            <HeroSceneTuningPanel />
             <HeroFlyModeToggle
               active={flyMode}
               onToggle={() => {
@@ -168,12 +171,6 @@ export const Hero = () => {
           </>
         ) : null}
 
-        {canInspectMoon && !moonLoreOpen ? (
-          <p className="pointer-events-none absolute bottom-[10%] right-[7%] z-[20] max-w-[11rem] text-right font-mono text-[9px] font-light uppercase leading-relaxed tracking-[0.24em] text-white/30 md:bottom-[12%] md:right-[8%]">
-            Clic en la Luna · dossier · botón derecho para girar vista
-          </p>
-        ) : null}
-
         {gameStartActive ? (
           <div
             className="pointer-events-none absolute inset-0 z-[28] bg-black"
@@ -182,7 +179,7 @@ export const Hero = () => {
           />
         ) : null}
 
-        {gameStartVisuals.showLoading ? (
+        {uiVisible && gameStartVisuals.showLoading ? (
           <div
             className="pointer-events-none absolute bottom-[18%] left-[7%] z-[35] md:bottom-[16%] md:left-[8%]"
             style={{ opacity: gameStartVisuals.loadingOpacity }}
@@ -212,7 +209,7 @@ export const Hero = () => {
             </div>
           ) : null}
 
-          {showScrollHint ? (
+          {uiVisible && showScrollHint ? (
             <div className="pointer-events-none flex flex-1 flex-col justify-end px-8 pb-12 md:px-16 md:pb-16 lg:px-24">
               <p className="max-w-xs font-mono text-[10px] font-light uppercase tracking-[0.32em] text-white/25 opacity-0 animate-[fadeIn_2.4s_ease_0.8s_forwards]">
                 Scroll para explorar
@@ -222,6 +219,7 @@ export const Hero = () => {
         </div>
       </div>
     </section>
+    </SceneTuningProvider>
   );
 };
 

@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { setScenePointer } from "../scene/sceneStore";
 
-export const CustomCursor = () => {
+export const CustomCursor = ({ hidden = false }: { hidden?: boolean }) => {
   const cursorDotRef = useRef<HTMLDivElement>(null);
   const cursorOutlineRef = useRef<HTMLDivElement>(null);
   const trailRef = useRef<HTMLDivElement>(null);
@@ -21,6 +21,7 @@ export const CustomCursor = () => {
     let outlineY = 0;
 
     const handleMouseMove = (e: MouseEvent) => {
+      if (hidden) return;
       mouseX = e.clientX;
       mouseY = e.clientY;
       setScenePointer(mouseX, mouseY);
@@ -56,7 +57,9 @@ export const CustomCursor = () => {
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("mouseover", handleMouseOver);
     const animId = requestAnimationFrame(animate);
-    document.body.classList.add("custom-cursor-active");
+    if (!hidden) {
+      document.body.classList.add("custom-cursor-active");
+    }
 
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
@@ -64,9 +67,22 @@ export const CustomCursor = () => {
       cancelAnimationFrame(animId);
       document.body.classList.remove("custom-cursor-active");
     };
-  }, []);
+  }, [hidden]);
 
-  if (!isVisible) return null;
+  useEffect(() => {
+    if (hidden) {
+      document.body.classList.remove("custom-cursor-active");
+      return;
+    }
+    if (isVisible) {
+      document.body.classList.add("custom-cursor-active");
+    }
+    return () => {
+      document.body.classList.remove("custom-cursor-active");
+    };
+  }, [hidden, isVisible]);
+
+  if (!isVisible || hidden) return null;
 
   return (
     <>

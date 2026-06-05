@@ -1,7 +1,7 @@
 "use client";
 
 import { Outlines, useTexture } from "@react-three/drei";
-import { Canvas, useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Bloom, ChromaticAberration, Noise, Vignette } from "@react-three/postprocessing";
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { BlendFunction } from "postprocessing";
@@ -10,8 +10,9 @@ import { getStableGlConfig, useQualityProfile, type QualityProfile } from "../he
 import { GlCanvasLifecycle } from "./GlCanvasLifecycle";
 import { SafeEffectComposer } from "./SafeEffectComposer";
 import { useScenePointer } from "../hero-scene/useScenePointer";
-import { MYSTERY_LIGHTS, mysteryLightSurfacePosition } from "./moonDarkSideLights";
+import { DeathStarFleet } from "./DeathStarFleet";
 import { MarsAsteroid } from "./MarsAsteroid";
+import { applyHardTerminator } from "./planetTerminator";
 import { SunLightProvider, useSunLightContext } from "./SunLightContext";
 import { SunLightSource } from "./SunLightSource";
 import { getPlanetLightDirection } from "./sunLighting";
@@ -46,6 +47,7 @@ import {
   PHASE1_LOOK_AT_X,
 } from "./moonCameraPath";
 import { MOON_LORE_CAMERA, MOON_LORE_FOV, MOON_LORE_LOOK_AT } from "./moonLoreView";
+import { DEFAULT_CAMERA_FOV, useSceneTuning } from "./SceneTuningContext";
 import { getHeroScrollPhases } from "./useHeroScroll";
 import { HeroFlyControls } from "./useHeroFlyControls";
 import { useRightDragCameraLook } from "./useRightDragCameraLook";
@@ -91,58 +93,6 @@ function PlanetHoverOutline({ visible }: { visible: boolean }) {
       toneMapped={false}
     />
   );
-}
-
-function applyHardTerminator(
-  material: THREE.MeshStandardMaterial,
-  cacheKey: string,
-  lightDirection: THREE.Vector3,
-  uniformName: "uMoonLightDir" | "uMarsLightDir"
-) {
-  material.customProgramCacheKey = () => cacheKey;
-
-  material.onBeforeCompile = (shader) => {
-    shader.uniforms[uniformName] = { value: lightDirection.clone() };
-
-    shader.vertexShader = shader.vertexShader.replace(
-      "#include <common>",
-      `#include <common>
-      varying vec3 vMoonWorldNormal;`
-    );
-
-    shader.vertexShader = shader.vertexShader.replace(
-      "#include <beginnormal_vertex>",
-      `#include <beginnormal_vertex>
-      vMoonWorldNormal = normalize(normalMatrix * objectNormal);`
-    );
-
-    shader.fragmentShader = shader.fragmentShader.replace(
-      "#include <common>",
-      `#include <common>
-      varying vec3 vMoonWorldNormal;
-      uniform vec3 ${uniformName};`
-    );
-
-    shader.fragmentShader = shader.fragmentShader.replace(
-      "#include <output_fragment>",
-      `float moonFacing = dot(normalize(vMoonWorldNormal), normalize(${uniformName}));
-      if (moonFacing < 0.018) {
-        gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
-      } else {
-        #include <output_fragment>
-        float moonLum = dot(gl_FragColor.rgb, vec3(0.2126, 0.7152, 0.0722));
-        float terminatorBand = smoothstep(0.95, 0.02, moonFacing);
-        float caMask = terminatorBand * smoothstep(0.22, 0.88, moonLum);
-        float ca = caMask * 0.32;
-        gl_FragColor.r = min(gl_FragColor.r + ca * 1.75, 1.0);
-        gl_FragColor.g = gl_FragColor.g + ca * 0.04;
-        gl_FragColor.b = max(gl_FragColor.b - ca * 1.55, 0.0);
-      }`
-    );
-
-    material.userData.shader = shader;
-    material.userData.lightUniform = uniformName;
-  };
 }
 
 function PlanetSurfaceMaterial({
@@ -192,18 +142,6 @@ function PlanetSurfaceMaterial({
   );
 }
 
-function MoonSurfaceMaterial({ map }: { map: THREE.Texture }) {
-  return (
-    <PlanetSurfaceMaterial
-      map={map}
-      bumpScale={0.15}
-      planetCenter={MOON_CENTER}
-      cacheKey="moon-hard-terminator-v5-sun-unified"
-      uniformName="uMoonLightDir"
-    />
-  );
-}
-
 function configureTexture(texture: THREE.Texture, anisotropy: number) {
   texture.colorSpace = THREE.SRGBColorSpace;
   texture.anisotropy = anisotropy;
@@ -218,73 +156,6 @@ function SceneExposure({ target = 1.22 }: { target?: number }) {
     gl.toneMappingExposure = THREE.MathUtils.lerp(gl.toneMappingExposure, target, 0.06);
   });
   return null;
-}
-
-function MysteryLightPoint({
-  direction,
-  color,
-  size,
-  pulse,
-  delay,
-  visibility,
-  reducedMotion,
-}: {
-  direction: [number, number, number];
-  color: string;
-  size: number;
-  pulse: number;
-  delay: number;
-  visibility: number;
-  reducedMotion: boolean;
-}) {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const position = useMemo(() => mysteryLightSurfacePosition(direction, MOON_RADIUS), [direction]);
-  const quaternion = useMemo(() => {
-    const normal = new THREE.Vector3(...direction).normalize();
-    return new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), normal);
-  }, [direction]);
-
-  useFrame(({ clock }) => {
-    if (!meshRef.current) return;
-    const flicker = reducedMotion
-      ? 1
-      : 0.55 + Math.sin(clock.elapsedTime * pulse + delay) * 0.22 + Math.sin(clock.elapsedTime * pulse * 2.4 + delay * 1.7) * 0.12;
-    meshRef.current.scale.setScalar(size * flicker);
-    const material = meshRef.current.material as THREE.MeshBasicMaterial;
-    material.opacity = visibility * flicker;
-  });
-
-  if (visibility <= 0.001) return null;
-
-  return (
-    <mesh ref={meshRef} position={position} quaternion={quaternion} renderOrder={2}>
-      <circleGeometry args={[1, 12]} />
-      <meshBasicMaterial
-        color={color}
-        transparent
-        opacity={visibility}
-        toneMapped={false}
-        blending={THREE.AdditiveBlending}
-        depthWrite={false}
-        side={THREE.DoubleSide}
-      />
-    </mesh>
-  );
-}
-
-function DarkSideMysteryLights({ reducedMotion }: { reducedMotion: boolean }) {
-  return (
-    <group>
-      {MYSTERY_LIGHTS.map((light) => (
-        <MysteryLightPoint
-          key={`${light.direction.join("-")}-${light.delay}`}
-          {...light}
-          visibility={1}
-          reducedMotion={reducedMotion}
-        />
-      ))}
-    </group>
-  );
 }
 
 /** ~110 s por vuelta completa — rotación marciana lenta y visible. */
@@ -338,55 +209,6 @@ function MarsMesh({
   );
 }
 
-function MoonMesh({
-  quality,
-  selectable,
-  onSelect,
-}: {
-  quality: QualityProfile;
-  selectable: boolean;
-  onSelect?: () => void;
-}) {
-  const { gl } = useThree();
-  const colorMap = useTexture("/textures/moon_color.jpg");
-  const segments = quality === "high" ? 192 : 128;
-  const [hovered, setHovered] = useState(false);
-  const showOutline = selectable && hovered;
-
-  useEffect(() => {
-    configureTexture(colorMap, 16);
-  }, [colorMap]);
-
-  const handlePointerOver = (event: ThreeEvent<PointerEvent>) => {
-    if (!selectable) return;
-    event.stopPropagation();
-    setHovered(true);
-    gl.domElement.style.cursor = "pointer";
-  };
-
-  const handlePointerOut = (event: ThreeEvent<PointerEvent>) => {
-    event.stopPropagation();
-    setHovered(false);
-    gl.domElement.style.cursor = "default";
-  };
-
-  return (
-    <mesh
-      onClick={(event) => {
-        if (!selectable) return;
-        event.stopPropagation();
-        onSelect?.();
-      }}
-      onPointerOver={handlePointerOver}
-      onPointerOut={handlePointerOut}
-    >
-      <sphereGeometry args={[MOON_RADIUS, segments, segments]} />
-      <MoonSurfaceMaterial map={colorMap} />
-      <PlanetHoverOutline visible={showOutline} />
-    </mesh>
-  );
-}
-
 const marsTravelCamScratch = new THREE.Vector3();
 const marsTravelLookScratch = new THREE.Vector3();
 
@@ -416,8 +238,6 @@ function MoonSceneContent({
   const pointer = useScenePointer();
   const flyNavigation = flyMode && !reducedMotion;
   const marsTravel = marsTravelProgress > 0.001;
-  const moonSelectable =
-    moonInspectable && !marsTravel && !reducedMotion && typeof onMoonLoreOpen === "function";
   const orbitTarget: PlanetOrbitTarget =
     flyNavigation || moonLoreOpen
     ? null
@@ -427,6 +247,9 @@ function MoonSceneContent({
         ? null
         : "moon";
   const orbitOffset = usePlanetOrbitControl(reducedMotion, orbitTarget);
+  const { cameraFov } = useSceneTuning();
+  const cameraFovShift = cameraFov - DEFAULT_CAMERA_FOV;
+  const applyCameraFov = (baseFov: number) => baseFov + cameraFovShift;
   const targetCam = useRef(new THREE.Vector3(CAMERA_X, 0, CAMERA_Z_NEAR));
   const targetLook = useRef(new THREE.Vector3(SCENE_LOOK_AT[0], SCENE_LOOK_AT[1], SCENE_LOOK_AT[2]));
   const orbitedCam = useRef(new THREE.Vector3());
@@ -457,10 +280,16 @@ function MoonSceneContent({
     const damp = 1 - Math.exp(-5.5 * delta);
     const marsOrbitReady = marsTravelProgress >= MARS_ORBIT_READY;
 
+    if (flyNavigation) {
+      cam.fov = cameraFov;
+      cam.updateProjectionMatrix();
+      return;
+    }
+
     if (moonLoreOpen && !marsTravel && !marsOrbitReady) {
       const loreDamp = 1 - Math.exp(-4.2 * delta);
       cam.position.lerp(MOON_LORE_CAMERA, loreDamp);
-      cam.fov = THREE.MathUtils.lerp(cam.fov, MOON_LORE_FOV, loreDamp);
+      cam.fov = THREE.MathUtils.lerp(cam.fov, applyCameraFov(MOON_LORE_FOV), loreDamp);
       cam.updateProjectionMatrix();
 
       if (!moonLoreViewSynced.current) {
@@ -471,8 +300,6 @@ function MoonSceneContent({
 
       return;
     }
-
-    if (flyNavigation) return;
 
     if (marsOrbitReady) {
       relativeOffset.current.copy(MARS_VIEW_CAMERA).sub(MARS_CENTER);
@@ -491,7 +318,7 @@ function MoonSceneContent({
 
       const followStrength = THREE.MathUtils.lerp(damp, Math.min(1, damp * 2.4), orbitAmount);
       cam.position.lerp(orbitedCam.current, followStrength);
-      cam.fov = THREE.MathUtils.lerp(cam.fov, MARS_VIEW_FOV, damp);
+      cam.fov = THREE.MathUtils.lerp(cam.fov, applyCameraFov(MARS_VIEW_FOV), damp);
       cam.updateProjectionMatrix();
       smoothedLook.current.lerp(orbitedLook.current, damp);
       cam.lookAt(smoothedLook.current);
@@ -506,7 +333,7 @@ function MoonSceneContent({
 
       cam.position.lerp(marsTravelCamScratch, travelDamp);
       smoothedLook.current.lerp(marsTravelLookScratch, travelDamp);
-      cam.fov = THREE.MathUtils.lerp(cam.fov, marsFov, travelDamp);
+      cam.fov = THREE.MathUtils.lerp(cam.fov, applyCameraFov(marsFov), travelDamp);
       cam.updateProjectionMatrix();
       cam.lookAt(smoothedLook.current);
       return;
@@ -570,7 +397,7 @@ function MoonSceneContent({
 
     const followStrength = THREE.MathUtils.lerp(damp, Math.min(1, damp * 2.4), orbitAmount);
     cam.position.lerp(orbitedCam.current, followStrength);
-    cam.fov = THREE.MathUtils.lerp(cam.fov, targetFov, damp);
+    cam.fov = THREE.MathUtils.lerp(cam.fov, applyCameraFov(targetFov), damp);
     cam.updateProjectionMatrix();
     smoothedLook.current.lerp(orbitedLook.current, damp);
     cam.lookAt(smoothedLook.current);
@@ -594,7 +421,7 @@ function MoonSceneContent({
           <MarsMesh
             quality={quality}
             reducedMotion={reducedMotion}
-            outlineOnHover={!marsTravel}
+            outlineOnHover={false}
           />
           <MarsAsteroid
             reducedMotion={reducedMotion}
@@ -602,8 +429,10 @@ function MoonSceneContent({
           />
         </group>
         <group position={MOON_POSITION}>
-          <MoonMesh quality={quality} selectable={moonSelectable} onSelect={onMoonLoreOpen} />
-          <DarkSideMysteryLights reducedMotion={reducedMotion} />
+          <DeathStarFleet
+            selectable={false}
+            reducedMotion={reducedMotion}
+          />
         </group>
       </Suspense>
 

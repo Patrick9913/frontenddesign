@@ -12,7 +12,8 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { MARS_CENTER } from "./marsCameraPath";
 import { MOON_CENTER } from "./moonSceneConstants";
-import { getPlanetLightDirection, SUN_LIGHT_INTENSITY, sunWorld } from "./sunLighting";
+import { useSceneTuning } from "./SceneTuningContext";
+import { getPlanetLightDirection, SUN_LIGHT_INTENSITY, updateSunWorldPosition } from "./sunLighting";
 
 export type SunLightMaterialEntry = {
   material: THREE.MeshStandardMaterial;
@@ -41,6 +42,7 @@ export function SunLightProvider({
   children: ReactNode;
   marsTravelProgress?: number;
 }) {
+  const { sunOffset } = useSceneTuning();
   const lightRef = useRef<THREE.DirectionalLight | null>(null);
   const entriesRef = useRef<SunLightMaterialEntry[]>([]);
 
@@ -60,8 +62,12 @@ export function SunLightProvider({
   );
 
   useFrame(() => {
+    updateSunWorldPosition(sunOffset[0], sunOffset[1], sunOffset[2]);
+
     const light = lightRef.current;
     if (light) {
+      light.position.set(sunOffset[0], sunOffset[1], sunOffset[2]);
+
       const marsBlend = THREE.MathUtils.clamp(marsTravelProgress * 1.15, 0, 1);
       lightTargetScratch.copy(MOON_CENTER).lerp(MARS_CENTER, marsBlend);
       light.target.position.copy(lightTargetScratch);
@@ -93,4 +99,5 @@ export function useSunLightContext() {
 }
 
 /** Intensidad y color compartidos por la luz real y materiales estándar (p. ej. asteroide). */
-export { SUN_LIGHT_INTENSITY, sunWorld };
+export { SUN_LIGHT_INTENSITY };
+export { sunWorld } from "./sunLighting";

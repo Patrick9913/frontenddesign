@@ -5,6 +5,10 @@ export const SUN_POSITION: [number, number, number] = [0, 0, 0];
 
 export const sunWorld = new THREE.Vector3(...SUN_POSITION);
 
+export function updateSunWorldPosition(x: number, y: number, z: number) {
+  sunWorld.set(x, y, z);
+}
+
 /** Intensidad de la única luz direccional de escena (sin sombras). */
 export const SUN_LIGHT_INTENSITY = 7.5;
 export const SUN_LIGHT_COLOR = "#ffffff";
