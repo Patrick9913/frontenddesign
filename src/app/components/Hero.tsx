@@ -10,6 +10,7 @@ import { FleetFlyModeSync } from "./FleetFlyModeSync";
 import { FleetPhotoModeSync } from "./FleetPhotoModeSync";
 import { FleetCommandProvider } from "./moon-scene/fleetCommandContext";
 import { SceneTuningProvider } from "./moon-scene/SceneTuningContext";
+import { QualityProfileProvider } from "./hero-scene/useQualityProfile";
 import { HERO_SCROLL_VH, useHeroScroll } from "./moon-scene/useHeroScroll";
 
 const MoonHeroScene = dynamic(() => import("./moon-scene/MoonHeroScene"), {
@@ -89,7 +90,8 @@ export const Hero = ({ photoMode = false, onTogglePhotoMode }: HeroProps) => {
   };
 
   return (
-    <FleetCommandProvider>
+    <QualityProfileProvider>
+      <FleetCommandProvider>
       <FleetPhotoModeSync photoMode={photoMode} />
       <FleetFlyModeSync flyMode={flyMode} />
       <SceneTuningProvider layoutEditEnabled={layoutEditEnabled}>
@@ -157,7 +159,8 @@ export const Hero = ({ photoMode = false, onTogglePhotoMode }: HeroProps) => {
           </div>
         </section>
       </SceneTuningProvider>
-    </FleetCommandProvider>
+      </FleetCommandProvider>
+    </QualityProfileProvider>
   );
 };
 

@@ -9,7 +9,7 @@ import * as THREE from "three";
 import { notifySceneUi, subscribeSceneStore, getSceneStoreVersion } from "../scene/SceneContext";
 import { decayContactFlash, sceneStore } from "../scene/sceneStore";
 import { getSectionMeta, type SiteSectionId } from "../scene/sections";
-import { getStableGlConfig, useQualityProfile, type QualityProfile } from "./hero-scene/useQualityProfile";
+import { getQualitySettings, getStableGlConfig, useQualityProfile, type QualityProfile } from "./hero-scene/useQualityProfile";
 
 const CUBE_SIZE = 1.65;
 const cubeGeometry = new THREE.BoxGeometry(CUBE_SIZE, CUBE_SIZE, CUBE_SIZE);
@@ -331,6 +331,7 @@ function CubeExploreHint({ onExplore }: { onExplore?: () => void }) {
 function PostFX({ quality }: { quality: QualityProfile }) {
   const explore = sceneStore.exploreMode ? 1 : 0;
   const bloomBoost = sceneStore.activeSection === "projects" ? 0.22 : 0;
+  const settings = getQualitySettings(quality);
 
   if (quality === "low") {
     return (
@@ -341,10 +342,24 @@ function PostFX({ quality }: { quality: QualityProfile }) {
     );
   }
 
+  if (quality === "medium") {
+    return (
+      <EffectComposer multisampling={0}>
+        <Bloom luminanceThreshold={0.68 - explore * 0.1} intensity={0.5 + explore * 0.14 + bloomBoost} mipmapBlur radius={0.62} />
+        <Vignette offset={0.32} darkness={0.58} eskil={false} />
+      </EffectComposer>
+    );
+  }
+
   return (
-    <EffectComposer multisampling={0}>
-      <Bloom luminanceThreshold={0.62 - explore * 0.12} intensity={0.62 + explore * 0.15 + bloomBoost} mipmapBlur radius={0.78} />
-      <Noise blendFunction={BlendFunction.OVERLAY} opacity={0.035} />
+    <EffectComposer multisampling={settings.multisampling}>
+      <Bloom
+        luminanceThreshold={(quality === "ultra" ? 0.56 : 0.62) - explore * 0.12}
+        intensity={(quality === "ultra" ? 0.72 : 0.62) + explore * 0.15 + bloomBoost}
+        mipmapBlur
+        radius={quality === "ultra" ? 0.85 : 0.78}
+      />
+      <Noise blendFunction={BlendFunction.OVERLAY} opacity={quality === "ultra" ? 0.04 : 0.035} />
       <Vignette offset={0.32} darkness={0.62} eskil={false} />
     </EffectComposer>
   );
@@ -370,8 +385,9 @@ function FloatingCubeScene({
   const lastProjectIndex = useRef(-1);
   const projectTextureRef = useRef<THREE.Texture | null>(null);
 
-  const isHigh = quality === "high";
-  const stormLightCount = isHigh ? 10 : 5;
+  const isHigh = quality === "high" || quality === "ultra";
+  const stormLightCount =
+    quality === "ultra" ? 14 : quality === "high" ? 10 : quality === "medium" ? 7 : 5;
   const themePrimary = useRef(new THREE.Color());
   const themeSecondary = useRef(new THREE.Color());
 
@@ -541,6 +557,7 @@ function SceneCanvas({ onExplore }: HeroCubeSceneProps) {
   const [ready, setReady] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
   const quality = useQualityProfile();
+  const settings = getQualitySettings(quality);
   const glConfig = getStableGlConfig();
 
   useSyncExternalStore(subscribeSceneStore, getSceneStoreVersion, getSceneStoreVersion);
@@ -560,7 +577,7 @@ function SceneCanvas({ onExplore }: HeroCubeSceneProps) {
       style={{ width: "100%", height: "100%", pointerEvents: interactive ? "auto" : "none" }}
       camera={{ position: [0, 0, 5.2], fov: 42 }}
       gl={glConfig}
-      dpr={quality === "high" ? [1, 2] : [1, 1.25]}
+      dpr={settings.dpr}
       frameloop="always"
     >
       <color attach="background" args={["#000000"]} />

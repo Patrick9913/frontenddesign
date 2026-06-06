@@ -4,6 +4,7 @@ import { Outlines, useGLTF } from "@react-three/drei";
 import { useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
+import { useQualitySettings } from "../hero-scene/useQualityProfile";
 import { getCinematicPhases, getDestroyerHyperspaceProgress } from "./cinematicPhases";
 import { FleetDestinationMarkers } from "./FleetCommandLayer";
 import { FleetCommandPlaneMesh, FleetStrategyPreview } from "./FleetStrategyPreview";
@@ -142,10 +143,10 @@ function centerAndScaleToMaxDim(root: THREE.Object3D, targetMaxDim: number) {
   root.position.sub(box.getCenter(new THREE.Vector3()));
 }
 
-function tuneFleetMaterial(material: THREE.MeshStandardMaterial) {
+function tuneFleetMaterial(material: THREE.MeshStandardMaterial, envMapIntensity: number) {
   material.metalness = THREE.MathUtils.clamp(material.metalness, 0.18, 0.72);
   material.roughness = THREE.MathUtils.clamp(material.roughness, 0.28, 0.82);
-  material.envMapIntensity = 0.32;
+  material.envMapIntensity = envMapIntensity;
 }
 
 function LitFleetModel({
@@ -156,6 +157,7 @@ function LitFleetModel({
   cacheKey: string;
 }) {
   const { registerMaterial } = useSunLightContext();
+  const { settings } = useQualitySettings();
   const lightDirection = useRef(new THREE.Vector3());
 
   useEffect(() => {
@@ -166,7 +168,7 @@ function LitFleetModel({
       const material = child.material;
       if (!(material instanceof THREE.MeshStandardMaterial)) return;
 
-      tuneFleetMaterial(material);
+      tuneFleetMaterial(material, settings.fleetEnvMapIntensity);
       getPlanetLightDirection(MOON_CENTER, lightDirection.current);
       applyHardTerminator(material, cacheKey, lightDirection.current, "uMoonLightDir");
       material.needsUpdate = true;
@@ -183,7 +185,7 @@ function LitFleetModel({
     return () => {
       cleanups.forEach((cleanup) => cleanup());
     };
-  }, [cacheKey, model, registerMaterial]);
+  }, [cacheKey, model, registerMaterial, settings.fleetEnvMapIntensity]);
 
   return <primitive object={model} />;
 }

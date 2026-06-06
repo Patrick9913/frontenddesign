@@ -2,6 +2,7 @@
 
 import type { MouseEvent, ReactNode } from "react";
 import { FiCamera, FiNavigation, FiSliders } from "react-icons/fi";
+import { HeroGraphicsSettings } from "./HeroGraphicsSettings";
 
 type PhotoModeToolbarProps = {
   photoMode: boolean;
@@ -80,6 +81,7 @@ export function PhotoModeToolbar({
         >
           <FiNavigation className="h-[18px] w-[18px]" aria-hidden />
         </ToolbarButton>
+        <HeroGraphicsSettings disabled={photoMode || flyMode} />
       </div>
 
       {flyMode ? (

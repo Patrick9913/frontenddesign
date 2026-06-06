@@ -1,37 +1,48 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useContext } from "react";
 import * as THREE from "three";
+import { QualityProfileContext } from "./QualityProfileContext";
+import {
+  detectDefaultQuality,
+  getQualitySettings,
+  resolveInitialQuality,
+  type QualityProfile,
+  type QualitySettings,
+} from "./qualitySettings";
 
-export type QualityProfile = "high" | "low";
+export type { QualityProfile, QualitySettings } from "./qualitySettings";
+export {
+  getQualitySettings,
+  isLegacyHighQuality,
+  QUALITY_DESCRIPTIONS,
+  QUALITY_LABELS,
+} from "./qualitySettings";
+export { QualityProfileProvider, useQualityProfileContext } from "./QualityProfileContext";
 
-function detectQuality(): QualityProfile {
-  if (typeof window === "undefined") return "high";
-  const isMobile = window.innerWidth < 768;
-  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  return isMobile || reducedMotion ? "low" : "high";
+function useOptionalQualityContext() {
+  return useContext(QualityProfileContext);
 }
 
 export function useQualityProfile(): QualityProfile {
-  const [quality, setQuality] = useState<QualityProfile>(detectQuality);
-
-  useEffect(() => {
-    setQuality(detectQuality());
-
-    const onResize = () => {
-      const next = detectQuality();
-      setQuality((prev) => (prev === next ? prev : next));
-    };
-
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, []);
-
-  return quality;
+  const ctx = useOptionalQualityContext();
+  return ctx?.quality ?? detectDefaultQuality();
 }
 
-const stableGlConfig = {
-  antialias: false,
+export function useQualitySettings(): {
+  quality: QualityProfile;
+  settings: QualitySettings;
+  setQuality: (quality: QualityProfile) => void;
+} {
+  const ctx = useOptionalQualityContext();
+  const quality = ctx?.quality ?? detectDefaultQuality();
+  const settings = ctx?.settings ?? getQualitySettings(quality);
+  const setQuality = ctx?.setQuality ?? (() => undefined);
+
+  return { quality, settings, setQuality };
+}
+
+const stableGlBase = {
   alpha: false,
   depth: true,
   stencil: false,
@@ -40,11 +51,11 @@ const stableGlConfig = {
   toneMappingExposure: 1,
 };
 
-if (typeof window !== "undefined") {
-  stableGlConfig.antialias = detectQuality() === "high";
-}
-
-/** Atributos WebGL fijados al cargar el módulo en cliente — alpha explícito para postprocessing. */
+/** Atributos WebGL — antialias según preset guardado al cargar el módulo. */
 export function getStableGlConfig() {
-  return stableGlConfig;
+  const settings = getQualitySettings(resolveInitialQuality());
+  return {
+    ...stableGlBase,
+    antialias: settings.canvasAntialias,
+  };
 }

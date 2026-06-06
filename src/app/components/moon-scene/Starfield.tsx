@@ -7,12 +7,16 @@ import * as THREE from "three";
 type StarfieldProps = {
   count?: number;
   radius?: number;
+  starSize?: number;
+  opacity?: number;
   reducedMotion?: boolean;
 };
 
 export function Starfield({
   count = 2400,
   radius = 140,
+  starSize = 0.09,
+  opacity = 0.72,
   reducedMotion = false,
 }: StarfieldProps) {
   const pointsRef = useRef<THREE.Points>(null);
@@ -49,10 +53,10 @@ export function Starfield({
       <primitive object={geometry} attach="geometry" />
       <pointsMaterial
         color="#d8e2f0"
-        size={0.09}
+        size={starSize}
         sizeAttenuation
         transparent
-        opacity={0.72}
+        opacity={opacity}
         depthWrite={false}
         blending={THREE.AdditiveBlending}
       />
