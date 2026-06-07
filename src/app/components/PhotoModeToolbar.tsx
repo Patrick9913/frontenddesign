@@ -2,12 +2,14 @@
 
 import type { MouseEvent, ReactNode } from "react";
 import { FiCamera, FiNavigation, FiSliders } from "react-icons/fi";
+import { HeroCentralBodyToggle } from "./HeroCentralBodyToggle";
 import { HeroGraphicsSettings } from "./HeroGraphicsSettings";
 
 type PhotoModeToolbarProps = {
   photoMode: boolean;
   optionsOpen: boolean;
   flyMode: boolean;
+  fleetHints?: boolean;
   onTogglePhotoMode: () => void;
   onToggleOptions: () => void;
   onToggleFlyMode: () => void;
@@ -44,6 +46,7 @@ export function PhotoModeToolbar({
   photoMode,
   optionsOpen,
   flyMode,
+  fleetHints = true,
   onTogglePhotoMode,
   onToggleOptions,
   onToggleFlyMode,
@@ -59,7 +62,7 @@ export function PhotoModeToolbar({
 
   return (
     <div className="pointer-events-none absolute left-4 top-4 z-[40] flex flex-col gap-2 md:left-6 md:top-6">
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <ToolbarButton
           label="Modo foto (V)"
           active={photoMode}
@@ -68,7 +71,7 @@ export function PhotoModeToolbar({
           <FiCamera className="h-[18px] w-[18px]" aria-hidden />
         </ToolbarButton>
         <ToolbarButton
-          label="Opciones del modo foto"
+          label="Opciones de escena"
           active={optionsOpen}
           onClick={(event) => stop(event, onToggleOptions)}
         >
@@ -81,12 +84,15 @@ export function PhotoModeToolbar({
         >
           <FiNavigation className="h-[18px] w-[18px]" aria-hidden />
         </ToolbarButton>
-        <HeroGraphicsSettings disabled={photoMode || flyMode} />
+        <HeroGraphicsSettings disabled={photoMode} />
+        <HeroCentralBodyToggle disabled={photoMode} />
       </div>
 
       {flyMode ? (
         <p className="pointer-events-none max-w-[18rem] font-mono text-[11px] font-light uppercase leading-relaxed tracking-[0.14em] text-white/45 drop-shadow-[0_0_10px_rgba(0,0,0,0.9)]">
-          WASD · Espacio / Ctrl · Clic unidad / destino · Esc
+          {fleetHints
+            ? "WASD · Espacio / Ctrl · Clic unidad / destino · Esc"
+            : "WASD · Espacio / Ctrl · Esc"}
         </p>
       ) : null}
     </div>

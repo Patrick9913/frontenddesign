@@ -20,6 +20,9 @@ export const DEFAULT_CAMERA_FOV = 38;
 export const DEFAULT_CHROMATIC_OFFSET: [number, number] = [0.0042, 0.0015];
 export const DEFAULT_CHROMATIC_INTENSITY = 1;
 export const DEFAULT_CHROMATIC_MODULATION = 0.25;
+export const DEFAULT_MOON_DISPLACEMENT = 0.035;
+export const DEFAULT_MOON_NORMAL_INTENSITY = 1;
+export const DEFAULT_STARS_VISIBLE = true;
 
 export type DestroyerId = number;
 export type Axis = 0 | 1 | 2;
@@ -45,12 +48,18 @@ type SceneTuningContextValue = {
   chromaticOffset: [number, number];
   chromaticIntensity: number;
   chromaticModulation: number;
+  moonDisplacement: number;
+  moonNormalIntensity: number;
+  starsVisible: boolean;
   setDeathStarRotationDeg: (axis: Axis, value: number) => void;
   setSunOffset: (axis: Axis, value: number) => void;
   setCameraFov: (value: number) => void;
   setChromaticOffset: (axis: 0 | 1, value: number) => void;
   setChromaticIntensity: (value: number) => void;
   setChromaticModulation: (value: number) => void;
+  setMoonDisplacement: (value: number) => void;
+  setMoonNormalIntensity: (value: number) => void;
+  setStarsVisible: (value: boolean) => void;
   setDestroyerPosition: (id: DestroyerId, axis: Axis, value: number) => void;
   setDestroyerPositionTuple: (id: DestroyerId, position: [number, number, number]) => void;
   setDestroyerScale: (id: DestroyerId, scale: number) => void;
@@ -62,6 +71,8 @@ type SceneTuningContextValue = {
   resetSunOffset: () => void;
   resetCameraFov: () => void;
   resetChromaticAberration: () => void;
+  resetMoonSurface: () => void;
+  resetSceneEnvironment: () => void;
   resetDestroyer: (id: DestroyerId) => void;
   resetDestroyers: () => void;
 };
@@ -108,6 +119,9 @@ export function SceneTuningProvider({
     useState<[number, number]>(DEFAULT_CHROMATIC_OFFSET);
   const [chromaticIntensity, setChromaticIntensityState] = useState(DEFAULT_CHROMATIC_INTENSITY);
   const [chromaticModulation, setChromaticModulationState] = useState(DEFAULT_CHROMATIC_MODULATION);
+  const [moonDisplacement, setMoonDisplacementState] = useState(DEFAULT_MOON_DISPLACEMENT);
+  const [moonNormalIntensity, setMoonNormalIntensityState] = useState(DEFAULT_MOON_NORMAL_INTENSITY);
+  const [starsVisible, setStarsVisibleState] = useState(DEFAULT_STARS_VISIBLE);
   const nextDestroyerIdRef = useRef(
     DEFAULT_DESTROYERS.reduce((max, destroyer) => Math.max(max, destroyer.id), 0) + 1
   );
@@ -123,6 +137,9 @@ export function SceneTuningProvider({
       chromaticOffset,
       chromaticIntensity,
       chromaticModulation,
+      moonDisplacement,
+      moonNormalIntensity,
+      starsVisible,
       setDeathStarRotationDeg: (axis, value) => {
         setDeathStarRotationDegState((prev) => {
           const next: [number, number, number] = [...prev];
@@ -147,6 +164,9 @@ export function SceneTuningProvider({
       },
       setChromaticIntensity: setChromaticIntensityState,
       setChromaticModulation: setChromaticModulationState,
+      setMoonDisplacement: setMoonDisplacementState,
+      setMoonNormalIntensity: setMoonNormalIntensityState,
+      setStarsVisible: setStarsVisibleState,
       setDestroyerPosition: (id, axis, value) => {
         setDestroyersState((prev) =>
           prev.map((destroyer) =>
@@ -207,6 +227,9 @@ export function SceneTuningProvider({
         setChromaticOffsetState(DEFAULT_CHROMATIC_OFFSET);
         setChromaticIntensityState(DEFAULT_CHROMATIC_INTENSITY);
         setChromaticModulationState(DEFAULT_CHROMATIC_MODULATION);
+        setMoonDisplacementState(DEFAULT_MOON_DISPLACEMENT);
+        setMoonNormalIntensityState(DEFAULT_MOON_NORMAL_INTENSITY);
+        setStarsVisibleState(DEFAULT_STARS_VISIBLE);
         nextDestroyerIdRef.current =
           DEFAULT_DESTROYERS.reduce((max, destroyer) => Math.max(max, destroyer.id), 0) + 1;
       },
@@ -223,6 +246,13 @@ export function SceneTuningProvider({
         setChromaticOffsetState(DEFAULT_CHROMATIC_OFFSET);
         setChromaticIntensityState(DEFAULT_CHROMATIC_INTENSITY);
         setChromaticModulationState(DEFAULT_CHROMATIC_MODULATION);
+      },
+      resetMoonSurface: () => {
+        setMoonDisplacementState(DEFAULT_MOON_DISPLACEMENT);
+        setMoonNormalIntensityState(DEFAULT_MOON_NORMAL_INTENSITY);
+      },
+      resetSceneEnvironment: () => {
+        setStarsVisibleState(DEFAULT_STARS_VISIBLE);
       },
       resetDestroyer: (id) => {
         const defaults = getDefaultDestroyerById(id);
@@ -253,7 +283,10 @@ export function SceneTuningProvider({
       deathStarRotationDeg,
       destroyers,
       layoutEditEnabled,
+      moonDisplacement,
+      moonNormalIntensity,
       selectedDestroyerId,
+      starsVisible,
       sunOffset,
     ]
   );

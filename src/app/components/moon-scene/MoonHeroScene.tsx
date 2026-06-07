@@ -11,11 +11,13 @@ import {
   type QualityProfile,
   type QualitySettings,
 } from "../hero-scene/useQualityProfile";
+import { useHeroCentralBody } from "../hero-scene/HeroCentralBodyContext";
 import { useScenePointer } from "../hero-scene/useScenePointer";
 import { GlCanvasLifecycle } from "./GlCanvasLifecycle";
 import { SafeEffectComposer } from "./SafeEffectComposer";
 import { getCinematicPhases } from "./cinematicPhases";
 import { DeathStarFleet } from "./DeathStarFleet";
+import { MoonMesh } from "./MoonMesh";
 import { SpaceEnvironment } from "./SpaceEnvironment";
 import { Starfield } from "./Starfield";
 import { MOON_CENTER, MOON_POSITION } from "./moonSceneConstants";
@@ -122,15 +124,17 @@ function MoonSceneContent({
   effectsEnabled?: boolean;
 }) {
   const { settings } = useQualitySettings();
+  const { isMoon, isDeathStar } = useHeroCentralBody();
   const pointer = useScenePointer();
   const flyNavigation = flyMode && !reducedMotion;
-  const { cameraFov, chromaticOffset, chromaticIntensity, chromaticModulation } = useSceneTuning();
+  const { cameraFov, chromaticOffset, chromaticIntensity, chromaticModulation, starsVisible } =
+    useSceneTuning();
   const cameraFovShift = cameraFov - DEFAULT_CAMERA_FOV;
   const applyCameraFov = (baseFov: number) => baseFov + cameraFovShift;
   const smoothedLook = useRef(CINEMATIC_LOOK_AT.clone());
   const cinematicCamScratch = useRef(CINEMATIC_CAMERA.clone());
 
-  const cinematic = getCinematicPhases(scrollProgress);
+  const cinematic = getCinematicPhases(isDeathStar ? scrollProgress : 0);
   const bloomIntensity =
     (0.42 + cinematic.hyperspaceFlash * 1.35) * settings.bloomIntensityScale;
   const chromaScale =
@@ -146,7 +150,7 @@ function MoonSceneContent({
 
     if (flyNavigation) return;
 
-    const pullBack = cinematic.deathStarRise * 0.9;
+    const pullBack = isDeathStar ? cinematic.deathStarRise * 0.9 : 0;
     const px = reducedMotion ? 0 : pointer.current.x * 0.02;
     const py = reducedMotion ? 0 : pointer.current.y * 0.012;
 
@@ -169,7 +173,7 @@ function MoonSceneContent({
         reducedMotion={reducedMotion}
         onRequestExit={onFlyModeExit}
       />
-      <StrategySelectionCamera enabled={flyNavigation && !photoMode} />
+      <StrategySelectionCamera enabled={flyNavigation && !photoMode && isDeathStar} />
       <SceneExposure target={settings.exposure} />
       <SpaceEnvironment
         enabled={settings.environment}
@@ -179,24 +183,30 @@ function MoonSceneContent({
 
       <ambientLight intensity={0} />
       <SunLightSource reducedMotion={reducedMotion} />
-      <group position={[MOON_CENTER.x, MOON_CENTER.y, MOON_CENTER.z]}>
-        <Starfield
-          key={`stars-${quality}`}
-          count={settings.starCount}
-          starSize={settings.starSize}
-          opacity={settings.starOpacity}
-          reducedMotion={reducedMotion}
-        />
-      </group>
+      {starsVisible ? (
+        <group position={[MOON_CENTER.x, MOON_CENTER.y, MOON_CENTER.z]}>
+          <Starfield
+            key={`stars-${quality}`}
+            count={settings.starCount}
+            starSize={settings.starSize}
+            opacity={settings.starOpacity}
+            reducedMotion={reducedMotion}
+          />
+        </group>
+      ) : null}
 
       <Suspense fallback={null}>
         <group position={MOON_POSITION}>
-          <DeathStarFleet
-            selectable={false}
-            reducedMotion={reducedMotion}
-            scrollProgress={scrollProgress}
-            strategyEnabled={flyMode && !photoMode}
-          />
+          {isMoon ? (
+            <MoonMesh reducedMotion={reducedMotion} />
+          ) : (
+            <DeathStarFleet
+              selectable={false}
+              reducedMotion={reducedMotion}
+              scrollProgress={scrollProgress}
+              strategyEnabled={flyMode && !photoMode && isDeathStar}
+            />
+          )}
         </group>
       </Suspense>
 

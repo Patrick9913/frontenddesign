@@ -207,12 +207,18 @@ export function HeroSceneTuningPanel() {
     chromaticOffset,
     chromaticIntensity,
     chromaticModulation,
+    moonDisplacement,
+    moonNormalIntensity,
+    starsVisible,
     setDeathStarRotationDeg,
     setSunOffset,
     setCameraFov,
     setChromaticOffset,
     setChromaticIntensity,
     setChromaticModulation,
+    setMoonDisplacement,
+    setMoonNormalIntensity,
+    setStarsVisible,
     setSelectedDestroyerId,
     addDestroyer,
     removeDestroyer,
@@ -221,6 +227,8 @@ export function HeroSceneTuningPanel() {
     resetSunOffset,
     resetCameraFov,
     resetChromaticAberration,
+    resetMoonSurface,
+    resetSceneEnvironment,
     resetDestroyer,
     resetDestroyers,
   } = useSceneTuning();
@@ -267,6 +275,9 @@ export function HeroSceneTuningPanel() {
       `CHROMATIC_OFFSET: [${chromaticOffset.map((v) => v.toFixed(4)).join(", ")}]`,
       `CHROMATIC_INTENSITY: ${chromaticIntensity.toFixed(2)}`,
       `CHROMATIC_MODULATION: ${chromaticModulation.toFixed(2)}`,
+      `MOON_DISPLACEMENT: ${moonDisplacement.toFixed(3)}`,
+      `MOON_NORMAL_INTENSITY: ${moonNormalIntensity.toFixed(2)}`,
+      `STARS_VISIBLE: ${starsVisible}`,
       ...destroyerLines,
     ].join("\n");
 
@@ -282,7 +293,7 @@ export function HeroSceneTuningPanel() {
       <div className="mb-4 flex items-start justify-between gap-3">
         <div>
           <p className="font-mono text-[9px] font-light uppercase tracking-[0.28em] text-amber-100/45">
-            Opciones del modo foto
+            Opciones de escena
           </p>
           <h2 className="mt-1 font-mono text-[11px] font-light uppercase tracking-[0.2em] text-amber-100/90">
             Ajuste de escena
@@ -311,11 +322,48 @@ export function HeroSceneTuningPanel() {
       </div>
 
       <p className="mb-4 font-mono text-[8px] leading-relaxed tracking-[0.14em] text-white/35">
-        Los destructores son independientes de la Death Star. Arrástralos en la escena o usa los
-        sliders.
+        Ajustes compartidos para luna y Death Star. Los destructores solo aplican con la flota activa.
       </p>
 
       <div className="space-y-5">
+        <TuningCategory title="Entorno" onReset={resetSceneEnvironment}>
+          <label className="flex cursor-pointer items-center justify-between gap-3">
+            <span className="font-mono text-[9px] font-light uppercase tracking-[0.18em] text-white/45">
+              Mostrar estrellas
+            </span>
+            <input
+              type="checkbox"
+              checked={starsVisible}
+              onChange={(event) => setStarsVisible(event.target.checked)}
+              className="h-4 w-4 cursor-pointer accent-amber-200/90"
+            />
+          </label>
+        </TuningCategory>
+
+        <TuningCategory title="Luna (PBR)" onReset={resetMoonSurface}>
+          <ScaleSlider
+            label="Relieve geométrico"
+            value={moonDisplacement}
+            min={0}
+            max={0.2}
+            step={0.002}
+            suffix=""
+            onChange={setMoonDisplacement}
+          />
+          <ScaleSlider
+            label="Relieve superficial"
+            value={moonNormalIntensity}
+            min={0}
+            max={1.6}
+            step={0.05}
+            suffix="×"
+            onChange={setMoonNormalIntensity}
+          />
+          <p className="font-mono text-[8px] leading-relaxed tracking-[0.12em] text-white/30">
+            Geométrico = cráteres en 3D. Superficial = detalle en shader (0 = liso).
+          </p>
+        </TuningCategory>
+
         <TuningCategory title="Death Star" onReset={resetDeathStarRotation}>
           <SliderRow
             label="Rotación"

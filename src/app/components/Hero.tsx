@@ -8,9 +8,13 @@ import { HeroSceneTuningPanel } from "./HeroSceneTuningPanel";
 import { FleetCommandCursorHud } from "./FleetCommandCursorHud";
 import { FleetFlyModeSync } from "./FleetFlyModeSync";
 import { FleetPhotoModeSync } from "./FleetPhotoModeSync";
+import {
+  HeroCentralBodyProvider,
+  useHeroCentralBody,
+} from "./hero-scene/HeroCentralBodyContext";
+import { QualityProfileProvider } from "./hero-scene/useQualityProfile";
 import { FleetCommandProvider } from "./moon-scene/fleetCommandContext";
 import { SceneTuningProvider } from "./moon-scene/SceneTuningContext";
-import { QualityProfileProvider } from "./hero-scene/useQualityProfile";
 import { HERO_SCROLL_VH, useHeroScroll } from "./moon-scene/useHeroScroll";
 
 const MoonHeroScene = dynamic(() => import("./moon-scene/MoonHeroScene"), {
@@ -23,9 +27,10 @@ type HeroProps = {
   onTogglePhotoMode?: () => void;
 };
 
-export const Hero = ({ photoMode = false, onTogglePhotoMode }: HeroProps) => {
+function HeroContent({ photoMode = false, onTogglePhotoMode }: HeroProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const scrollProgress = useHeroScroll(sectionRef);
+  const { isDeathStar } = useHeroCentralBody();
   const [reducedMotion, setReducedMotion] = useState(false);
   const [flyMode, setFlyMode] = useState(false);
   const [optionsOpen, setOptionsOpen] = useState(false);
@@ -79,7 +84,7 @@ export const Hero = ({ photoMode = false, onTogglePhotoMode }: HeroProps) => {
 
   const showScrollHint = !photoMode && !reducedMotion && scrollProgress < 0.08;
   const sceneScrollProgress = reducedMotion ? 0 : scrollProgress;
-  const strategyEnabled = flyMode && !photoMode && !reducedMotion;
+  const strategyEnabled = flyMode && !photoMode && !reducedMotion && isDeathStar;
   const layoutEditEnabled = optionsOpen && !photoMode && !reducedMotion && !flyMode;
 
   const handleToggleFlyMode = () => {
@@ -90,8 +95,7 @@ export const Hero = ({ photoMode = false, onTogglePhotoMode }: HeroProps) => {
   };
 
   return (
-    <QualityProfileProvider>
-      <FleetCommandProvider>
+    <FleetCommandProvider>
       <FleetPhotoModeSync photoMode={photoMode} />
       <FleetFlyModeSync flyMode={flyMode} />
       <SceneTuningProvider layoutEditEnabled={layoutEditEnabled}>
@@ -139,6 +143,7 @@ export const Hero = ({ photoMode = false, onTogglePhotoMode }: HeroProps) => {
                 photoMode={photoMode}
                 optionsOpen={optionsOpen}
                 flyMode={flyMode}
+                fleetHints={isDeathStar}
                 onTogglePhotoMode={onTogglePhotoMode ?? (() => undefined)}
                 onToggleOptions={() => setOptionsOpen((open) => !open)}
                 onToggleFlyMode={handleToggleFlyMode}
@@ -159,7 +164,16 @@ export const Hero = ({ photoMode = false, onTogglePhotoMode }: HeroProps) => {
           </div>
         </section>
       </SceneTuningProvider>
-      </FleetCommandProvider>
+    </FleetCommandProvider>
+  );
+}
+
+export const Hero = (props: HeroProps) => {
+  return (
+    <QualityProfileProvider>
+      <HeroCentralBodyProvider>
+        <HeroContent {...props} />
+      </HeroCentralBodyProvider>
     </QualityProfileProvider>
   );
 };
