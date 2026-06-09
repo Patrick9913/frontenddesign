@@ -14,6 +14,11 @@ const innerRadius = HALO_MAJOR_RADIUS - BAND_HALF_WIDTH;
 const outerRadius = HALO_MAJOR_RADIUS + BAND_HALF_WIDTH;
 const bandRadialWidth = BAND_HALF_WIDTH * 2;
 
+/** Segmentos del arco principal (antes 128 → ~56; un InstancedMesh en lugar de N meshes). */
+const ARC_SEGMENTS = 56;
+/** Muestreo de líneas de borde sobre el arco. */
+const RIM_STEP = 8;
+
 type RingAssets = {
   group: THREE.Group;
   geometries: THREE.BufferGeometry[];
@@ -30,20 +35,30 @@ function trackMaterial(materials: THREE.Material[], material: THREE.Material) {
   return material;
 }
 
-function placeBandSlab(
-  slab: THREE.Object3D,
-  angle: number,
-  radius: number,
-  y = 0
+function buildRimLineSegments(
+  geometries: THREE.BufferGeometry[],
+  arcSegments: number,
+  rimStep: number,
+  rimY: number,
+  buildSegment: (angle: number) => [THREE.Vector3, THREE.Vector3]
 ) {
-  slab.position.set(Math.cos(angle) * radius, y, Math.sin(angle) * radius);
-  slab.rotation.y = -angle;
+  const points: THREE.Vector3[] = [];
+
+  for (let i = 0; i <= arcSegments; i += rimStep) {
+    const angle = (i / arcSegments) * Math.PI * 2;
+    const [a, b] = buildSegment(angle);
+    points.push(a, b);
+  }
+
+  const geometry = trackGeometry(geometries, new THREE.BufferGeometry().setFromPoints(points));
+  return new THREE.LineSegments(geometry);
 }
 
-export function createHaloRing(segmentCount = 28): RingAssets {
+export function createHaloRing(segmentCount = 16): RingAssets {
   const group = new THREE.Group();
   const geometries: THREE.BufferGeometry[] = [];
   const materials: THREE.Material[] = [];
+  const matrixHelper = new THREE.Object3D();
 
   const bodyMaterial = trackMaterial(
     materials,
@@ -82,65 +97,83 @@ export function createHaloRing(segmentCount = 28): RingAssets {
     })
   );
 
-  const arcSegments = 128;
-  const slabLength = ((Math.PI * 2 * HALO_MAJOR_RADIUS) / arcSegments) * 1.01;
+  const slabLength = ((Math.PI * 2 * HALO_MAJOR_RADIUS) / ARC_SEGMENTS) * 1.01;
   const slabGeometry = trackGeometry(
     geometries,
     new THREE.BoxGeometry(slabLength, BAND_DEPTH, bandRadialWidth)
   );
-  const slabEdges = trackGeometry(geometries, new THREE.EdgesGeometry(slabGeometry, 20));
+
+  const slabInstances = new THREE.InstancedMesh(slabGeometry, bodyMaterial, ARC_SEGMENTS);
+  for (let i = 0; i < ARC_SEGMENTS; i++) {
+    const angle = ((i + 0.5) / ARC_SEGMENTS) * Math.PI * 2;
+    matrixHelper.position.set(
+      Math.cos(angle) * HALO_MAJOR_RADIUS,
+      0,
+      Math.sin(angle) * HALO_MAJOR_RADIUS
+    );
+    matrixHelper.rotation.set(0, -angle, 0);
+    matrixHelper.updateMatrix();
+    slabInstances.setMatrixAt(i, matrixHelper.matrix);
+  }
+  slabInstances.instanceMatrix.needsUpdate = true;
+  group.add(slabInstances);
 
   const rimY = BAND_DEPTH * 0.48;
-  const rimSteps = 12;
 
-  for (let i = 0; i < arcSegments; i++) {
-    const angle = ((i + 0.5) / arcSegments) * Math.PI * 2;
-
-    const slab = new THREE.Mesh(slabGeometry, bodyMaterial);
-    placeBandSlab(slab, angle, HALO_MAJOR_RADIUS);
-    group.add(slab);
-
-    const edgeLines = new THREE.LineSegments(slabEdges, edgeMaterial);
-    placeBandSlab(edgeLines, angle, HALO_MAJOR_RADIUS);
-    group.add(edgeLines);
-  }
-
-  for (let i = 0; i <= arcSegments; i += rimSteps) {
-    const angle = (i / arcSegments) * Math.PI * 2;
-    const cos = Math.cos(angle);
-    const sin = Math.sin(angle);
-
-    const innerTop = trackGeometry(
-      geometries,
-      new THREE.BufferGeometry().setFromPoints([
+  const innerTopLines = buildRimLineSegments(
+    geometries,
+    ARC_SEGMENTS,
+    RIM_STEP,
+    rimY,
+    (angle) => {
+      const cos = Math.cos(angle);
+      const sin = Math.sin(angle);
+      return [
         new THREE.Vector3(cos * innerRadius, rimY, sin * innerRadius),
         new THREE.Vector3(cos * outerRadius, rimY, sin * outerRadius),
-      ])
-    );
-    group.add(new THREE.Line(innerTop, i % (rimSteps * 2) === 0 ? innerRimMaterial : edgeMaterial));
+      ];
+    }
+  );
+  innerTopLines.material = edgeMaterial;
+  group.add(innerTopLines);
 
-    const innerRim = trackGeometry(
-      geometries,
-      new THREE.BufferGeometry().setFromPoints([
+  const innerVerticalLines = buildRimLineSegments(
+    geometries,
+    ARC_SEGMENTS,
+    RIM_STEP,
+    rimY,
+    (angle) => {
+      const cos = Math.cos(angle);
+      const sin = Math.sin(angle);
+      return [
         new THREE.Vector3(cos * innerRadius, rimY, sin * innerRadius),
         new THREE.Vector3(cos * innerRadius, -rimY, sin * innerRadius),
-      ])
-    );
-    group.add(new THREE.Line(innerRim, innerRimMaterial));
+      ];
+    }
+  );
+  innerVerticalLines.material = innerRimMaterial;
+  group.add(innerVerticalLines);
 
-    const outerRim = trackGeometry(
-      geometries,
-      new THREE.BufferGeometry().setFromPoints([
+  const outerVerticalLines = buildRimLineSegments(
+    geometries,
+    ARC_SEGMENTS,
+    RIM_STEP,
+    rimY,
+    (angle) => {
+      const cos = Math.cos(angle);
+      const sin = Math.sin(angle);
+      return [
         new THREE.Vector3(cos * outerRadius, rimY, sin * outerRadius),
         new THREE.Vector3(cos * outerRadius, -rimY, sin * outerRadius),
-      ])
-    );
-    group.add(new THREE.Line(outerRim, outerRimMaterial));
-  }
+      ];
+    }
+  );
+  outerVerticalLines.material = outerRimMaterial;
+  group.add(outerVerticalLines);
 
   const innerFaceGeometry = trackGeometry(
     geometries,
-    new THREE.RingGeometry(innerRadius + 0.01, innerRadius + bandRadialWidth * 0.22, 96)
+    new THREE.RingGeometry(innerRadius + 0.01, innerRadius + bandRadialWidth * 0.22, ARC_SEGMENTS)
   );
   const innerFaceMaterial = trackMaterial(
     materials,
@@ -170,15 +203,23 @@ export function createHaloRing(segmentCount = 28): RingAssets {
   );
 
   const panelRadius = innerRadius + bandRadialWidth * 0.35;
+  const panelInstances = new THREE.InstancedMesh(panelGeometry, panelMaterial, segmentCount);
   for (let i = 0; i < segmentCount; i++) {
     const angle = (i / segmentCount) * Math.PI * 2;
-    const panel = new THREE.Mesh(panelGeometry, panelMaterial);
-    panel.position.set(Math.cos(angle) * panelRadius, 0, Math.sin(angle) * panelRadius);
-    panel.lookAt(0, 0, 0);
-    panel.rotateY(Math.PI / 2);
-    group.add(panel);
+    matrixHelper.position.set(
+      Math.cos(angle) * panelRadius,
+      0,
+      Math.sin(angle) * panelRadius
+    );
+    matrixHelper.lookAt(0, 0, 0);
+    matrixHelper.rotateY(Math.PI / 2);
+    matrixHelper.updateMatrix();
+    panelInstances.setMatrixAt(i, matrixHelper.matrix);
   }
+  panelInstances.instanceMatrix.needsUpdate = true;
+  group.add(panelInstances);
 
+  const bridgeCount = Math.ceil(segmentCount / 2);
   const bridgeGeometry = trackGeometry(
     geometries,
     new THREE.BoxGeometry(0.05, BAND_DEPTH * 1.05, 0.05)
@@ -192,17 +233,20 @@ export function createHaloRing(segmentCount = 28): RingAssets {
     })
   );
 
-  for (let i = 0; i < segmentCount; i += 2) {
-    const angle = (i / segmentCount) * Math.PI * 2;
-    const bridge = new THREE.Mesh(bridgeGeometry, bridgeMaterial);
-    bridge.position.set(
+  const bridgeInstances = new THREE.InstancedMesh(bridgeGeometry, bridgeMaterial, bridgeCount);
+  for (let i = 0; i < bridgeCount; i++) {
+    const angle = ((i * 2) / segmentCount) * Math.PI * 2;
+    matrixHelper.position.set(
       Math.cos(angle) * (panelRadius + 0.03),
       0,
       Math.sin(angle) * (panelRadius + 0.03)
     );
-    bridge.lookAt(0, 0, 0);
-    group.add(bridge);
+    matrixHelper.lookAt(0, 0, 0);
+    matrixHelper.updateMatrix();
+    bridgeInstances.setMatrixAt(i, matrixHelper.matrix);
   }
+  bridgeInstances.instanceMatrix.needsUpdate = true;
+  group.add(bridgeInstances);
 
   return { group, geometries, materials };
 }

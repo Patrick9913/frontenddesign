@@ -7,6 +7,7 @@ import Experience from "./Experience";
 import Skills from "./Skills";
 import Projects from "./Projects";
 import Contact from "./Contact";
+import Footer from "./Footer";
 import { IoMdClose } from "react-icons/io";
 
 interface CardStackProps {
@@ -79,6 +80,15 @@ const CARDS: CardItem[] = [
     previewSubtitle: "AHORA",
     previewDesc: "¿Estás buscando integrar a alguien a tu equipo o querés charlar sobre diseño y tecnología? Escribime ahora.",
     component: Contact,
+  },
+  {
+    id: "footer",
+    index: "06",
+    label: "Cierre",
+    previewTitle: "PATRICK",
+    previewSubtitle: "ORDOÑEZ",
+    previewDesc: "Navegación, servicios y redes. Todo el cierre del portfolio en una última hoja del stack.",
+    component: Footer,
   },
 ];
 

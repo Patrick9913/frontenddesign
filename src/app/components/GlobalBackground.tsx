@@ -73,9 +73,18 @@ const SECTION_CONFIGS: SectionConfig[] = [
     particleOpacity: 0.3,
     fogDensity: 0.07,
   },
+  // 6: Footer (Cierre)
+  {
+    cameraPos: { x: 1.8, y: -0.4, z: 10.0 },
+    lookAtPos: { x: -0.6, y: 0.1, z: -3.2 },
+    haloPos: { x: -0.6, y: 0.1, z: -3.2 },
+    haloRotationSpeed: 0.022,
+    particleOpacity: 0.25,
+    fogDensity: 0.075,
+  },
 ];
 
-const HALO_SEGMENT_COUNT = 24;
+const HALO_SEGMENT_COUNT = 16;
 /** Inclinación base del anillo (igual que la versión original). */
 const HALO_BASE_TILT_X = Math.PI * 0.42;
 const HALO_BASE_TILT_Z = Math.PI * 0.06;

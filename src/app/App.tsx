@@ -1,11 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import GlobalBackground from "./components/GlobalBackground";
-import CardStack from "./components/CardStack";
+import PortfolioScene from "./components/PortfolioScene";
 import FloatingSidebars from "./components/FloatingSidebars";
 import CustomCursor from "./components/CustomCursor";
-import Footer from "./components/Footer";
 
 export const App = () => {
   const [activeSection, setActiveSection] = useState(0);
@@ -14,14 +12,12 @@ export const App = () => {
   return (
     <>
       <CustomCursor />
-      <GlobalBackground activeSection={activeSection} isPaused={!!expandedCardId} />
       <FloatingSidebars activeSection={activeSection} expandedCardId={expandedCardId} />
-      <CardStack 
-        setActiveSection={setActiveSection} 
+      <PortfolioScene
+        setActiveSection={setActiveSection}
         expandedCardId={expandedCardId}
         setExpandedCardId={setExpandedCardId}
       />
-      <Footer />
     </>
   );
 };

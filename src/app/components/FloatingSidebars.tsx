@@ -14,6 +14,7 @@ const NAV_ITEMS = [
   { id: "skills", label: "Habilidades", index: "03" },
   { id: "projects", label: "Proyectos", index: "04" },
   { id: "contact", label: "Contacto", index: "05" },
+  { id: "footer", label: "Cierre", index: "06" },
 ];
 
 const SOCIAL_LINKS = [

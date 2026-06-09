@@ -7,6 +7,7 @@ const NAV_LINKS = [
   { name: "Tecnologías", href: "#skills" },
   { name: "Proyectos", href: "#projects" },
   { name: "Contacto", href: "#contact" },
+  { name: "Cierre", href: "#footer" },
 ] as const;
 
 const SERVICES = [
@@ -26,11 +27,21 @@ const SOCIAL_LINKS = [
   { label: "Email", href: "mailto:patrickyoel13@gmail.com" },
 ] as const;
 
+const SECTION_INDEX = "[ 06 ]";
+
 export const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-black text-[#F0F0F0] py-24 lg:py-32 border-t border-white/[0.08] font-sans">
+    <div id="footer" className="bg-black text-[#F0F0F0] py-16 md:py-24 lg:py-32 font-sans">
+      <div className="max-w-7xl mx-auto px-8 md:px-16 lg:px-24 mb-12 md:mb-16">
+        <span className="font-mono text-[10px] font-light tracking-[0.25em] uppercase text-white/40 block mb-4">
+          {SECTION_INDEX}
+        </span>
+        <h2 className="text-3xl md:text-4xl font-light tracking-[-0.02em] text-[#F0F0F0] uppercase">
+          Cierre
+        </h2>
+      </div>
       <div className="max-w-7xl mx-auto px-8 md:px-16 lg:px-24">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-16 lg:gap-12 pb-16 md:pb-20 lg:pb-24 border-b border-white/[0.08]">
           {/* Marca */}
@@ -123,7 +134,7 @@ export const Footer = () => {
           </p>
         </div>
       </div>
-    </footer>
+    </div>
   );
 };
 
