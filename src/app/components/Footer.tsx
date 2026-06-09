@@ -70,6 +70,13 @@ export const Footer = () => {
                 <li key={item.name}>
                   <a
                     href={item.href}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      const sectionId = item.href.replace("#", "");
+                      window.dispatchEvent(
+                        new CustomEvent("nav-to-section", { detail: { sectionId } })
+                      );
+                    }}
                     className="group inline-flex items-center gap-3 text-sm md:text-base font-light tracking-wide text-white/50 transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:text-[#F0F0F0]"
                   >
                     <span

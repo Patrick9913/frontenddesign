@@ -1,11 +1,9 @@
 import React from "react";
 import { Navbar } from "./Navbar";
-import { HeroBackground } from "./HeroBackground";
 
 const SECTION_INDEX = "[ 00 ]";
 
 const COPY = {
-  overline: "Portfolio",
   title: {
     line1: "FRONT END",
     accent: "DEVELOPER",
@@ -28,33 +26,29 @@ export const Hero = () => {
   return (
     <section
       id="hero"
-      className="relative min-h-screen w-full flex flex-col bg-black text-[#F0F0F0] overflow-hidden font-sans"
+      className="relative min-h-full h-full w-full flex flex-col bg-transparent text-[#F0F0F0] overflow-hidden font-sans"
     >
-      <HeroBackground />
-      <div className="absolute inset-0 z-[1] bg-black/62" aria-hidden />
+      <div className="absolute inset-0 z-[1] bg-black/40" aria-hidden />
 
       <div className="relative z-10 w-full pt-4">
         <Navbar />
       </div>
 
-      <div className="relative z-10 flex-grow flex items-center w-full px-8 md:px-16 lg:px-24 py-16 md:py-20">
+      <div className="relative z-10 flex-grow flex items-center w-full px-8 md:px-16 lg:px-24 py-8 md:py-12">
         <div className="w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-end lg:items-center">
           {/* Columna principal — contenido editorial */}
-          <div className="lg:col-span-7 xl:col-span-8 flex flex-col">
-            <header className="mb-10 md:mb-14">
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-8 md:mb-10">
+          <div className="lg:col-span-7 xl:col-span-12 flex flex-col">
+            <header className="mb-8 md:mb-10">
+              <div className="mb-6 md:mb-8">
                 <span className="font-mono text-[10px] md:text-xs font-light tracking-[0.25em] uppercase text-white/50">
                   {SECTION_INDEX}
                 </span>
-                <span className="text-[10px] md:text-xs font-light tracking-[0.25em] uppercase text-white/50">
-                  {COPY.overline}
-                </span>
               </div>
 
-              <h1 className="text-6xl md:text-8xl lg:text-9xl font-light tracking-[-0.03em] text-[#F0F0F0] leading-[0.95] mb-8 md:mb-10">
+              <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-light tracking-[-0.03em] text-[#F0F0F0] leading-[0.92] mb-6 md:mb-8">
                 {COPY.title.line1}
                 <br />
-                <span className="font-medium text-white/50">{COPY.title.accent}</span>
+                <span className="font-medium text-white/65">{COPY.title.accent}</span>
               </h1>
 
               <div className="w-8 md:w-12 h-px bg-white/[0.08]" aria-hidden />
@@ -64,7 +58,7 @@ export const Hero = () => {
               {COPY.body}
             </p>
 
-            <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 pt-6 border-t border-white/[0.08]">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:hidden gap-4 sm:gap-6 pt-6 border-t border-white/[0.08]">
               <a
                 href="#projects"
                 className="group inline-flex w-fit items-center gap-4 px-8 py-4 bg-[#F0F0F0] text-black text-[10px] md:text-xs font-medium tracking-[0.2em] uppercase rounded-none transition-opacity duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:opacity-90"
@@ -90,8 +84,8 @@ export const Hero = () => {
             </div>
           </div>
 
-          {/* Columna lateral — redes + indicador de scroll */}
-          <aside className="lg:col-span-4 xl:col-span-3 lg:col-start-9 xl:col-start-10 flex flex-row lg:flex-col justify-between lg:justify-end items-end gap-12 lg:gap-16 lg:min-h-[280px]">
+          {/* Columna lateral — redes (ocultas en xl: ya están en la barra derecha) + scroll */}
+          <aside className="lg:col-span-4 lg:col-start-9 flex flex-row lg:flex-col justify-between lg:justify-end items-end gap-12 lg:gap-16 lg:min-h-[280px] xl:hidden">
             <nav
               className="flex flex-row lg:flex-col gap-6 lg:gap-8"
               aria-label="Redes sociales"

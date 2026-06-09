@@ -43,18 +43,32 @@ export const Navbar: React.FC = () => {
         { name: 'Contacto', href: '#contact' },
     ];
 
+    const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+        e.preventDefault();
+        const sectionId = href.replace("#", "");
+        window.dispatchEvent(
+            new CustomEvent("nav-to-section", { detail: { sectionId } })
+        );
+        setIsMenuOpen(false);
+    };
+
     return (
         <>
         <nav className="relative z-50 max-w-7xl mx-auto px-8 md:px-16 lg:px-24 py-4 font-sans">
             <div className="flex justify-between items-center w-full">
-                <a href="#hero" className="text-lg md:text-xl font-light tracking-widest text-white hover:text-gray-400 transition-colors duration-300 uppercase">
+                <a 
+                    href="#hero" 
+                    onClick={(e) => handleNavClick(e, "#hero")}
+                    className="text-lg md:text-xl font-light tracking-widest text-white hover:text-gray-400 transition-colors duration-300 uppercase"
+                >
                     Patrick Ordoñez
                 </a>
-                <div className="hidden md:flex md:space-x-10 md:items-center">
+                <div className="hidden md:flex xl:hidden md:space-x-10 md:items-center">
                     {navItems.map((item) => (
                     <a
                         key={item.name}
                         href={item.href}
+                        onClick={(e) => handleNavClick(e, item.href)}
                         className="text-[10px] md:text-xs tracking-[0.25em] uppercase text-gray-400 hover:text-white transition-colors duration-300"
                     >
                         {item.name}
@@ -62,26 +76,29 @@ export const Navbar: React.FC = () => {
                     ))}
                 </div>
 
-                {!isMenuOpen && (
-                    <button
-                        type="button"
-                        className="md:hidden fixed top-5 right-5 z-[1102] flex h-11 w-11 items-center justify-center border border-white/20 bg-black/45 text-white backdrop-blur-md transition-all duration-500 ease-[cubic-bezier(0.65,0.02,0.28,1)] hover:border-white/35 hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
-                        onClick={() => setIsMenuOpen(true)}
-                        aria-expanded={false}
-                        aria-controls="mobile-menu-panel"
-                        aria-label="Abrir menú"
-                    >
-                        <HiOutlineMenuAlt3 className="h-6 w-6" aria-hidden />
-                    </button>
-                )}
+                {/* Espaciador en móvil: el botón real vive en portal (fixed respecto al viewport). */}
+                <div className="h-11 w-11 md:hidden" aria-hidden />
             </div>
         </nav>
 
-        {/* Portal a document.body: el Navbar vive dentro del Hero (z-10); sin portal el contenido
-            hermano del hero se pinta encima del panel y parece “transparente”. */}
+        {/* Portal a document.body: menú móvil y botón hamburguesa fuera del card stack (evita
+            que position:fixed quede preso por transform de las pestañas sticky). */}
         {mounted
             ? createPortal(
                   <>
+                      {!isMenuOpen ? (
+                          <button
+                              type="button"
+                              className="md:hidden fixed top-5 right-5 z-[1102] flex h-11 w-11 items-center justify-center border border-white/20 bg-black/70 text-white backdrop-blur-md transition-all duration-500 ease-[cubic-bezier(0.65,0.02,0.28,1)] hover:border-white/35 hover:bg-black/85 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                              onClick={() => setIsMenuOpen(true)}
+                              aria-expanded={false}
+                              aria-controls="mobile-menu-panel"
+                              aria-label="Abrir menú"
+                          >
+                              <HiOutlineMenuAlt3 className="h-6 w-6" aria-hidden />
+                          </button>
+                      ) : null}
+
                       <div
                           className={`fixed inset-0 z-[1100] bg-black/80 transition-opacity duration-500 ease-out md:hidden ${
                               isMenuOpen
@@ -140,7 +157,7 @@ export const Navbar: React.FC = () => {
                                                       ? `${80 + index * 45}ms`
                                                       : '0ms',
                                               }}
-                                              onClick={() => setIsMenuOpen(false)}
+                                              onClick={(e) => handleNavClick(e, item.href)}
                                           >
                                               {item.name}
                                           </a>
