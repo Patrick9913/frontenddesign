@@ -715,6 +715,7 @@ body {
   width: 0;
   height: 0;
   transform: translate(-50%, -50%);
+  pointer-events: none;
 }
 
 .constellation-ring--inner {
@@ -750,26 +751,42 @@ body {
 }
 
 .constellation-node-label {
+  --proximity: 0;
+  --pull-x: 0;
+  --pull-y: 0;
   display: inline-block;
-  transform: translate(-50%, -50%);
+  pointer-events: auto;
+  transform: translate(-50%, -50%)
+    translate(calc(var(--pull-x) * 1px), calc(var(--pull-y) * 1px))
+    scale(calc(1 + var(--proximity) * 0.07));
   padding: 0.35rem 0.55rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(5, 5, 5, 0.72);
+  border: 1px solid
+    color-mix(
+      in srgb,
+      rgba(255, 255, 255, 0.1) calc((1 - var(--proximity)) * 100%),
+      rgba(255, 255, 255, 0.55) calc(var(--proximity) * 100%)
+    );
+  background: color-mix(
+    in srgb,
+    rgba(5, 5, 5, 0.72) calc((1 - var(--proximity)) * 100%),
+    rgba(22, 22, 22, 0.92) calc(var(--proximity) * 100%)
+  );
   font-family: ui-monospace, monospace;
   font-size: 9px;
   font-weight: 300;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.42);
+  color: color-mix(
+    in srgb,
+    rgba(255, 255, 255, 0.38) calc((1 - var(--proximity)) * 100%),
+    rgba(255, 255, 255, 0.96) calc(var(--proximity) * 100%)
+  );
   white-space: nowrap;
   backdrop-filter: blur(4px);
-  transition: color 0.35s ease, border-color 0.35s ease;
-}
-
-.constellation-ring:hover .constellation-node-label,
-.constellation-node-label:hover {
-  color: rgba(255, 255, 255, 0.78);
-  border-color: rgba(255, 255, 255, 0.22);
+  box-shadow:
+    0 0 calc(var(--proximity) * 22px) rgba(255, 255, 255, calc(var(--proximity) * 0.28)),
+    inset 0 0 calc(var(--proximity) * 12px) rgba(255, 255, 255, calc(var(--proximity) * 0.06));
+  will-change: transform, color, box-shadow;
 }
 
 .constellation-core {
