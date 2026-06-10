@@ -3,7 +3,6 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { CSS3DObject, CSS3DRenderer } from "three/examples/jsm/renderers/CSS3DRenderer.js";
-import { createHaloRing } from "./createHaloRing";
 import { CardPanelContent } from "./CardPanelContent";
 import {
   createThreeCardShell,
@@ -20,49 +19,27 @@ interface PortfolioSceneProps {
   setExpandedCardId: (id: string | null) => void;
 }
 
-const HALO_SEGMENT_COUNT = 16;
-const HALO_BASE_TILT_X = Math.PI * 0.42;
-const HALO_BASE_TILT_Z = Math.PI * 0.06;
-const HALO_SPIN_SCALE = 0.16;
-const HALO_AXIS_WOBBLE = {
-  speedX: 0.1,
-  speedZ: 0.07,
-  ampX: 0.045,
-  ampZ: 0.032,
+/** Parallax de la cámara ortográfica de los paneles 3D (escena principal) */
+const PANEL_CAMERA_PARALLAX = {
+  /** Desplazamiento lateral de la cámara en px — paneles flotan, la cámara se mueve */
+  cameraSlide: 48,
+  /** Punto de mira desplazado → sensación de girar la cabeza y mirar a un lado */
+  lookShift: 72,
+  /** Inercia del seguimiento respecto al cursor */
+  lookAtFollowSharpness: 2.1,
 } as const;
 
-const POINTER_PARALLAX = {
-  /** Desplazamiento lateral/vertical de la cámara */
-  cameraSlide: 2.4,
-  /** El punto de mira se mueve un poco más → sensación de giro suave */
-  lookShift: 1.15,
-  cameraDolly: 0.32,
-  /** Inclinación sutil de la cámara hacia el cursor (rad) */
-  cameraYaw: 0.038,
-  cameraPitch: 0.026,
-  haloTiltX: 0.18,
-  haloTiltZ: 0.11,
-  haloPosX: 0.32,
-  haloPosY: 0.22,
+const PANEL_CAMERA_Z = 1200;
+
+const BG_PARALLAX = {
   particlesX: 0.28,
   particlesY: 0.16,
-  /** Seguimiento del cursor (halo / partículas) */
   followSharpness: 5,
-  /** Seguimiento de cámara más lento = inercia natural */
-  cameraFollowSharpness: 2.6,
 } as const;
-
-const cameraScratch = {
-  forward: new THREE.Vector3(),
-  right: new THREE.Vector3(),
-  up: new THREE.Vector3(0, 1, 0),
-  lookTarget: new THREE.Vector3(),
-};
 
 const lerpTargets = {
   cameraPos: new THREE.Vector3(),
   lookAtPos: new THREE.Vector3(),
-  haloPos: new THREE.Vector3(),
 };
 
 type CardRig = {
@@ -76,11 +53,13 @@ type CardRig = {
 };
 
 const STACK = {
-  CARD_HEIGHT_VH: 0.85,
+  /** Proporción fija alto/ancho — la composición no depende del alto del viewport (F11, etc.) */
+  CARD_ASPECT: 0.650,
+  MAX_CARD_WIDTH: 1024,
   /** Fracción del alto visible del asomo (solo si cabe bajo el panel activo) */
   INCOMING_PEEK_RATIO: 0.22,
   /** Separación mínima entre el borde inferior del activo y el asomo */
-  PEEK_GAP: 12,
+  PEEK_GAP: 0.050,
   OUTGOING_BLUR_MAX: 12,
   /** Difuminado de la carta que asoma por debajo (se aclara al subir) */
   INCOMING_BLUR_MAX: 11,
@@ -117,8 +96,25 @@ function normalizeScrollProgress(rawProgress: number): number {
   return Math.min(1, Math.max(0, rawProgress / SCROLL_END_RAW));
 }
 
-function getCenterStickyTopPx(viewportH: number) {
-  return viewportH * (0.5 - STACK.CARD_HEIGHT_VH / 2);
+type CardComposition = {
+  cardWidth: number;
+  cardHeight: number;
+  cardLeft: number;
+  centerTop: number;
+};
+
+function getCardComposition(
+  viewportW: number,
+  viewportH: number,
+  stackContainer: HTMLElement | null
+): CardComposition {
+  const containerRect = stackContainer?.getBoundingClientRect();
+  const cardWidth = containerRect?.width ?? Math.min(STACK.MAX_CARD_WIDTH, viewportW * 0.92);
+  const cardHeight = cardWidth * STACK.CARD_ASPECT;
+  const cardLeft = containerRect?.left ?? (viewportW - cardWidth) / 2;
+  const centerTop = Math.max(0, (viewportH - cardHeight) * 0.5);
+
+  return { cardWidth, cardHeight, cardLeft, centerTop };
 }
 
 /**
@@ -190,8 +186,24 @@ function makeCardCamera(viewportW: number, viewportH: number) {
     1,
     4000
   );
-  camera.position.set(0, 0, 1200);
+  camera.position.set(0, 0, PANEL_CAMERA_Z);
+  camera.lookAt(0, 0, 0);
   return camera;
+}
+
+function applyPanelCameraParallax(
+  camera: THREE.OrthographicCamera,
+  lookX: number,
+  lookY: number
+) {
+  const { cameraSlide, lookShift } = PANEL_CAMERA_PARALLAX;
+  camera.position.set(lookX * cameraSlide, -lookY * cameraSlide * 0.82, PANEL_CAMERA_Z);
+  camera.lookAt(lookX * lookShift, -lookY * lookShift * 0.82, 0);
+}
+
+function resetPanelCamera(camera: THREE.OrthographicCamera) {
+  camera.position.set(0, 0, PANEL_CAMERA_Z);
+  camera.lookAt(0, 0, 0);
 }
 
 function getIncomingRestTop(centerTop: number, cardHeight: number, viewportH: number): number {
@@ -319,11 +331,11 @@ function syncCardsTo3DLayout(
   viewportW: number,
   viewportH: number
 ) {
-  const containerRect = stackContainer?.getBoundingClientRect();
-  const cardWidth = containerRect?.width ?? Math.min(1024, viewportW * 0.92);
-  const cardLeft = containerRect?.left ?? (viewportW - cardWidth) / 2;
-  const cardHeight = viewportH * STACK.CARD_HEIGHT_VH;
-  const centerTop = getCenterStickyTopPx(viewportH);
+  const { cardWidth, cardHeight, cardLeft, centerTop } = getCardComposition(
+    viewportW,
+    viewportH,
+    stackContainer
+  );
   const nextIndex = getNextCardIndex(stackIndex);
 
   rigs.forEach((rig, index) => {
@@ -365,17 +377,14 @@ function syncCardsTo3DLayout(
     const centerY = -(layout.top + layout.height / 2 - viewportH / 2);
     const depthZ = -layout.zIndex * 2.5;
 
-    const widthScale = cardWidth / rig.baseWidth;
-    const heightScale = cardHeight / rig.baseHeight;
-    const shellScaleX = scale * widthScale;
-    const shellScaleY = scale * heightScale;
+    const uniformScale = scale * (cardWidth / rig.baseWidth);
 
     rig.shellRoot.position.set(centerX, centerY, depthZ - 8);
-    rig.shellRoot.scale.set(shellScaleX, shellScaleY, scale);
+    rig.shellRoot.scale.set(uniformScale, uniformScale, uniformScale);
     rig.shellRoot.visible = true;
 
     rig.cssRoot.position.set(centerX, centerY, depthZ);
-    rig.cssRoot.scale.set(scale * widthScale, scale * heightScale, scale);
+    rig.cssRoot.scale.set(uniformScale, uniformScale, uniformScale);
     rig.cssRoot.visible = true;
 
     rig.dom.style.width = `${cardWidth}px`;
@@ -495,19 +504,6 @@ export const PortfolioScene = ({
     bgRenderer.setClearColor(0x000000, 0);
     bgContainer.appendChild(bgRenderer.domElement);
 
-    const { group: haloMesh, geometries: haloGeometries, materials: haloMaterials } =
-      createHaloRing(HALO_SEGMENT_COUNT);
-    const haloWobble = new THREE.Group();
-    const haloOrbit = new THREE.Group();
-    const haloTilt = new THREE.Group();
-    const haloRig = new THREE.Group();
-    haloWobble.add(haloMesh);
-    haloOrbit.add(haloWobble);
-    haloTilt.add(haloOrbit);
-    haloRig.add(haloTilt);
-    haloRig.position.set(initialConfig.haloPos.x, initialConfig.haloPos.y, initialConfig.haloPos.z);
-    bgScene.add(haloRig);
-
     const particleCount = prefersReducedMotion ? 30 : 100;
     const particlePositions = new Float32Array(particleCount * 3);
     for (let i = 0; i < particleCount; i++) {
@@ -559,9 +555,12 @@ export const PortfolioScene = ({
     cardKeyLight.position.set(0, 0, 240);
     cardScene.add(cardKeyLight);
 
-    const stackRect = stackContainerRef.current?.getBoundingClientRect();
-    const initialCardWidth = stackRect?.width ?? Math.min(1024, viewportW() * 0.92);
-    const initialCardHeight = viewportH() * STACK.CARD_HEIGHT_VH;
+    const initialComposition = getCardComposition(
+      viewportW(),
+      viewportH(),
+      stackContainerRef.current
+    );
+    const { cardWidth: initialCardWidth, cardHeight: initialCardHeight } = initialComposition;
 
     const cardGeometries: THREE.BufferGeometry[] = [];
     const cardMaterials: THREE.Material[] = [];
@@ -614,7 +613,7 @@ export const PortfolioScene = ({
 
     const pointerTarget = { x: 0, y: 0 };
     const pointerSmooth = { x: 0, y: 0 };
-    const cameraFollowSmooth = { x: 0, y: 0 };
+    const panelLookFollowSmooth = { x: 0, y: 0 };
 
     const handlePointer = (clientX: number, clientY: number) => {
       pointerTarget.x = (clientX / viewportW()) * 2 - 1;
@@ -654,8 +653,6 @@ export const PortfolioScene = ({
       initialConfig.lookAtPos.y,
       initialConfig.lookAtPos.z
     );
-    const currentHaloPos = new THREE.Vector3().copy(haloRig.position);
-    let currentHaloSpeed = initialConfig.haloRotationSpeed;
     let currentParticleOpacity = initialConfig.particleOpacity;
     let currentFogDensity = initialConfig.fogDensity;
 
@@ -710,6 +707,25 @@ export const PortfolioScene = ({
         }
       }
 
+      const pointerActive = !isTouchPrimary && !prefersReducedMotion && !expanded;
+      const panelLookTargetX = pointerActive ? pointerTarget.x : 0;
+      const panelLookTargetY = pointerActive ? pointerTarget.y : 0;
+      const panelLookFollow = 1 - Math.exp(-PANEL_CAMERA_PARALLAX.lookAtFollowSharpness * delta);
+      panelLookFollowSmooth.x += (panelLookTargetX - panelLookFollowSmooth.x) * panelLookFollow;
+      panelLookFollowSmooth.y += (panelLookTargetY - panelLookFollowSmooth.y) * panelLookFollow;
+
+      if (!expanded) {
+        if (pointerActive) {
+          applyPanelCameraParallax(
+            cardCamera,
+            panelLookFollowSmooth.x,
+            panelLookFollowSmooth.y
+          );
+        } else {
+          resetPanelCamera(cardCamera);
+        }
+      }
+
       syncCardsTo3DLayout(
         rigs,
         stackContainerRef.current,
@@ -740,88 +756,34 @@ export const PortfolioScene = ({
         targetConfig.lookAtPos.y,
         targetConfig.lookAtPos.z
       );
-      lerpTargets.haloPos.set(targetConfig.haloPos.x, targetConfig.haloPos.y, targetConfig.haloPos.z);
-
       currentCameraPos.lerp(lerpTargets.cameraPos, lerpSpeed);
       currentLookAtPos.lerp(lerpTargets.lookAtPos, lerpSpeed);
-      currentHaloPos.lerp(lerpTargets.haloPos, lerpSpeed);
-      currentHaloSpeed += (targetConfig.haloRotationSpeed - currentHaloSpeed) * lerpSpeed;
       currentParticleOpacity += (targetConfig.particleOpacity - currentParticleOpacity) * lerpSpeed;
       currentFogDensity += (targetConfig.fogDensity - currentFogDensity) * lerpSpeed;
 
-      haloRig.position.copy(currentHaloPos);
       particleMaterial.opacity = currentParticleOpacity;
       if (bgScene.fog instanceof THREE.FogExp2) bgScene.fog.density = currentFogDensity;
 
-      const pointerActive = !isTouchPrimary && !prefersReducedMotion;
       if (pointerActive) {
-        const follow = 1 - Math.exp(-POINTER_PARALLAX.followSharpness * delta);
+        const follow = 1 - Math.exp(-BG_PARALLAX.followSharpness * delta);
         pointerSmooth.x += (pointerTarget.x - pointerSmooth.x) * follow;
         pointerSmooth.y += (pointerTarget.y - pointerSmooth.y) * follow;
-
-        const camFollow = 1 - Math.exp(-POINTER_PARALLAX.cameraFollowSharpness * delta);
-        cameraFollowSmooth.x += (pointerSmooth.x - cameraFollowSmooth.x) * camFollow;
-        cameraFollowSmooth.y += (pointerSmooth.y - cameraFollowSmooth.y) * camFollow;
       } else {
         pointerSmooth.x = 0;
         pointerSmooth.y = 0;
-        cameraFollowSmooth.x = 0;
-        cameraFollowSmooth.y = 0;
       }
 
       const px = pointerSmooth.x;
       const py = pointerSmooth.y;
-      const camX = cameraFollowSmooth.x;
-      const camY = cameraFollowSmooth.y;
 
       if (!prefersReducedMotion) {
-        haloOrbit.rotation.y = elapsed * currentHaloSpeed * HALO_SPIN_SCALE;
-        haloWobble.rotation.x = Math.sin(elapsed * HALO_AXIS_WOBBLE.speedX) * HALO_AXIS_WOBBLE.ampX;
-        haloWobble.rotation.z = Math.cos(elapsed * HALO_AXIS_WOBBLE.speedZ) * HALO_AXIS_WOBBLE.ampZ;
-        haloTilt.rotation.x = HALO_BASE_TILT_X + (pointerActive ? py * POINTER_PARALLAX.haloTiltX : 0);
-        haloTilt.rotation.z = HALO_BASE_TILT_Z + (pointerActive ? px * POINTER_PARALLAX.haloTiltZ : 0);
-
-        const floatY = Math.sin(elapsed * 0.45) * 0.18;
-        haloRig.position.x = currentHaloPos.x + (pointerActive ? px * POINTER_PARALLAX.haloPosX : 0);
-        haloRig.position.y =
-          currentHaloPos.y + floatY + (pointerActive ? -py * POINTER_PARALLAX.haloPosY : 0);
-        haloRig.position.z = currentHaloPos.z;
-
         particles.rotation.y = elapsed * 0.015;
-        particles.position.x = pointerActive ? -px * POINTER_PARALLAX.particlesX : 0;
-        particles.position.y = pointerActive ? py * POINTER_PARALLAX.particlesY : 0;
+        particles.position.x = pointerActive ? -px * BG_PARALLAX.particlesX : 0;
+        particles.position.y = pointerActive ? py * BG_PARALLAX.particlesY : 0;
       }
 
       bgCamera.position.copy(currentCameraPos);
-      if (pointerActive) {
-        const { forward, right, up, lookTarget } = cameraScratch;
-        lookTarget.copy(currentLookAtPos);
-        bgCamera.lookAt(lookTarget);
-        bgCamera.getWorldDirection(forward);
-        right.crossVectors(forward, up);
-        if (right.lengthSq() < 1e-6) right.set(1, 0, 0);
-        else right.normalize();
-
-        bgCamera.position
-          .addScaledVector(right, camX * POINTER_PARALLAX.cameraSlide)
-          .addScaledVector(up, -camY * POINTER_PARALLAX.cameraSlide * 0.82)
-          .addScaledVector(
-            forward,
-            -camY * POINTER_PARALLAX.cameraDolly * 0.35 + camX * POINTER_PARALLAX.cameraDolly * 0.12
-          );
-
-        lookTarget
-          .copy(currentLookAtPos)
-          .addScaledVector(right, camX * POINTER_PARALLAX.lookShift)
-          .addScaledVector(up, -camY * POINTER_PARALLAX.lookShift * 0.75);
-
-        bgCamera.lookAt(lookTarget);
-        bgCamera.rotateY(camX * POINTER_PARALLAX.cameraYaw);
-        bgCamera.rotateX(camY * POINTER_PARALLAX.cameraPitch);
-      } else {
-        bgCamera.lookAt(currentLookAtPos);
-      }
-
+      bgCamera.lookAt(currentLookAtPos);
       bgRenderer.render(bgScene, bgCamera);
     };
 
@@ -834,8 +796,8 @@ export const PortfolioScene = ({
       window.removeEventListener("resize", handleResize);
       bgRenderer.dispose();
       cardRenderer.dispose();
-      [...haloGeometries, ...cardGeometries, particleGeometry].forEach((g) => g.dispose());
-      [...haloMaterials, ...cardMaterials, particleMaterial].forEach((m) => m.dispose());
+      [...cardGeometries, particleGeometry].forEach((g) => g.dispose());
+      [...cardMaterials, particleMaterial].forEach((m) => m.dispose());
       rigs.forEach((rig) => disposeCardShell(rig.shell));
       if (bgContainer.contains(bgRenderer.domElement)) bgContainer.removeChild(bgRenderer.domElement);
       if (cardContainer.contains(cardRenderer.domElement)) {
