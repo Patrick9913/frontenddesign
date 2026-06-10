@@ -329,7 +329,9 @@ function syncCardsTo3DLayout(
   stackIndex: number,
   expanded: boolean,
   viewportW: number,
-  viewportH: number
+  viewportH: number,
+  parallaxX = 0,
+  parallaxY = 0
 ) {
   const { cardWidth, cardHeight, cardLeft, centerTop } = getCardComposition(
     viewportW,
@@ -399,6 +401,8 @@ function syncCardsTo3DLayout(
     rig.dom.style.cursor = isClickable ? "pointer" : "default";
     rig.dom.dataset.stackRole = layout.stackRole;
     rig.dom.dataset.cardClickable = isClickable ? "true" : "false";
+    rig.dom.style.setProperty("--panel-px", parallaxX.toFixed(4));
+    rig.dom.style.setProperty("--panel-py", parallaxY.toFixed(4));
   });
 }
 
@@ -732,7 +736,9 @@ export const PortfolioScene = ({
         smoothStackIndexRef.current,
         expanded,
         w,
-        h
+        h,
+        panelLookFollowSmooth.x,
+        panelLookFollowSmooth.y
       );
 
       if (!expanded) {
