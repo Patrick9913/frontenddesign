@@ -89,17 +89,20 @@ body {
   overflow: hidden;
 }
 
-/* Tarjetas del stack — layout tipo archivo sincronizado por scroll */
-.three-card-overlay {
-  overflow: visible;
+/* Placas 3D — shell WebGL + contenido CSS3D */
+.three-card-panel-scene {
+  overflow: hidden;
+}
+
+.three-card-css3d-layer .three-card-dom {
+  transform-origin: center center;
+  backface-visibility: hidden;
+  box-shadow: none;
 }
 
 .card-stack-item-visual,
 .three-card-dom {
-  transform-origin: center top;
-  box-shadow: none !important;
-  filter: none;
-  will-change: transform, opacity, top, left, width, height;
+  transform-origin: center center;
 }
 
 /* Carta activa al frente */

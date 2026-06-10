@@ -2,7 +2,14 @@
 
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import * as THREE from "three";
+import { CSS3DObject, CSS3DRenderer } from "three/examples/jsm/renderers/CSS3DRenderer.js";
 import { createHaloRing } from "./createHaloRing";
+import { CardPanelContent } from "./CardPanelContent";
+import {
+  createThreeCardShell,
+  disposeCardShell,
+  type CardShellAssets,
+} from "./createThreeCardShell";
 import { CARDS } from "./cardStackData";
 import { SECTION_CONFIGS } from "./sectionConfigs";
 import { IoMdClose } from "react-icons/io";
@@ -59,13 +66,21 @@ const lerpTargets = {
 };
 
 type CardRig = {
+  shellRoot: THREE.Group;
+  cssRoot: THREE.Group;
+  cssObject: CSS3DObject;
   dom: HTMLDivElement;
+  shell: CardShellAssets;
+  baseWidth: number;
+  baseHeight: number;
 };
 
 const STACK = {
   CARD_HEIGHT_VH: 0.85,
-  /** Fracción del alto de la carta visible en el borde inferior al estar en espera */
-  INCOMING_PEEK_RATIO: 0.3,
+  /** Fracción del alto visible del asomo (solo si cabe bajo el panel activo) */
+  INCOMING_PEEK_RATIO: 0.22,
+  /** Separación mínima entre el borde inferior del activo y el asomo */
+  PEEK_GAP: 12,
   OUTGOING_BLUR_MAX: 12,
   /** Difuminado de la carta que asoma por debajo (se aclara al subir) */
   INCOMING_BLUR_MAX: 11,
@@ -92,6 +107,16 @@ type StackLayout = {
 
 const CARD_COUNT = CARDS.length;
 
+/** Scroll físico donde el último panel queda centrado (≈92.9% del recorrido actual) */
+const SCROLL_END_RAW = (CARD_COUNT - 0.5) / CARD_COUNT;
+
+/** A partir de aquí solo el último panel, limpio y activo */
+const LAST_PANEL_STACK_INDEX = CARD_COUNT - 0.35;
+
+function normalizeScrollProgress(rawProgress: number): number {
+  return Math.min(1, Math.max(0, rawProgress / SCROLL_END_RAW));
+}
+
 function getCenterStickyTopPx(viewportH: number) {
   return viewportH * (0.5 - STACK.CARD_HEIGHT_VH / 2);
 }
@@ -113,8 +138,12 @@ function getScrollMetrics(stackContainer: HTMLElement | null, viewportH: number)
   return { progress, maxScroll, start };
 }
 
-function progressToStackIndex(progress: number): number {
-  return Math.max(0, Math.min(CARD_COUNT - 1, progress * CARD_COUNT - 0.5));
+function progressToStackIndex(normalizedProgress: number): number {
+  if (normalizedProgress >= 1) return CARD_COUNT - 1;
+  return Math.max(
+    0,
+    Math.min(CARD_COUNT - 1, normalizedProgress * CARD_COUNT - 0.5)
+  );
 }
 
 function stackIndexToScrollY(
@@ -127,16 +156,54 @@ function stackIndexToScrollY(
   return start + targetProgress * maxScroll;
 }
 
-function shouldShowCard(index: number, stackIndex: number): boolean {
-  const depth = stackIndex - index;
-  // Carta siguiente en espera (depth ≈ -1): siempre visible debajo
-  if (depth > -1.001 && depth < 0) return true;
-  if (depth < -1.001) return false;
-  return depth < 1.06;
+function getNextCardIndex(stackIndex: number): number | null {
+  const next = Math.floor(stackIndex + 1e-5) + 1;
+  if (next >= CARD_COUNT) return null;
+  return next;
 }
 
-function getIncomingRestTop(cardHeight: number, viewportH: number): number {
-  return viewportH - cardHeight * STACK.INCOMING_PEEK_RATIO;
+function shouldShowCard(index: number, stackIndex: number): boolean {
+  if (stackIndex >= LAST_PANEL_STACK_INDEX) {
+    return index === CARD_COUNT - 1;
+  }
+
+  const depth = stackIndex - index;
+  const nextIndex = getNextCardIndex(stackIndex);
+
+  if (nextIndex !== null && index === nextIndex) return true;
+  if (depth >= 0.78) return false;
+  if (depth >= 0 && depth < 1.12) return true;
+  return false;
+}
+
+function parseUniformScale(transform: string): number {
+  const match = transform.match(/scale\(([\d.]+)\)/);
+  return match ? Number.parseFloat(match[1]) : 1;
+}
+
+function makeCardCamera(viewportW: number, viewportH: number) {
+  const camera = new THREE.OrthographicCamera(
+    -viewportW / 2,
+    viewportW / 2,
+    viewportH / 2,
+    -viewportH / 2,
+    1,
+    4000
+  );
+  camera.position.set(0, 0, 1200);
+  return camera;
+}
+
+function getIncomingRestTop(centerTop: number, cardHeight: number, viewportH: number): number {
+  const activeBottom = centerTop + cardHeight;
+  const peekFromViewport = viewportH - cardHeight * STACK.INCOMING_PEEK_RATIO;
+  const peekBelowActive = activeBottom + STACK.PEEK_GAP;
+
+  // El asomo nunca invade el panel activo
+  if (peekFromViewport < peekBelowActive) {
+    return peekBelowActive;
+  }
+  return peekFromViewport;
 }
 
 function clamp01(t: number) {
@@ -169,19 +236,40 @@ function getStackLayout(
 ): StackLayout {
   const depth = stackIndex - index;
   const base = { left: cardLeft, width: cardWidth, height: cardHeight };
-  const restTop = getIncomingRestTop(cardHeight, viewportH);
+  const activeBottom = centerTop + cardHeight;
+  const restTop = getIncomingRestTop(centerTop, cardHeight, viewportH);
 
-  // Entrante: asoma fija en el borde inferior; sube al centro al hacer scroll
+  const activeLayout = (): StackLayout => ({
+    ...base,
+    top: centerTop,
+    opacity: 1,
+    blur: 0,
+    zIndex: 100 + index,
+    transform: "none",
+    stackRole: "active",
+  });
+
+  if (index === CARD_COUNT - 1 && stackIndex >= LAST_PANEL_STACK_INDEX) {
+    return activeLayout();
+  }
+
+  // Entrante: asoma debajo del activo; sube al centro al hacer scroll
   if (depth < 0) {
-    const riseT = smootherstep(1 + depth);
+    const isLastPanel = index === CARD_COUNT - 1;
+    const riseT = isLastPanel
+      ? smootherstep(clamp01((1 + depth) / 0.65))
+      : smootherstep(1 + depth);
     const clearT = smoothstep(riseT);
+    const incomingTop = lerp(restTop, centerTop, riseT);
+    const overlapsActive = incomingTop < activeBottom - 2;
+    const behindActive = overlapsActive || riseT < 0.72;
 
     return {
       ...base,
-      top: lerp(restTop, centerTop, riseT),
+      top: incomingTop,
       opacity: lerp(STACK.INCOMING_OPACITY_MIN, 1, clearT),
       blur: lerp(STACK.INCOMING_BLUR_MAX, 0, clearT),
-      zIndex: riseT < 0.2 ? 52 + index : 100 + index + Math.round(riseT * 16),
+      zIndex: behindActive ? 48 + index : 100 + index + Math.round(riseT * 16),
       transform: `scale(${lerp(0.965, 1, riseT)})`,
       stackRole: riseT > 0.9 ? "active" : "incoming",
     };
@@ -223,7 +311,7 @@ function isCardClickable(index: number, stackIndex: number, layout: StackLayout)
   );
 }
 
-function syncCardsToScrollLayout(
+function syncCardsTo3DLayout(
   rigs: CardRig[],
   stackContainer: HTMLDivElement | null,
   stackIndex: number,
@@ -236,16 +324,23 @@ function syncCardsToScrollLayout(
   const cardLeft = containerRect?.left ?? (viewportW - cardWidth) / 2;
   const cardHeight = viewportH * STACK.CARD_HEIGHT_VH;
   const centerTop = getCenterStickyTopPx(viewportH);
+  const nextIndex = getNextCardIndex(stackIndex);
+
   rigs.forEach((rig, index) => {
-    if (expanded) {
-      rig.dom.style.visibility = "hidden";
+    const hide = () => {
+      rig.shellRoot.visible = false;
+      rig.cssRoot.visible = false;
       rig.dom.style.pointerEvents = "none";
+      rig.dom.style.visibility = "hidden";
+    };
+
+    if (expanded) {
+      hide();
       return;
     }
 
     if (!shouldShowCard(index, stackIndex)) {
-      rig.dom.style.visibility = "hidden";
-      rig.dom.style.pointerEvents = "none";
+      hide();
       return;
     }
 
@@ -259,26 +354,38 @@ function syncCardsToScrollLayout(
       viewportH
     );
 
-    if (layout.opacity < 0.02) {
-      rig.dom.style.visibility = "hidden";
-      rig.dom.style.pointerEvents = "none";
+    const isPeekCard = nextIndex === index;
+    if (layout.opacity < 0.02 && !isPeekCard) {
+      hide();
       return;
     }
 
-    rig.dom.style.visibility = "visible";
-    rig.dom.style.position = "absolute";
-    rig.dom.style.left = `${layout.left}px`;
-    rig.dom.style.top = `${layout.top}px`;
-    rig.dom.style.width = `${layout.width}px`;
-    rig.dom.style.height = `${layout.height}px`;
-    rig.dom.style.transform = layout.transform;
-    rig.dom.style.clipPath = "none";
-    rig.dom.style.filter = layout.blur > 0.2 ? `blur(${layout.blur.toFixed(1)}px)` : "none";
-    rig.dom.style.opacity = String(layout.opacity);
-    rig.dom.style.transition = "none";
-    const isClickable = isCardClickable(index, stackIndex, layout);
+    const scale = parseUniformScale(layout.transform);
+    const centerX = layout.left + layout.width / 2 - viewportW / 2;
+    const centerY = -(layout.top + layout.height / 2 - viewportH / 2);
+    const depthZ = -layout.zIndex * 2.5;
 
-    rig.dom.style.zIndex = String(layout.zIndex);
+    const widthScale = cardWidth / rig.baseWidth;
+    const heightScale = cardHeight / rig.baseHeight;
+    const shellScaleX = scale * widthScale;
+    const shellScaleY = scale * heightScale;
+
+    rig.shellRoot.position.set(centerX, centerY, depthZ - 8);
+    rig.shellRoot.scale.set(shellScaleX, shellScaleY, scale);
+    rig.shellRoot.visible = true;
+
+    rig.cssRoot.position.set(centerX, centerY, depthZ);
+    rig.cssRoot.scale.set(scale * widthScale, scale * heightScale, scale);
+    rig.cssRoot.visible = true;
+
+    rig.dom.style.width = `${cardWidth}px`;
+    rig.dom.style.height = `${cardHeight}px`;
+    rig.dom.style.visibility = "visible";
+    rig.dom.style.opacity = String(Math.max(isPeekCard ? STACK.INCOMING_OPACITY_MIN : 0, layout.opacity));
+    rig.dom.style.filter = layout.blur > 0.2 ? `blur(${layout.blur.toFixed(1)}px)` : "none";
+    rig.dom.style.pointerEvents = "none";
+
+    const isClickable = isCardClickable(index, stackIndex, layout);
     rig.dom.style.pointerEvents = isClickable ? "auto" : "none";
     rig.dom.style.cursor = isClickable ? "pointer" : "default";
     rig.dom.dataset.stackRole = layout.stackRole;
@@ -295,6 +402,7 @@ export const PortfolioScene = ({
   const [cardsDomReady, setCardsDomReady] = useState(false);
 
   const bgContainerRef = useRef<HTMLDivElement>(null);
+  const cardContainerRef = useRef<HTMLDivElement>(null);
   const stackContainerRef = useRef<HTMLDivElement>(null);
   const cardDomRefs = useRef<(HTMLDivElement | null)[]>([]);
   const activeCardIndexRef = useRef(0);
@@ -358,7 +466,8 @@ export const PortfolioScene = ({
     if (!cardsDomReady) return;
 
     const bgContainer = bgContainerRef.current;
-    if (!bgContainer) return;
+    const cardContainer = cardContainerRef.current;
+    if (!bgContainer || !cardContainer) return;
 
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const isTouchPrimary = window.matchMedia("(hover: none) and (pointer: coarse)").matches;
@@ -418,14 +527,87 @@ export const PortfolioScene = ({
     const particles = new THREE.Points(particleGeometry, particleMaterial);
     bgScene.add(particles);
 
+    // --- Placas 3D (shell WebGL + contenido CSS3D) ---
+    const cardScene = new THREE.Scene();
+    const css3dScene = new THREE.Scene();
+    let cardCamera = makeCardCamera(viewportW(), viewportH());
+
+    const cardRenderer = new THREE.WebGLRenderer({
+      antialias: true,
+      alpha: true,
+      powerPreference: "high-performance",
+    });
+    cardRenderer.setSize(viewportW(), viewportH());
+    cardRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+    cardRenderer.setClearColor(0x000000, 0);
+    cardRenderer.domElement.style.position = "absolute";
+    cardRenderer.domElement.style.inset = "0";
+    cardRenderer.domElement.style.pointerEvents = "none";
+
+    const css3dRenderer = new CSS3DRenderer();
+    css3dRenderer.setSize(viewportW(), viewportH());
+    css3dRenderer.domElement.className = "three-card-css3d-layer";
+    css3dRenderer.domElement.style.position = "absolute";
+    css3dRenderer.domElement.style.inset = "0";
+    css3dRenderer.domElement.style.pointerEvents = "none";
+
+    cardContainer.appendChild(cardRenderer.domElement);
+    cardContainer.appendChild(css3dRenderer.domElement);
+
+    cardScene.add(new THREE.AmbientLight(0xffffff, 0.58));
+    const cardKeyLight = new THREE.DirectionalLight(0xf0f4fa, 0.9);
+    cardKeyLight.position.set(0, 0, 240);
+    cardScene.add(cardKeyLight);
+
+    const stackRect = stackContainerRef.current?.getBoundingClientRect();
+    const initialCardWidth = stackRect?.width ?? Math.min(1024, viewportW() * 0.92);
+    const initialCardHeight = viewportH() * STACK.CARD_HEIGHT_VH;
+
+    const cardGeometries: THREE.BufferGeometry[] = [];
+    const cardMaterials: THREE.Material[] = [];
     const rigs: CardRig[] = [];
 
     CARDS.forEach((card, index) => {
       const dom = cardDomRefs.current[index];
       if (!dom) return;
 
-      const rig: CardRig = { dom };
-      rigs.push(rig);
+      dom.style.width = `${initialCardWidth}px`;
+      dom.style.height = `${initialCardHeight}px`;
+      dom.style.overflow = "hidden";
+      dom.style.backfaceVisibility = "hidden";
+
+      const shell = createThreeCardShell(initialCardWidth, initialCardHeight);
+      cardGeometries.push(...shell.geometries);
+      cardMaterials.push(...shell.materials);
+      shell.group.position.z = -6;
+
+      const shellRoot = new THREE.Group();
+      shellRoot.add(shell.group);
+      cardScene.add(shellRoot);
+
+      const cssObject = new CSS3DObject(dom);
+      const cssRoot = new THREE.Group();
+      cssRoot.add(cssObject);
+      css3dScene.add(cssRoot);
+
+      rigs.push({
+        shellRoot,
+        cssRoot,
+        cssObject,
+        dom,
+        shell,
+        baseWidth: initialCardWidth,
+        baseHeight: initialCardHeight,
+      });
+
+      dom.addEventListener("click", () => {
+        if (expandedRef.current) return;
+        if (card.id === "hero") {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        } else {
+          setExpandedCardId(card.id);
+        }
+      });
     });
 
     rigsRef.current = rigs;
@@ -452,6 +634,10 @@ export const PortfolioScene = ({
       bgCamera.aspect = w / h;
       bgCamera.updateProjectionMatrix();
       bgRenderer.setSize(w, h);
+
+      cardCamera = makeCardCamera(w, h);
+      cardRenderer.setSize(w, h);
+      css3dRenderer.setSize(w, h);
     };
 
     if (!isTouchPrimary) {
@@ -474,11 +660,11 @@ export const PortfolioScene = ({
     let currentFogDensity = initialConfig.fogDensity;
 
     const initIndex = progressToStackIndex(
-      getScrollMetrics(stackContainerRef.current, viewportH()).progress
+      normalizeScrollProgress(getScrollMetrics(stackContainerRef.current, viewportH()).progress)
     );
     smoothStackIndexRef.current = initIndex;
     targetStackIndexRef.current = initIndex;
-    syncCardsToScrollLayout(
+    syncCardsTo3DLayout(
       rigs,
       stackContainerRef.current,
       initIndex,
@@ -496,7 +682,8 @@ export const PortfolioScene = ({
       const delta = Math.min(clock.getDelta(), 0.05);
 
       if (!expanded) {
-        const { progress } = getScrollMetrics(stackContainerRef.current, h);
+        const { progress: rawProgress } = getScrollMetrics(stackContainerRef.current, h);
+        const progress = normalizeScrollProgress(rawProgress);
         targetStackIndexRef.current = progressToStackIndex(progress);
 
         const percent = Math.round(progress * 1000) / 10;
@@ -505,9 +692,15 @@ export const PortfolioScene = ({
           scrollPercentRef.current.textContent = `${percent.toFixed(1)}%`;
         }
 
-        const follow = 1 - Math.exp(-STACK.SMOOTH_FOLLOW * delta);
+        const endBoost = progress > 0.86 ? 3.2 : 1;
+        const follow = 1 - Math.exp(-STACK.SMOOTH_FOLLOW * endBoost * delta);
         smoothStackIndexRef.current +=
           (targetStackIndexRef.current - smoothStackIndexRef.current) * follow;
+
+        if (progress >= 0.9) {
+          smoothStackIndexRef.current = CARD_COUNT - 1;
+          targetStackIndexRef.current = CARD_COUNT - 1;
+        }
 
         const sectionIndex = Math.round(targetStackIndexRef.current);
         if (sectionIndex !== activeCardIndexRef.current) {
@@ -517,7 +710,7 @@ export const PortfolioScene = ({
         }
       }
 
-      syncCardsToScrollLayout(
+      syncCardsTo3DLayout(
         rigs,
         stackContainerRef.current,
         smoothStackIndexRef.current,
@@ -525,6 +718,11 @@ export const PortfolioScene = ({
         w,
         h
       );
+
+      if (!expanded) {
+        cardRenderer.render(cardScene, cardCamera);
+        css3dRenderer.render(css3dScene, cardCamera);
+      }
 
       if (expanded) return;
 
@@ -635,9 +833,17 @@ export const PortfolioScene = ({
       document.documentElement.removeEventListener("mouseleave", handleMouseLeave);
       window.removeEventListener("resize", handleResize);
       bgRenderer.dispose();
-      [...haloGeometries, particleGeometry].forEach((g) => g.dispose());
-      [...haloMaterials, particleMaterial].forEach((m) => m.dispose());
+      cardRenderer.dispose();
+      [...haloGeometries, ...cardGeometries, particleGeometry].forEach((g) => g.dispose());
+      [...haloMaterials, ...cardMaterials, particleMaterial].forEach((m) => m.dispose());
+      rigs.forEach((rig) => disposeCardShell(rig.shell));
       if (bgContainer.contains(bgRenderer.domElement)) bgContainer.removeChild(bgRenderer.domElement);
+      if (cardContainer.contains(cardRenderer.domElement)) {
+        cardContainer.removeChild(cardRenderer.domElement);
+      }
+      if (cardContainer.contains(css3dRenderer.domElement)) {
+        cardContainer.removeChild(css3dRenderer.domElement);
+      }
       rigsRef.current.forEach((rig) => {
         rig.dom.style.visibility = "hidden";
       });
@@ -670,6 +876,12 @@ export const PortfolioScene = ({
 
       <div ref={bgContainerRef} className="fixed inset-0 z-0 pointer-events-none" aria-hidden />
 
+      <div
+        ref={cardContainerRef}
+        className="three-card-panel-scene fixed inset-0 z-[8] pointer-events-none"
+        aria-hidden
+      />
+
       {/* Track de scroll: 7 segmentos iguales (~14.29% cada uno) */}
       <div
         ref={stackContainerRef}
@@ -681,85 +893,28 @@ export const PortfolioScene = ({
         ))}
       </div>
 
-      <div className="three-card-overlay fixed inset-0 z-[9] pointer-events-none">
-        {CARDS.map((card, index) => {
-          const isHero = card.id === "hero";
-          const Component = card.component;
-
-          return (
-            <div
-              key={card.id}
-              id={`card-${card.id}`}
-              ref={(el) => {
-                cardDomRefs.current[index] = el;
-              }}
-              className="three-card-dom card-stack-item-visual cursor-pointer overflow-hidden border border-white/[0.08] bg-[#050505] pointer-events-auto"
-              style={{ visibility: "hidden", position: "absolute" }}
-              onClick={() => handleCardClick(card.id)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  handleCardClick(card.id);
-                }
-              }}
-              role="button"
-              tabIndex={0}
-              aria-label={`Abrir ${card.label}`}
-            >
-              <header className="card-stack-header h-12 border-b border-white/[0.08] flex items-center justify-between px-6 bg-[#0a0a0a] select-none shrink-0">
-                <div className="flex items-center gap-4">
-                  <span className="font-mono text-[10px] font-light tracking-[0.2em] text-white/45">
-                    [ {card.index} ]
-                  </span>
-                  <span className="font-mono text-[10px] font-light tracking-[0.2em] uppercase text-white/75">
-                    {card.label}
-                  </span>
-                </div>
-                {!isHero && (
-                  <span className="card-stack-header-extra font-mono text-[9px] font-light tracking-[0.15em] text-white/30 uppercase">
-                    [ VER DETALLES ]
-                  </span>
-                )}
-              </header>
-
-              {isHero ? (
-                <div className="card-stack-body h-[calc(100%-3rem)] overflow-hidden bg-[#050505]">
-                  <Component />
-                </div>
-              ) : (
-                <div className="card-stack-body h-[calc(100%-3rem)] flex flex-col justify-between p-8 md:p-12 text-left relative bg-gradient-to-b from-[#050505] to-[#000000]">
-                  <div
-                    className="absolute right-0 bottom-0 top-0 w-1/2 opacity-[0.03] pointer-events-none bg-cover bg-right bg-no-repeat"
-                    style={{ backgroundImage: `url('/wireone.png')` }}
-                    aria-hidden
-                  />
-                  <div className="max-w-xl relative z-10">
-                    <span className="font-mono text-[10px] tracking-[0.25em] uppercase text-white/30 block mb-6">
-                      Preview
-                    </span>
-                    <h2 className="text-4xl md:text-6xl font-light tracking-[-0.02em] text-[#F0F0F0] leading-[1.05] uppercase mb-4">
-                      {card.previewTitle}
-                      <br />
-                      <span className="font-medium text-white/40">{card.previewSubtitle}</span>
-                    </h2>
-                    <div className="w-8 h-px bg-white/[0.08] my-6" />
-                    <p className="text-sm md:text-base font-light text-white/50 leading-[1.75] tracking-wide">
-                      {card.previewDesc}
-                    </p>
-                  </div>
-                  <div className="flex justify-between items-end relative z-10">
-                    <span className="font-mono text-[10px] tracking-[0.2em] text-white/25">
-                      CLIC PARA AMPLIAR HOJA
-                    </span>
-                    <div className="flex h-12 w-12 items-center justify-center border border-white/10 bg-white/5">
-                      <span className="text-white text-base">↗</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          );
-        })}
+      <div className="fixed -left-[200vw] top-0 w-0 h-0 overflow-visible pointer-events-none" aria-hidden>
+        {CARDS.map((card, index) => (
+          <div
+            key={card.id}
+            id={`card-${card.id}`}
+            ref={(el) => {
+              cardDomRefs.current[index] = el;
+            }}
+            className="three-card-dom card-stack-item-visual cursor-pointer overflow-hidden border border-white/[0.08] bg-[#050505]"
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                handleCardClick(card.id);
+              }
+            }}
+            role="button"
+            tabIndex={0}
+            aria-label={`Abrir ${card.label}`}
+          >
+            <CardPanelContent card={card} />
+          </div>
+        ))}
       </div>
 
       {activeCard && (
