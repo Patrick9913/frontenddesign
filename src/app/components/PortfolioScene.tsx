@@ -25,16 +25,24 @@ const HALO_AXIS_WOBBLE = {
 } as const;
 
 const POINTER_PARALLAX = {
-  cameraSlide: 1.35,
-  lookShift: 0.62,
-  cameraDolly: 0.22,
+  /** Desplazamiento lateral/vertical de la cámara */
+  cameraSlide: 2.4,
+  /** El punto de mira se mueve un poco más → sensación de giro suave */
+  lookShift: 1.15,
+  cameraDolly: 0.32,
+  /** Inclinación sutil de la cámara hacia el cursor (rad) */
+  cameraYaw: 0.038,
+  cameraPitch: 0.026,
   haloTiltX: 0.18,
   haloTiltZ: 0.11,
   haloPosX: 0.32,
   haloPosY: 0.22,
   particlesX: 0.28,
   particlesY: 0.16,
-  followSharpness: 5.2,
+  /** Seguimiento del cursor (halo / partículas) */
+  followSharpness: 5,
+  /** Seguimiento de cámara más lento = inercia natural */
+  cameraFollowSharpness: 2.6,
 } as const;
 
 const cameraScratch = {
@@ -56,13 +64,12 @@ type CardRig = {
 
 const STACK = {
   CARD_HEIGHT_VH: 0.85,
-  /** Posición inicial de la siguiente carta (fracción del alto bajo el centro) */
   INCOMING_START_OFFSET: 0.68,
-  /** Blur máximo al difuminar la carta que sale */
-  OUTGOING_BLUR_MAX: 14,
-  /** Placa de reposo: fracción del segmento donde la carta queda activa sin transición */
-  ACTIVE_HOLD: 0.22,
-  SMOOTH_FOLLOW: 10,
+  OUTGOING_BLUR_MAX: 12,
+  /** Suavizado del índice visual (mayor = más inercia al soltar el scroll) */
+  SMOOTH_FOLLOW: 7.5,
+  /** Zona en la que la tarjeta se siente activa y clicable */
+  CLICK_DEPTH: 0.36,
 } as const;
 
 type StackRole = "active" | "incoming" | "outgoing";
@@ -118,17 +125,9 @@ function stackIndexToScrollY(
 
 function shouldShowCard(index: number, stackIndex: number): boolean {
   const depth = stackIndex - index;
-
-  // Siguiente carta oculta hasta que comienza la transición (stackIndex > index - 1)
+  // Siguiente carta oculta hasta que el scroll supere el centro de la actual (depth > -1)
   if (depth <= -1) return false;
-
-  // Solo activa, entrante o saliente durante la transición
-  return depth < 1.02;
-}
-
-/** Tarjeta centrada en pantalla — única que recibe clics */
-function getFocusedCardIndex(stackIndex: number): number {
-  return Math.max(0, Math.min(CARD_COUNT - 1, Math.round(stackIndex)));
+  return depth < 1.06;
 }
 
 function clamp01(t: number) {
@@ -139,14 +138,15 @@ function lerp(a: number, b: number, t: number) {
   return a + (b - a) * t;
 }
 
-function getIncomingRiseT(depth: number): number {
-  if (depth >= -STACK.ACTIVE_HOLD) return 1;
-  return clamp01((depth + 1) / (1 - STACK.ACTIVE_HOLD));
+function smoothstep(t: number) {
+  const c = clamp01(t);
+  return c * c * (3 - 2 * c);
 }
 
-function getOutgoingFadeT(depth: number): number {
-  if (depth <= STACK.ACTIVE_HOLD) return 0;
-  return clamp01((depth - STACK.ACTIVE_HOLD) / (1 - STACK.ACTIVE_HOLD));
+/** Curva suave con arranque y llegada graduales (más natural que linear/smoothstep) */
+function smootherstep(t: number) {
+  const c = clamp01(t);
+  return c * c * c * (c * (c * 6 - 15) + 10);
 }
 
 function getStackLayout(
@@ -159,52 +159,57 @@ function getStackLayout(
 ): StackLayout {
   const depth = stackIndex - index;
   const base = { left: cardLeft, width: cardWidth, height: cardHeight };
+  const startTop = centerTop + cardHeight * STACK.INCOMING_START_OFFSET;
 
-  const activeLayout = (): StackLayout => ({
-    ...base,
-    top: centerTop,
-    opacity: 1,
-    blur: 0,
-    zIndex: 100 + index,
-    transform: "none",
-    stackRole: "active",
-  });
-
-  // Siguiente carta: sube desde abajo; placa de reposo antes de quedar activa
-  if (depth < -0.001) {
-    const riseT = getIncomingRiseT(depth);
-    if (riseT >= 0.999) return activeLayout();
-
-    const startTop = centerTop + cardHeight * STACK.INCOMING_START_OFFSET;
+  // Entrante: sube con curva suave (depth -1 → 0)
+  if (depth < 0) {
+    const riseT = smootherstep(1 + depth);
 
     return {
       ...base,
       top: lerp(startTop, centerTop, riseT),
-      opacity: lerp(0.92, 1, riseT),
+      opacity: riseT <= 0 ? 0 : lerp(0.94, 1, smoothstep(riseT)),
       blur: 0,
-      zIndex: 110 + index,
-      transform: `scale(${lerp(0.96, 1, riseT)})`,
-      stackRole: "incoming",
+      zIndex: riseT <= 0.02 ? 40 + index : 100 + index + Math.round(riseT * 14),
+      transform: `scale(${lerp(0.97, 1, riseT)})`,
+      stackRole: riseT > 0.9 ? "active" : "incoming",
     };
   }
 
-  // Carta que sale: placa de reposo activa y luego difumina
-  if (depth > 0.001) {
-    const fadeT = getOutgoingFadeT(depth);
-    if (fadeT <= 0.001) return activeLayout();
+  // Saliente: difumina con curva que tarda un poco en arrancar (depth 0 → 1)
+  if (depth <= 1) {
+    const fadeT = Math.pow(smootherstep(depth), 1.35);
 
     return {
       ...base,
-      top: centerTop,
-      opacity: 1 - fadeT,
+      top: centerTop - fadeT * 10,
+      opacity: 1 - fadeT * 0.9,
       blur: fadeT * STACK.OUTGOING_BLUR_MAX,
-      zIndex: 40 + index,
-      transform: `scale(${1 - fadeT * 0.025})`,
-      stackRole: "outgoing",
+      zIndex: Math.max(48, 100 + index - Math.round(fadeT * 52)),
+      transform: `scale(${1 - fadeT * 0.022})`,
+      stackRole: fadeT < 0.14 ? "active" : "outgoing",
     };
   }
 
-  return activeLayout();
+  return {
+    ...base,
+    top: centerTop,
+    opacity: 0,
+    blur: 0,
+    zIndex: 1,
+    transform: "none",
+    stackRole: "outgoing",
+  };
+}
+
+function isCardClickable(index: number, stackIndex: number, layout: StackLayout): boolean {
+  const depth = Math.abs(stackIndex - index);
+  return (
+    depth < STACK.CLICK_DEPTH &&
+    layout.opacity > 0.85 &&
+    layout.blur < 2.5 &&
+    layout.stackRole !== "incoming"
+  );
 }
 
 function syncCardsToScrollLayout(
@@ -220,8 +225,6 @@ function syncCardsToScrollLayout(
   const cardLeft = containerRect?.left ?? (viewportW - cardWidth) / 2;
   const cardHeight = viewportH * STACK.CARD_HEIGHT_VH;
   const centerTop = getCenterStickyTopPx(viewportH);
-  const focusedIndex = getFocusedCardIndex(stackIndex);
-
   rigs.forEach((rig, index) => {
     if (expanded) {
       rig.dom.style.visibility = "hidden";
@@ -261,7 +264,7 @@ function syncCardsToScrollLayout(
     rig.dom.style.filter = layout.blur > 0.2 ? `blur(${layout.blur.toFixed(1)}px)` : "none";
     rig.dom.style.opacity = String(layout.opacity);
     rig.dom.style.transition = "none";
-    const isClickable = index === focusedIndex && layout.stackRole === "active";
+    const isClickable = isCardClickable(index, stackIndex, layout);
 
     rig.dom.style.zIndex = String(layout.zIndex);
     rig.dom.style.pointerEvents = isClickable ? "auto" : "none";
@@ -417,6 +420,7 @@ export const PortfolioScene = ({
 
     const pointerTarget = { x: 0, y: 0 };
     const pointerSmooth = { x: 0, y: 0 };
+    const cameraFollowSmooth = { x: 0, y: 0 };
 
     const handlePointer = (clientX: number, clientY: number) => {
       pointerTarget.x = (clientX / viewportW()) * 2 - 1;
@@ -504,7 +508,7 @@ export const PortfolioScene = ({
       syncCardsToScrollLayout(
         rigs,
         stackContainerRef.current,
-        targetStackIndexRef.current,
+        smoothStackIndexRef.current,
         expanded,
         w,
         h
@@ -544,13 +548,21 @@ export const PortfolioScene = ({
         const follow = 1 - Math.exp(-POINTER_PARALLAX.followSharpness * delta);
         pointerSmooth.x += (pointerTarget.x - pointerSmooth.x) * follow;
         pointerSmooth.y += (pointerTarget.y - pointerSmooth.y) * follow;
+
+        const camFollow = 1 - Math.exp(-POINTER_PARALLAX.cameraFollowSharpness * delta);
+        cameraFollowSmooth.x += (pointerSmooth.x - cameraFollowSmooth.x) * camFollow;
+        cameraFollowSmooth.y += (pointerSmooth.y - cameraFollowSmooth.y) * camFollow;
       } else {
         pointerSmooth.x = 0;
         pointerSmooth.y = 0;
+        cameraFollowSmooth.x = 0;
+        cameraFollowSmooth.y = 0;
       }
 
       const px = pointerSmooth.x;
       const py = pointerSmooth.y;
+      const camX = cameraFollowSmooth.x;
+      const camY = cameraFollowSmooth.y;
 
       if (!prefersReducedMotion) {
         haloOrbit.rotation.y = elapsed * currentHaloSpeed * HALO_SPIN_SCALE;
@@ -581,18 +593,21 @@ export const PortfolioScene = ({
         else right.normalize();
 
         bgCamera.position
-          .addScaledVector(right, px * POINTER_PARALLAX.cameraSlide)
-          .addScaledVector(up, -py * POINTER_PARALLAX.cameraSlide * 0.82)
+          .addScaledVector(right, camX * POINTER_PARALLAX.cameraSlide)
+          .addScaledVector(up, -camY * POINTER_PARALLAX.cameraSlide * 0.82)
           .addScaledVector(
             forward,
-            -py * POINTER_PARALLAX.cameraDolly * 0.35 + px * POINTER_PARALLAX.cameraDolly * 0.12
+            -camY * POINTER_PARALLAX.cameraDolly * 0.35 + camX * POINTER_PARALLAX.cameraDolly * 0.12
           );
 
         lookTarget
           .copy(currentLookAtPos)
-          .addScaledVector(right, px * POINTER_PARALLAX.lookShift)
-          .addScaledVector(up, -py * POINTER_PARALLAX.lookShift * 0.75);
+          .addScaledVector(right, camX * POINTER_PARALLAX.lookShift)
+          .addScaledVector(up, -camY * POINTER_PARALLAX.lookShift * 0.75);
+
         bgCamera.lookAt(lookTarget);
+        bgCamera.rotateY(camX * POINTER_PARALLAX.cameraYaw);
+        bgCamera.rotateX(camY * POINTER_PARALLAX.cameraPitch);
       } else {
         bgCamera.lookAt(currentLookAtPos);
       }
