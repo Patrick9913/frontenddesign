@@ -56,32 +56,27 @@ type CardRig = {
 
 const STACK = {
   CARD_HEIGHT_VH: 0.85,
-  STRIP_HEIGHT: 48,
-  STRIP_GAP: 0,
-  /** Carta siguiente: distancia bajo el centro (0–1 del alto) */
-  NEXT_PEEK_RATIO: 0.78,
-  /** Carta más antigua: cuánto sube al salir del encuadre */
-  EXIT_LIFT: 130,
+  /** Posición inicial de la siguiente carta (fracción del alto bajo el centro) */
+  INCOMING_START_OFFSET: 0.68,
+  /** Blur máximo al difuminar la carta que sale */
+  OUTGOING_BLUR_MAX: 14,
+  /** Placa de reposo: fracción del segmento donde la carta queda activa sin transición */
+  ACTIVE_HOLD: 0.22,
   SMOOTH_FOLLOW: 10,
-  ARCHIVE_OPACITY: 0.9,
-  ARCHIVE_OLD_OPACITY: 0.78,
 } as const;
 
-type ArchiveTone = "none" | "recent" | "old";
-type StackRole = "active" | "next" | "archive-recent" | "archive-old";
+type StackRole = "active" | "incoming" | "outgoing";
 
-type ArchiveLayout = {
+type StackLayout = {
   top: number;
   left: number;
   width: number;
   height: number;
   opacity: number;
+  blur: number;
   zIndex: number;
-  clipPath: string;
   transform: string;
-  isActive: boolean;
   stackRole: StackRole;
-  archiveTone: ArchiveTone;
 };
 
 const CARD_COUNT = CARDS.length;
@@ -123,121 +118,93 @@ function stackIndexToScrollY(
 
 function shouldShowCard(index: number, stackIndex: number): boolean {
   const depth = stackIndex - index;
-  if (depth < -1.15) return false;
-  if (depth > 2.35) return false;
-  return true;
+
+  // Siguiente carta oculta hasta que comienza la transición (stackIndex > index - 1)
+  if (depth <= -1) return false;
+
+  // Solo activa, entrante o saliente durante la transición
+  return depth < 1.02;
+}
+
+/** Tarjeta centrada en pantalla — única que recibe clics */
+function getFocusedCardIndex(stackIndex: number): number {
+  return Math.max(0, Math.min(CARD_COUNT - 1, Math.round(stackIndex)));
 }
 
 function clamp01(t: number) {
   return Math.min(1, Math.max(0, t));
 }
 
-function easeOutCubic(t: number) {
-  return 1 - Math.pow(1 - t, 3);
-}
-
-function easeInOutCubic(t: number) {
-  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-}
-
 function lerp(a: number, b: number, t: number) {
   return a + (b - a) * t;
 }
 
-function stackZIndex(depth: number): number {
-  return Math.max(1, Math.min(140, Math.round(100 - depth * 44)));
+function getIncomingRiseT(depth: number): number {
+  if (depth >= -STACK.ACTIVE_HOLD) return 1;
+  return clamp01((depth + 1) / (1 - STACK.ACTIVE_HOLD));
 }
 
-/** Recorta la carta hasta dejar solo la franja superior visible (archivo) */
-function stripClipPath(cardHeight: number, reveal: number): string {
-  if (reveal <= 0) return "none";
-  const hiddenPct = Math.max(0, 100 - (STACK.STRIP_HEIGHT / cardHeight) * 100 * reveal);
-  return `inset(0 0 ${hiddenPct}% 0 round 0)`;
+function getOutgoingFadeT(depth: number): number {
+  if (depth <= STACK.ACTIVE_HOLD) return 0;
+  return clamp01((depth - STACK.ACTIVE_HOLD) / (1 - STACK.ACTIVE_HOLD));
 }
 
-function getArchiveLayout(
+function getStackLayout(
   index: number,
   stackIndex: number,
   cardLeft: number,
   cardWidth: number,
   cardHeight: number,
   centerTop: number
-): ArchiveLayout {
+): StackLayout {
   const depth = stackIndex - index;
-  const stripStep = STACK.STRIP_HEIGHT + STACK.STRIP_GAP;
-  const stripTop = centerTop - stripStep;
-  const zIndex = stackZIndex(depth);
+  const base = { left: cardLeft, width: cardWidth, height: cardHeight };
 
-  const base = {
-    left: cardLeft,
-    width: cardWidth,
-    height: cardHeight,
-  };
-
-  // Entrante: sube desde abajo (depth -1 → 0)
-  if (depth < 0) {
-    const riseT = clamp01(1 + depth);
-    const peekTop = centerTop + cardHeight * STACK.NEXT_PEEK_RATIO;
-
-    return {
-      ...base,
-      top: lerp(peekTop, centerTop, riseT),
-      opacity: lerp(0.7, 1, riseT),
-      zIndex,
-      clipPath: "none",
-      transform: riseT < 1 ? `translateY(${(1 - riseT) * 4}px)` : "none",
-      isActive: riseT > 0.96,
-      stackRole: riseT > 0.96 ? "active" : "next",
-      archiveTone: "none",
-    };
-  }
-
-  // Principal archivándose (depth 0 → 1): movimiento continuo desde el centro
-  if (depth <= 1) {
-    const t = clamp01(depth);
-    const clipReveal = clamp01((t - 0.08) / 0.92);
-
-    return {
-      ...base,
-      top: lerp(centerTop, stripTop, t),
-      opacity: lerp(1, STACK.ARCHIVE_OPACITY, t),
-      zIndex: t < 0.04 ? 100 : zIndex,
-      clipPath: stripClipPath(cardHeight, clipReveal),
-      transform: `translateY(${-t * 5}px) scale(${1 - t * 0.018})`,
-      isActive: t < 0.04,
-      stackRole: t < 0.04 ? "active" : "archive-recent",
-      archiveTone: t < 0.04 ? "none" : "recent",
-    };
-  }
-
-  // Archivo antiguo → sube y desaparece (depth 1 → 2)
-  if (depth <= 2) {
-    const exitT = clamp01(depth - 1);
-
-    return {
-      ...base,
-      top: stripTop - exitT * STACK.EXIT_LIFT,
-      opacity: lerp(STACK.ARCHIVE_OLD_OPACITY, 0, exitT),
-      zIndex,
-      clipPath: stripClipPath(cardHeight, 1),
-      transform: `translateY(${-exitT * 14}px) scale(${1 - exitT * 0.05})`,
-      isActive: false,
-      stackRole: "archive-old",
-      archiveTone: "old",
-    };
-  }
-
-  return {
+  const activeLayout = (): StackLayout => ({
     ...base,
-    top: stripTop - STACK.EXIT_LIFT,
-    opacity: 0,
-    zIndex: 1,
-    clipPath: stripClipPath(cardHeight, 1),
+    top: centerTop,
+    opacity: 1,
+    blur: 0,
+    zIndex: 100 + index,
     transform: "none",
-    isActive: false,
-    stackRole: "archive-old",
-    archiveTone: "old",
-  };
+    stackRole: "active",
+  });
+
+  // Siguiente carta: sube desde abajo; placa de reposo antes de quedar activa
+  if (depth < -0.001) {
+    const riseT = getIncomingRiseT(depth);
+    if (riseT >= 0.999) return activeLayout();
+
+    const startTop = centerTop + cardHeight * STACK.INCOMING_START_OFFSET;
+
+    return {
+      ...base,
+      top: lerp(startTop, centerTop, riseT),
+      opacity: lerp(0.92, 1, riseT),
+      blur: 0,
+      zIndex: 110 + index,
+      transform: `scale(${lerp(0.96, 1, riseT)})`,
+      stackRole: "incoming",
+    };
+  }
+
+  // Carta que sale: placa de reposo activa y luego difumina
+  if (depth > 0.001) {
+    const fadeT = getOutgoingFadeT(depth);
+    if (fadeT <= 0.001) return activeLayout();
+
+    return {
+      ...base,
+      top: centerTop,
+      opacity: 1 - fadeT,
+      blur: fadeT * STACK.OUTGOING_BLUR_MAX,
+      zIndex: 40 + index,
+      transform: `scale(${1 - fadeT * 0.025})`,
+      stackRole: "outgoing",
+    };
+  }
+
+  return activeLayout();
 }
 
 function syncCardsToScrollLayout(
@@ -253,6 +220,7 @@ function syncCardsToScrollLayout(
   const cardLeft = containerRect?.left ?? (viewportW - cardWidth) / 2;
   const cardHeight = viewportH * STACK.CARD_HEIGHT_VH;
   const centerTop = getCenterStickyTopPx(viewportH);
+  const focusedIndex = getFocusedCardIndex(stackIndex);
 
   rigs.forEach((rig, index) => {
     if (expanded) {
@@ -267,7 +235,7 @@ function syncCardsToScrollLayout(
       return;
     }
 
-    const layout = getArchiveLayout(
+    const layout = getStackLayout(
       index,
       stackIndex,
       cardLeft,
@@ -289,13 +257,17 @@ function syncCardsToScrollLayout(
     rig.dom.style.width = `${layout.width}px`;
     rig.dom.style.height = `${layout.height}px`;
     rig.dom.style.transform = layout.transform;
-    rig.dom.style.clipPath = layout.clipPath;
+    rig.dom.style.clipPath = "none";
+    rig.dom.style.filter = layout.blur > 0.2 ? `blur(${layout.blur.toFixed(1)}px)` : "none";
     rig.dom.style.opacity = String(layout.opacity);
     rig.dom.style.transition = "none";
+    const isClickable = index === focusedIndex && layout.stackRole === "active";
+
     rig.dom.style.zIndex = String(layout.zIndex);
-    rig.dom.style.pointerEvents = layout.isActive ? "auto" : "none";
+    rig.dom.style.pointerEvents = isClickable ? "auto" : "none";
+    rig.dom.style.cursor = isClickable ? "pointer" : "default";
     rig.dom.dataset.stackRole = layout.stackRole;
-    rig.dom.dataset.archiveTone = layout.archiveTone;
+    rig.dom.dataset.cardClickable = isClickable ? "true" : "false";
   });
 }
 
@@ -315,6 +287,8 @@ export const PortfolioScene = ({
   const targetStackIndexRef = useRef(0);
   const expandedRef = useRef<string | null>(expandedCardId);
   const rigsRef = useRef<CardRig[]>([]);
+  const scrollPercentRef = useRef<HTMLSpanElement>(null);
+  const lastScrollPercentRef = useRef(-1);
 
   useLayoutEffect(() => {
     if (CARDS.every((_, i) => cardDomRefs.current[i])) {
@@ -435,19 +409,8 @@ export const PortfolioScene = ({
       const dom = cardDomRefs.current[index];
       if (!dom) return;
 
-      dom.style.pointerEvents = "auto";
-
       const rig: CardRig = { dom };
       rigs.push(rig);
-
-      dom.addEventListener("click", () => {
-        if (expandedRef.current) return;
-        if (card.id === "hero") {
-          window.scrollTo({ top: 0, behavior: "smooth" });
-        } else {
-          setExpandedCardId(card.id);
-        }
-      });
     });
 
     rigsRef.current = rigs;
@@ -519,6 +482,12 @@ export const PortfolioScene = ({
       if (!expanded) {
         const { progress } = getScrollMetrics(stackContainerRef.current, h);
         targetStackIndexRef.current = progressToStackIndex(progress);
+
+        const percent = Math.round(progress * 1000) / 10;
+        if (percent !== lastScrollPercentRef.current && scrollPercentRef.current) {
+          lastScrollPercentRef.current = percent;
+          scrollPercentRef.current.textContent = `${percent.toFixed(1)}%`;
+        }
 
         const follow = 1 - Math.exp(-STACK.SMOOTH_FOLLOW * delta);
         smoothStackIndexRef.current +=
@@ -651,8 +620,27 @@ export const PortfolioScene = ({
 
   const activeCard = expandedCardId ? CARDS.find((c) => c.id === expandedCardId) : null;
 
+  const handleCardClick = (cardId: string) => {
+    if (expandedCardId) return;
+    if (cardId === "hero") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+    setExpandedCardId(cardId);
+  };
+
   return (
     <>
+      {!expandedCardId ? (
+        <div
+          className="fixed top-5 right-5 md:top-6 md:right-8 z-[100] pointer-events-none select-none font-mono text-[10px] tracking-[0.2em] text-white/45 tabular-nums"
+          aria-live="polite"
+          aria-label="Progreso de scroll"
+        >
+          <span className=" text-black" ref={scrollPercentRef}>0.0%</span>
+        </div>
+      ) : null}
+
       <div ref={bgContainerRef} className="fixed inset-0 z-0 pointer-events-none" aria-hidden />
 
       {/* Track de scroll: 7 segmentos iguales (~14.29% cada uno) */}
@@ -680,6 +668,16 @@ export const PortfolioScene = ({
               }}
               className="three-card-dom card-stack-item-visual cursor-pointer overflow-hidden border border-white/[0.08] bg-[#050505] pointer-events-auto"
               style={{ visibility: "hidden", position: "absolute" }}
+              onClick={() => handleCardClick(card.id)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  handleCardClick(card.id);
+                }
+              }}
+              role="button"
+              tabIndex={0}
+              aria-label={`Abrir ${card.label}`}
             >
               <header className="card-stack-header h-12 border-b border-white/[0.08] flex items-center justify-between px-6 bg-[#0a0a0a] select-none shrink-0">
                 <div className="flex items-center gap-4">

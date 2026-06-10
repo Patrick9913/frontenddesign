@@ -49,13 +49,11 @@ export const CustomCursor = () => {
 
     const handleMouseOver = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      // Detectar si estamos sobre un elemento clickeable
-      const isClickable = 
-        window.getComputedStyle(target).cursor === 'pointer' ||
-        target.tagName.toLowerCase() === 'a' ||
-        target.tagName.toLowerCase() === 'button' ||
-        target.closest('a') !== null ||
-        target.closest('button') !== null;
+      const isClickable =
+        window.getComputedStyle(target).cursor === "pointer" ||
+        target.closest('[data-card-clickable="true"]') !== null ||
+        target.closest("a") !== null ||
+        target.closest("button") !== null;
 
       setIsHovering(isClickable);
     };
