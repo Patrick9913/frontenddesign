@@ -64,8 +64,12 @@ type CardRig = {
 
 const STACK = {
   CARD_HEIGHT_VH: 0.85,
-  INCOMING_START_OFFSET: 0.68,
+  /** Fracción del alto de la carta visible en el borde inferior al estar en espera */
+  INCOMING_PEEK_RATIO: 0.3,
   OUTGOING_BLUR_MAX: 12,
+  /** Difuminado de la carta que asoma por debajo (se aclara al subir) */
+  INCOMING_BLUR_MAX: 11,
+  INCOMING_OPACITY_MIN: 0.72,
   /** Suavizado del índice visual (mayor = más inercia al soltar el scroll) */
   SMOOTH_FOLLOW: 7.5,
   /** Zona en la que la tarjeta se siente activa y clicable */
@@ -125,9 +129,14 @@ function stackIndexToScrollY(
 
 function shouldShowCard(index: number, stackIndex: number): boolean {
   const depth = stackIndex - index;
-  // Siguiente carta oculta hasta que el scroll supere el centro de la actual (depth > -1)
-  if (depth <= -1) return false;
+  // Carta siguiente en espera (depth ≈ -1): siempre visible debajo
+  if (depth > -1.001 && depth < 0) return true;
+  if (depth < -1.001) return false;
   return depth < 1.06;
+}
+
+function getIncomingRestTop(cardHeight: number, viewportH: number): number {
+  return viewportH - cardHeight * STACK.INCOMING_PEEK_RATIO;
 }
 
 function clamp01(t: number) {
@@ -155,23 +164,25 @@ function getStackLayout(
   cardLeft: number,
   cardWidth: number,
   cardHeight: number,
-  centerTop: number
+  centerTop: number,
+  viewportH: number
 ): StackLayout {
   const depth = stackIndex - index;
   const base = { left: cardLeft, width: cardWidth, height: cardHeight };
-  const startTop = centerTop + cardHeight * STACK.INCOMING_START_OFFSET;
+  const restTop = getIncomingRestTop(cardHeight, viewportH);
 
-  // Entrante: sube con curva suave (depth -1 → 0)
+  // Entrante: asoma fija en el borde inferior; sube al centro al hacer scroll
   if (depth < 0) {
     const riseT = smootherstep(1 + depth);
+    const clearT = smoothstep(riseT);
 
     return {
       ...base,
-      top: lerp(startTop, centerTop, riseT),
-      opacity: riseT <= 0 ? 0 : lerp(0.94, 1, smoothstep(riseT)),
-      blur: 0,
-      zIndex: riseT <= 0.02 ? 40 + index : 100 + index + Math.round(riseT * 14),
-      transform: `scale(${lerp(0.97, 1, riseT)})`,
+      top: lerp(restTop, centerTop, riseT),
+      opacity: lerp(STACK.INCOMING_OPACITY_MIN, 1, clearT),
+      blur: lerp(STACK.INCOMING_BLUR_MAX, 0, clearT),
+      zIndex: riseT < 0.2 ? 52 + index : 100 + index + Math.round(riseT * 16),
+      transform: `scale(${lerp(0.965, 1, riseT)})`,
       stackRole: riseT > 0.9 ? "active" : "incoming",
     };
   }
@@ -207,8 +218,8 @@ function isCardClickable(index: number, stackIndex: number, layout: StackLayout)
   return (
     depth < STACK.CLICK_DEPTH &&
     layout.opacity > 0.85 &&
-    layout.blur < 2.5 &&
-    layout.stackRole !== "incoming"
+    layout.blur < 2 &&
+    layout.stackRole === "active"
   );
 }
 
@@ -244,7 +255,8 @@ function syncCardsToScrollLayout(
       cardLeft,
       cardWidth,
       cardHeight,
-      centerTop
+      centerTop,
+      viewportH
     );
 
     if (layout.opacity < 0.02) {
