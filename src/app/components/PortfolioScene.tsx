@@ -3,11 +3,6 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { createHaloRing } from "./createHaloRing";
-import {
-  createThreeCardShell,
-  THREE_CARD_HEIGHT,
-  THREE_CARD_WIDTH,
-} from "./createThreeCardShell";
 import { CARDS } from "./cardStackData";
 import { SECTION_CONFIGS } from "./sectionConfigs";
 import { IoMdClose } from "react-icons/io";
@@ -56,42 +51,43 @@ const lerpTargets = {
 };
 
 type CardRig = {
-  webglRoot: THREE.Group;
-  darkenPlane: THREE.Mesh;
-  shellBody: THREE.Mesh;
   dom: HTMLDivElement;
 };
 
 const STACK = {
-  PERSPECTIVE: 1800,
-  TAB_OFFSET: 52,
   CARD_HEIGHT_VH: 0.85,
-  TILT_BASE: 3,
-  TILT_PER_DEPTH: 6.5,
-  TILT_MAX: 38,
-  /** Escala mínima lejos del centro (atrás y adelante) */
-  SCALE_MIN: 0.55,
-  /** Distancia en índices hasta llegar a SCALE_MIN */
-  SCALE_FALL_OFF: 1.85,
-  Z_PUSH_PER_DEPTH: 0.14,
-  SMOOTH_FOLLOW: 8,
+  STRIP_HEIGHT: 48,
+  STRIP_GAP: 0,
+  /** Carta siguiente: distancia bajo el centro (0–1 del alto) */
+  NEXT_PEEK_RATIO: 0.78,
+  /** Carta más antigua: cuánto sube al salir del encuadre */
+  EXIT_LIFT: 130,
+  SMOOTH_FOLLOW: 10,
+  ARCHIVE_OPACITY: 0.9,
+  ARCHIVE_OLD_OPACITY: 0.78,
 } as const;
 
-type StackPose = {
-  scale: number;
-  translateY: number;
-  rotateXDeg: number;
+type ArchiveTone = "none" | "recent" | "old";
+type StackRole = "active" | "next" | "archive-recent" | "archive-old";
+
+type ArchiveLayout = {
+  top: number;
+  left: number;
+  width: number;
+  height: number;
+  opacity: number;
+  zIndex: number;
+  clipPath: string;
+  transform: string;
+  isActive: boolean;
+  stackRole: StackRole;
+  archiveTone: ArchiveTone;
 };
 
 const CARD_COUNT = CARDS.length;
 
 function getCenterStickyTopPx(viewportH: number) {
   return viewportH * (0.5 - STACK.CARD_HEIGHT_VH / 2);
-}
-
-function smoothStep(t: number) {
-  const c = Math.min(Math.max(t, 0), 1);
-  return c * c * (3 - 2 * c);
 }
 
 /**
@@ -125,72 +121,129 @@ function stackIndexToScrollY(
   return start + targetProgress * maxScroll;
 }
 
-function shouldShowCard(index: number, smoothIndex: number): boolean {
-  if (index > smoothIndex + 1.15) return false;
-  if (smoothIndex - index > 4.5) return false;
+function shouldShowCard(index: number, stackIndex: number): boolean {
+  const depth = stackIndex - index;
+  if (depth < -1.15) return false;
+  if (depth > 2.35) return false;
   return true;
 }
 
-function getDistanceScale(activeIndex: number, cardIndex: number): number {
-  const distance = Math.abs(activeIndex - cardIndex);
-  if (distance <= 0.02) return 1;
-
-  const t = smoothStep(Math.max(0, 1 - distance / STACK.SCALE_FALL_OFF));
-  return STACK.SCALE_MIN + t * (1 - STACK.SCALE_MIN);
+function clamp01(t: number) {
+  return Math.min(1, Math.max(0, t));
 }
 
-function getStackPose(index: number, activeIndex: number): StackPose {
-  const depth = activeIndex - index;
-  const scale = getDistanceScale(activeIndex, index);
+function easeOutCubic(t: number) {
+  return 1 - Math.pow(1 - t, 3);
+}
 
-  if (Math.abs(depth) <= 0.02) {
-    return { scale: 1, translateY: 0, rotateXDeg: 0 };
-  }
+function easeInOutCubic(t: number) {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
 
-  if (depth > 0.02) {
+function lerp(a: number, b: number, t: number) {
+  return a + (b - a) * t;
+}
+
+function stackZIndex(depth: number): number {
+  return Math.max(1, Math.min(140, Math.round(100 - depth * 44)));
+}
+
+/** Recorta la carta hasta dejar solo la franja superior visible (archivo) */
+function stripClipPath(cardHeight: number, reveal: number): string {
+  if (reveal <= 0) return "none";
+  const hiddenPct = Math.max(0, 100 - (STACK.STRIP_HEIGHT / cardHeight) * 100 * reveal);
+  return `inset(0 0 ${hiddenPct}% 0 round 0)`;
+}
+
+function getArchiveLayout(
+  index: number,
+  stackIndex: number,
+  cardLeft: number,
+  cardWidth: number,
+  cardHeight: number,
+  centerTop: number
+): ArchiveLayout {
+  const depth = stackIndex - index;
+  const stripStep = STACK.STRIP_HEIGHT + STACK.STRIP_GAP;
+  const stripTop = centerTop - stripStep;
+  const zIndex = stackZIndex(depth);
+
+  const base = {
+    left: cardLeft,
+    width: cardWidth,
+    height: cardHeight,
+  };
+
+  // Entrante: sube desde abajo (depth -1 → 0)
+  if (depth < 0) {
+    const riseT = clamp01(1 + depth);
+    const peekTop = centerTop + cardHeight * STACK.NEXT_PEEK_RATIO;
+
     return {
-      scale,
-      translateY: -depth * STACK.TAB_OFFSET,
-      rotateXDeg: -Math.min(STACK.TILT_BASE + depth * STACK.TILT_PER_DEPTH, STACK.TILT_MAX),
+      ...base,
+      top: lerp(peekTop, centerTop, riseT),
+      opacity: lerp(0.7, 1, riseT),
+      zIndex,
+      clipPath: "none",
+      transform: riseT < 1 ? `translateY(${(1 - riseT) * 4}px)` : "none",
+      isActive: riseT > 0.96,
+      stackRole: riseT > 0.96 ? "active" : "next",
+      archiveTone: "none",
     };
   }
 
-  const ahead = -depth;
-  const rise = smoothStep(Math.max(0, 1 - ahead / STACK.SCALE_FALL_OFF));
+  // Principal archivándose (depth 0 → 1): movimiento continuo desde el centro
+  if (depth <= 1) {
+    const t = clamp01(depth);
+    const clipReveal = clamp01((t - 0.08) / 0.92);
+
+    return {
+      ...base,
+      top: lerp(centerTop, stripTop, t),
+      opacity: lerp(1, STACK.ARCHIVE_OPACITY, t),
+      zIndex: t < 0.04 ? 100 : zIndex,
+      clipPath: stripClipPath(cardHeight, clipReveal),
+      transform: `translateY(${-t * 5}px) scale(${1 - t * 0.018})`,
+      isActive: t < 0.04,
+      stackRole: t < 0.04 ? "active" : "archive-recent",
+      archiveTone: t < 0.04 ? "none" : "recent",
+    };
+  }
+
+  // Archivo antiguo → sube y desaparece (depth 1 → 2)
+  if (depth <= 2) {
+    const exitT = clamp01(depth - 1);
+
+    return {
+      ...base,
+      top: stripTop - exitT * STACK.EXIT_LIFT,
+      opacity: lerp(STACK.ARCHIVE_OLD_OPACITY, 0, exitT),
+      zIndex,
+      clipPath: stripClipPath(cardHeight, 1),
+      transform: `translateY(${-exitT * 14}px) scale(${1 - exitT * 0.05})`,
+      isActive: false,
+      stackRole: "archive-old",
+      archiveTone: "old",
+    };
+  }
 
   return {
-    scale,
-    translateY: (1 - rise) * 22,
-    rotateXDeg: (1 - rise) * 4.5,
+    ...base,
+    top: stripTop - STACK.EXIT_LIFT,
+    opacity: 0,
+    zIndex: 1,
+    clipPath: stripClipPath(cardHeight, 1),
+    transform: "none",
+    isActive: false,
+    stackRole: "archive-old",
+    archiveTone: "old",
   };
-}
-
-function poseToTransform(pose: StackPose): string {
-  if (pose.rotateXDeg === 0 && pose.scale === 1 && pose.translateY === 0) {
-    return "none";
-  }
-  return `perspective(${STACK.PERSPECTIVE}px) rotateX(${pose.rotateXDeg}deg) scale(${pose.scale}) translateY(${pose.translateY}px)`;
-}
-
-function getCardVisualState(index: number, smoothActiveIndex: number) {
-  const depth = smoothActiveIndex - index;
-  const isStuck = depth > 0.02;
-  const isActive = Math.abs(depth) <= 0.02;
-  const pose = getStackPose(index, smoothActiveIndex);
-
-  const zIndex = isActive
-    ? 100
-    : depth > 0.02
-      ? 10 + index
-      : 5 + index;
-
-  return { isStuck, depth, zIndex, pose, isActive };
 }
 
 function syncCardsToScrollLayout(
   rigs: CardRig[],
   stackContainer: HTMLDivElement | null,
-  smoothActiveIndex: number,
+  stackIndex: number,
   expanded: boolean,
   viewportW: number,
   viewportH: number
@@ -203,67 +256,46 @@ function syncCardsToScrollLayout(
 
   rigs.forEach((rig, index) => {
     if (expanded) {
-      rig.webglRoot.visible = false;
       rig.dom.style.visibility = "hidden";
       rig.dom.style.pointerEvents = "none";
       return;
     }
 
-    if (!shouldShowCard(index, smoothActiveIndex)) {
-      rig.webglRoot.visible = false;
+    if (!shouldShowCard(index, stackIndex)) {
       rig.dom.style.visibility = "hidden";
       rig.dom.style.pointerEvents = "none";
       return;
     }
 
-    const { isStuck, depth, zIndex, pose, isActive } = getCardVisualState(
+    const layout = getArchiveLayout(
       index,
-      smoothActiveIndex
+      stackIndex,
+      cardLeft,
+      cardWidth,
+      cardHeight,
+      centerTop
     );
 
-    const left = cardLeft;
-    const width = cardWidth;
-    const height = cardHeight;
-    const transform = poseToTransform(pose);
-
-    let top = centerTop;
-    if (depth < -0.02) {
-      const ahead = -depth;
-      const riseT = smoothStep(Math.max(0, 1 - ahead / STACK.SCALE_FALL_OFF));
-      top = centerTop + (1 - riseT) * viewportH * 0.68;
+    if (layout.opacity < 0.02) {
+      rig.dom.style.visibility = "hidden";
+      rig.dom.style.pointerEvents = "none";
+      return;
     }
 
-    const centerX = left + width / 2 - viewportW / 2;
-    const centerY = -(top + height / 2 - viewportH / 2);
-    const scaleX = width / THREE_CARD_WIDTH;
-    const scaleY = height / THREE_CARD_HEIGHT;
-    const tiltRad = (pose.rotateXDeg * Math.PI) / 180;
-    const depthZ =
-      -0.02 -
-      (isStuck ? depth * STACK.Z_PUSH_PER_DEPTH : depth < -0.02 ? 0.06 : 0);
-
-    rig.webglRoot.visible = true;
-    rig.webglRoot.position.set(centerX, centerY + (isStuck ? depth * 8 : 0), depthZ);
-    rig.webglRoot.scale.set(scaleX * pose.scale, scaleY * pose.scale, 1);
-    rig.webglRoot.rotation.set(tiltRad, 0, 0);
-
     rig.dom.style.visibility = "visible";
-    rig.dom.style.position = "fixed";
-    rig.dom.style.left = `${left}px`;
-    rig.dom.style.top = `${top}px`;
-    rig.dom.style.width = `${width}px`;
-    rig.dom.style.height = `${height}px`;
-    rig.dom.style.transformOrigin = "center center";
-    rig.dom.style.transform = transform;
-    rig.dom.style.opacity = "1";
-    rig.dom.style.zIndex = String(zIndex);
-    rig.dom.style.pointerEvents = isActive ? "auto" : "none";
-
-    rig.darkenPlane.visible = false;
-
-    const bodyMat = rig.shellBody.material as THREE.MeshStandardMaterial;
-    bodyMat.opacity = 1;
-    bodyMat.transparent = false;
+    rig.dom.style.position = "absolute";
+    rig.dom.style.left = `${layout.left}px`;
+    rig.dom.style.top = `${layout.top}px`;
+    rig.dom.style.width = `${layout.width}px`;
+    rig.dom.style.height = `${layout.height}px`;
+    rig.dom.style.transform = layout.transform;
+    rig.dom.style.clipPath = layout.clipPath;
+    rig.dom.style.opacity = String(layout.opacity);
+    rig.dom.style.transition = "none";
+    rig.dom.style.zIndex = String(layout.zIndex);
+    rig.dom.style.pointerEvents = layout.isActive ? "auto" : "none";
+    rig.dom.dataset.stackRole = layout.stackRole;
+    rig.dom.dataset.archiveTone = layout.archiveTone;
   });
 }
 
@@ -276,7 +308,6 @@ export const PortfolioScene = ({
   const [cardsDomReady, setCardsDomReady] = useState(false);
 
   const bgContainerRef = useRef<HTMLDivElement>(null);
-  const cardContainerRef = useRef<HTMLDivElement>(null);
   const stackContainerRef = useRef<HTMLDivElement>(null);
   const cardDomRefs = useRef<(HTMLDivElement | null)[]>([]);
   const activeCardIndexRef = useRef(0);
@@ -338,8 +369,7 @@ export const PortfolioScene = ({
     if (!cardsDomReady) return;
 
     const bgContainer = bgContainerRef.current;
-    const cardContainer = cardContainerRef.current;
-    if (!bgContainer || !cardContainer) return;
+    if (!bgContainer) return;
 
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const isTouchPrimary = window.matchMedia("(hover: none) and (pointer: coarse)").matches;
@@ -399,76 +429,15 @@ export const PortfolioScene = ({
     const particles = new THREE.Points(particleGeometry, particleMaterial);
     bgScene.add(particles);
 
-    // --- Carcasas 3D de tarjetas (cámara ortográfica = coords de pantalla) ---
-    const cardScene = new THREE.Scene();
-
-    const makeCardCamera = () => {
-      const w = viewportW();
-      const h = viewportH();
-      return new THREE.OrthographicCamera(-w / 2, w / 2, h / 2, -h / 2, 0.1, 500);
-    };
-
-    let cardCamera = makeCardCamera();
-    cardCamera.position.z = 100;
-
-    const cardRenderer = new THREE.WebGLRenderer({
-      antialias: true,
-      alpha: true,
-      powerPreference: "high-performance",
-      precision: "mediump",
-    });
-    cardRenderer.setSize(viewportW(), viewportH());
-    cardRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
-    cardRenderer.setClearColor(0x000000, 0);
-    cardRenderer.domElement.style.position = "absolute";
-    cardRenderer.domElement.style.inset = "0";
-    cardRenderer.domElement.style.zIndex = "1";
-    cardRenderer.domElement.style.pointerEvents = "none";
-    cardContainer.appendChild(cardRenderer.domElement);
-
-    cardScene.add(new THREE.AmbientLight(0xffffff, 0.6));
-    const keyLight = new THREE.DirectionalLight(0xf0f4fa, 0.9);
-    keyLight.position.set(0, 0, 120);
-    cardScene.add(keyLight);
-
-    const cardGeometries: THREE.BufferGeometry[] = [];
-    const cardMaterials: THREE.Material[] = [];
     const rigs: CardRig[] = [];
 
     CARDS.forEach((card, index) => {
       const dom = cardDomRefs.current[index];
       if (!dom) return;
 
-      const webglRoot = new THREE.Group();
-      cardScene.add(webglRoot);
-
-      const shellAssets = createThreeCardShell();
-      cardGeometries.push(...shellAssets.geometries);
-      cardMaterials.push(...shellAssets.materials);
-
-      webglRoot.add(shellAssets.group);
-
-      const darkenGeometry = new THREE.PlaneGeometry(THREE_CARD_WIDTH * 0.995, THREE_CARD_HEIGHT * 0.995);
-      cardGeometries.push(darkenGeometry);
-      const darkenMaterial = new THREE.MeshBasicMaterial({
-        color: 0x000000,
-        transparent: true,
-        opacity: 0,
-        depthWrite: false,
-      });
-      cardMaterials.push(darkenMaterial);
-      const darkenPlane = new THREE.Mesh(darkenGeometry, darkenMaterial);
-      darkenPlane.position.z = 0.024;
-      webglRoot.add(darkenPlane);
-
       dom.style.pointerEvents = "auto";
 
-      const rig: CardRig = {
-        webglRoot,
-        darkenPlane,
-        shellBody: shellAssets.body,
-        dom,
-      };
+      const rig: CardRig = { dom };
       rigs.push(rig);
 
       dom.addEventListener("click", () => {
@@ -504,10 +473,6 @@ export const PortfolioScene = ({
       bgCamera.aspect = w / h;
       bgCamera.updateProjectionMatrix();
       bgRenderer.setSize(w, h);
-
-      cardCamera = makeCardCamera();
-      cardCamera.position.z = 100;
-      cardRenderer.setSize(w, h);
     };
 
     if (!isTouchPrimary) {
@@ -528,6 +493,20 @@ export const PortfolioScene = ({
     let currentHaloSpeed = initialConfig.haloRotationSpeed;
     let currentParticleOpacity = initialConfig.particleOpacity;
     let currentFogDensity = initialConfig.fogDensity;
+
+    const initIndex = progressToStackIndex(
+      getScrollMetrics(stackContainerRef.current, viewportH()).progress
+    );
+    smoothStackIndexRef.current = initIndex;
+    targetStackIndexRef.current = initIndex;
+    syncCardsToScrollLayout(
+      rigs,
+      stackContainerRef.current,
+      initIndex,
+      false,
+      viewportW(),
+      viewportH()
+    );
 
     const animate = () => {
       frameId = requestAnimationFrame(animate);
@@ -556,7 +535,7 @@ export const PortfolioScene = ({
       syncCardsToScrollLayout(
         rigs,
         stackContainerRef.current,
-        smoothStackIndexRef.current,
+        targetStackIndexRef.current,
         expanded,
         w,
         h
@@ -650,7 +629,6 @@ export const PortfolioScene = ({
       }
 
       bgRenderer.render(bgScene, bgCamera);
-      cardRenderer.render(cardScene, cardCamera);
     };
 
     animate();
@@ -661,11 +639,9 @@ export const PortfolioScene = ({
       document.documentElement.removeEventListener("mouseleave", handleMouseLeave);
       window.removeEventListener("resize", handleResize);
       bgRenderer.dispose();
-      cardRenderer.dispose();
-      [...haloGeometries, ...cardGeometries, particleGeometry].forEach((g) => g.dispose());
-      [...haloMaterials, ...cardMaterials, particleMaterial].forEach((m) => m.dispose());
+      [...haloGeometries, particleGeometry].forEach((g) => g.dispose());
+      [...haloMaterials, particleMaterial].forEach((m) => m.dispose());
       if (bgContainer.contains(bgRenderer.domElement)) bgContainer.removeChild(bgRenderer.domElement);
-      if (cardContainer.contains(cardRenderer.domElement)) cardContainer.removeChild(cardRenderer.domElement);
       rigsRef.current.forEach((rig) => {
         rig.dom.style.visibility = "hidden";
       });
@@ -690,12 +666,6 @@ export const PortfolioScene = ({
         ))}
       </div>
 
-      <div
-        ref={cardContainerRef}
-        className="fixed inset-0 z-[8] pointer-events-none"
-        aria-hidden
-      />
-
       <div className="three-card-overlay fixed inset-0 z-[9] pointer-events-none">
         {CARDS.map((card, index) => {
           const isHero = card.id === "hero";
@@ -708,10 +678,10 @@ export const PortfolioScene = ({
               ref={(el) => {
                 cardDomRefs.current[index] = el;
               }}
-              className="three-card-dom card-stack-item-visual cursor-pointer overflow-hidden border border-white/[0.08] bg-[#050505] shadow-[0_-20px_40px_-15px_rgba(0,0,0,0.95)] pointer-events-auto"
-              style={{ visibility: "hidden", position: "fixed" }}
+              className="three-card-dom card-stack-item-visual cursor-pointer overflow-hidden border border-white/[0.08] bg-[#050505] pointer-events-auto"
+              style={{ visibility: "hidden", position: "absolute" }}
             >
-              <header className="h-12 border-b border-white/[0.08] flex items-center justify-between px-6 bg-[#0a0a0a] select-none shrink-0">
+              <header className="card-stack-header h-12 border-b border-white/[0.08] flex items-center justify-between px-6 bg-[#0a0a0a] select-none shrink-0">
                 <div className="flex items-center gap-4">
                   <span className="font-mono text-[10px] font-light tracking-[0.2em] text-white/45">
                     [ {card.index} ]
@@ -721,18 +691,18 @@ export const PortfolioScene = ({
                   </span>
                 </div>
                 {!isHero && (
-                  <span className="font-mono text-[9px] font-light tracking-[0.15em] text-white/30 uppercase">
+                  <span className="card-stack-header-extra font-mono text-[9px] font-light tracking-[0.15em] text-white/30 uppercase">
                     [ VER DETALLES ]
                   </span>
                 )}
               </header>
 
               {isHero ? (
-                <div className="h-[calc(100%-3rem)] overflow-hidden bg-[#050505]">
+                <div className="card-stack-body h-[calc(100%-3rem)] overflow-hidden bg-[#050505]">
                   <Component />
                 </div>
               ) : (
-                <div className="h-[calc(100%-3rem)] flex flex-col justify-between p-8 md:p-12 text-left relative bg-gradient-to-b from-[#050505] to-[#000000]">
+                <div className="card-stack-body h-[calc(100%-3rem)] flex flex-col justify-between p-8 md:p-12 text-left relative bg-gradient-to-b from-[#050505] to-[#000000]">
                   <div
                     className="absolute right-0 bottom-0 top-0 w-1/2 opacity-[0.03] pointer-events-none bg-cover bg-right bg-no-repeat"
                     style={{ backgroundImage: `url('/wireone.png')` }}

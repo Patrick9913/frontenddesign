@@ -212,13 +212,11 @@ export const CardStack = ({ setActiveSection, expandedCardId, setExpandedCardId 
 
         // 3D transform properties for cards stacked underneath the active card
         let transformStyle = "scale(1) translateY(0px)";
-        let opacityStyle = "1";
 
         if (isStuck && !expandedCardId) {
           const scale = 1 - depth * 0.018;
           const yOffset = -depth * 10;
           transformStyle = `scale(${scale}) translateY(${yOffset}px)`;
-          opacityStyle = `${1 - depth * 0.08}`;
         }
 
         const isHero = card.id === "hero";
@@ -235,7 +233,6 @@ export const CardStack = ({ setActiveSection, expandedCardId, setExpandedCardId 
             style={{
               top: stickyTop,
               transform: transformStyle,
-              opacity: opacityStyle,
               zIndex: 10 + index,
               backgroundColor: isHero ? "transparent" : "#050505",
             }}
@@ -248,14 +245,6 @@ export const CardStack = ({ setActiveSection, expandedCardId, setExpandedCardId 
               }
             }}
           >
-            {/* Overlay de oscurecimiento acelerado por hardware (reemplaza filter: brightness) */}
-            {isStuck && !expandedCardId ? (
-              <div 
-                className="absolute inset-0 bg-black pointer-events-none z-20 transition-opacity duration-500"
-                style={{ opacity: Math.min(depth * 0.15, 0.65) }}
-              />
-            ) : null}
-
             {/* Header (Always Visible at Top when Stacked) */}
             <header className="h-12 border-b border-white/[0.08] flex items-center justify-between px-6 bg-[#0a0a0a] select-none">
               <div className="flex items-center gap-4">
