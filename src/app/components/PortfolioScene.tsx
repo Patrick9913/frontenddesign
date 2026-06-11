@@ -886,7 +886,7 @@ export const PortfolioScene = ({
       </div>
 
       {activeCard && (
-        <div className="fixed inset-0 z-[9999] bg-black/95 overflow-y-auto expanded-content-scroll flex flex-col">
+        <div className="expanded-view fixed inset-0 z-[9999] overflow-y-auto expanded-content-scroll flex flex-col">
           <div className="sticky top-0 left-0 right-0 z-50 bg-black/80 border-b border-white/[0.08] px-8 py-4 flex justify-between items-center max-w-7xl mx-auto w-full">
             <div className="flex items-center gap-4">
               <span className="font-mono text-xs text-white/40">[ {activeCard.index} ]</span>

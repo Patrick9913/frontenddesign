@@ -1,6 +1,8 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { ExpandedContentPanel, ExpandedSection } from "./expanded/ExpandedSection";
+import { ProjectsSectionDecor } from "./expanded/SectionDecors";
 
 const SECTION_INDEX = "[ 04 ]";
 
@@ -81,155 +83,131 @@ export const Projects = () => {
   const current = DEMOS[currentIndex];
 
   return (
-    <section
+    <ExpandedSection
       id="projects"
-      className="py-32 lg:py-48 bg-black text-[#F0F0F0] font-sans border-t border-white/[0.08]"
+      decor={<ProjectsSectionDecor />}
+      index={SECTION_INDEX}
+      overline={COPY.overline}
+      title={COPY.title}
+      accent={COPY.accent}
     >
-      <div className="max-w-7xl mx-auto px-8 md:px-16 lg:px-24">
-        <header className="mb-16 md:mb-20 lg:mb-24">
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-8 md:mb-10">
-            <span className="font-mono text-[10px] md:text-xs font-light tracking-[0.25em] uppercase text-white/50">
-              {SECTION_INDEX}
-            </span>
-            <span className="text-[10px] md:text-xs font-light tracking-[0.25em] uppercase text-white/50">
-              {COPY.overline}
-            </span>
-          </div>
-
-          <h2 className="text-4xl md:text-6xl lg:text-7xl font-light tracking-[-0.02em] text-[#F0F0F0] leading-[1.05] uppercase">
-            {COPY.title}
-            <br />
-            <span className="font-medium text-white/50">{COPY.accent}</span>
-          </h2>
-
-          <div className="w-8 md:w-12 h-px bg-white/[0.08] mt-8 md:mt-10" aria-hidden />
-        </header>
-
-        <div className="border-t border-white/[0.08] pt-12 md:pt-16 lg:pt-20">
-          <div
-            key={currentIndex}
-            className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 xl:gap-20 items-center project-content-in"
-          >
-            {/* Info del proyecto */}
-            <div className="lg:col-span-5 flex flex-col order-2 lg:order-1">
-              <div className="flex items-baseline justify-between gap-4 mb-6 md:mb-8">
-                <span className="font-mono text-[10px] md:text-xs font-light tracking-[0.2em] uppercase text-white/50">
-                  {current.id}
-                </span>
-                <span className="font-mono text-[10px] md:text-xs font-light tracking-[0.15em] uppercase text-white/25">
-                  {current.subtitle}
-                </span>
-              </div>
-
-              <h3 className="text-3xl md:text-4xl lg:text-5xl font-light tracking-[-0.02em] text-[#F0F0F0] leading-[1.1] mb-6 md:mb-8">
-                {current.title}
-              </h3>
-
-              <p className="text-sm md:text-base font-light text-white/50 leading-[1.75] tracking-wide max-w-lg mb-8 md:mb-10">
-                {current.description}
-              </p>
-
-              <ul className="flex flex-wrap gap-2 md:gap-3 mb-10 md:mb-12" role="list">
-                {current.technologies.map((tech) => (
-                  <li key={tech}>
-                    <span className="inline-block font-mono text-[10px] font-light tracking-[0.15em] uppercase text-white/40 border border-white/[0.08] px-3 py-2">
-                      {tech}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-
-              <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 pt-6 border-t border-white/[0.08]">
-                <a
-                  href={current.github}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group inline-flex w-fit items-center gap-4 px-8 py-4 bg-[#F0F0F0] text-black text-[10px] md:text-xs font-medium tracking-[0.2em] uppercase rounded-none transition-opacity duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:opacity-90"
-                >
-                  Ver Código
-                  <span
-                    className="text-base transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1"
-                    aria-hidden
-                  >
-                    →
-                  </span>
-                </a>
-                <a
-                  href={current.live}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex w-fit items-center gap-4 px-8 py-4 border border-white/20 bg-transparent text-[10px] md:text-xs font-light tracking-[0.2em] uppercase text-white/50 rounded-none transition-[color,border-color] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:text-[#F0F0F0] hover:border-white/40"
-                >
-                  Ver Demo
-                  <span className="text-base" aria-hidden>
-                    ↗
-                  </span>
-                </a>
-              </div>
+      <ExpandedContentPanel>
+        <div key={currentIndex} className="project-content-in grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-16 xl:gap-20">
+          <div className="order-2 flex flex-col lg:order-1 lg:col-span-5">
+            <div className="mb-6 flex items-baseline justify-between gap-4 md:mb-8">
+              <span className="font-mono text-[10px] font-light uppercase tracking-[0.2em] text-white/50 md:text-xs">
+                {current.id}
+              </span>
+              <span className="font-mono text-[10px] font-light uppercase tracking-[0.15em] text-white/25 md:text-xs">
+                {current.subtitle}
+              </span>
             </div>
 
-            {/* Panel visual */}
-            <div className="lg:col-span-6 lg:col-start-7 order-1 lg:order-2">
-              <div className="border border-white/[0.08] overflow-hidden">
-                <img
-                  src={current.image}
-                  alt={current.title}
-                  className="w-full h-56 sm:h-72 md:h-80 lg:h-[420px] object-cover object-top grayscale transition-[filter,transform] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:grayscale-0 hover:scale-[1.02] motion-reduce:grayscale-0 motion-reduce:scale-100"
-                />
-              </div>
+            <h3 className="mb-6 text-3xl font-light leading-[1.1] tracking-[-0.02em] text-[#F0F0F0] md:mb-8 md:text-4xl lg:text-5xl">
+              {current.title}
+            </h3>
+
+            <p className="mb-8 max-w-lg text-sm font-light leading-[1.75] tracking-wide text-white/50 md:mb-10 md:text-base">
+              {current.description}
+            </p>
+
+            <ul className="mb-10 flex flex-wrap gap-2 md:mb-12 md:gap-3" role="list">
+              {current.technologies.map((tech) => (
+                <li key={tech}>
+                  <span className="expanded-tech-tag">{tech}</span>
+                </li>
+              ))}
+            </ul>
+
+            <div className="flex flex-col gap-4 border-t border-white/[0.08] pt-6 sm:flex-row sm:gap-6">
+              <a
+                href={current.github}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group inline-flex w-fit items-center gap-4 bg-[#F0F0F0] px-8 py-4 text-[10px] font-medium uppercase tracking-[0.2em] text-black transition-opacity duration-500 hover:opacity-90 md:text-xs"
+              >
+                Ver Código
+                <span className="text-base transition-transform duration-500 group-hover:translate-x-1" aria-hidden>
+                  →
+                </span>
+              </a>
+              <a
+                href={current.live}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex w-fit items-center gap-4 border border-white/20 bg-transparent px-8 py-4 text-[10px] font-light uppercase tracking-[0.2em] text-white/50 transition-[color,border-color] duration-500 hover:border-white/40 hover:text-[#F0F0F0] md:text-xs"
+              >
+                Ver Demo
+                <span className="text-base" aria-hidden>
+                  ↗
+                </span>
+              </a>
             </div>
           </div>
 
-          {/* Navegación del carrusel */}
-          <nav
-            className="mt-12 md:mt-16 pt-8 border-t border-white/[0.08] flex flex-col md:flex-row md:items-center md:justify-between gap-8"
-            aria-label="Navegación de demos"
-          >
-            <span className="font-mono text-[10px] md:text-xs font-light tracking-[0.2em] uppercase text-white/50">
-              {current.id} / {String(total).padStart(2, "0")}
-            </span>
-
-            <div className="flex items-center justify-between md:justify-end gap-8 md:gap-12">
-              <button
-                type="button"
-                onClick={prev}
-                className="font-mono text-[10px] md:text-xs font-light tracking-[0.2em] uppercase text-white/40 transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:text-[#F0F0F0]"
-                aria-label="Demo anterior"
-              >
-                ← Anterior
-              </button>
-
-              <div className="flex items-center gap-3" role="tablist" aria-label="Seleccionar demo">
-                {DEMOS.map((demo, index) => (
-                  <button
-                    key={demo.id}
-                    type="button"
-                    role="tab"
-                    aria-selected={index === currentIndex}
-                    aria-label={`Ir a ${demo.title}`}
-                    onClick={() => goTo(index)}
-                    className={`h-px transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                      index === currentIndex
-                        ? "w-10 bg-[#F0F0F0]"
-                        : "w-6 bg-white/25 hover:bg-white/50"
-                    }`}
-                  />
-                ))}
+          <div className="order-1 lg:order-2 lg:col-span-6 lg:col-start-7">
+            <div className="projects-panel-window projects-panel-window--front expanded-project-frame relative overflow-hidden">
+              <div className="projects-panel-window-bar">
+                <span />
+                <span />
+                <span />
+                <span className="projects-panel-window-title">{current.title.toLowerCase().replace(/\s+/g, "-")}</span>
               </div>
-
-              <button
-                type="button"
-                onClick={next}
-                className="font-mono text-[10px] md:text-xs font-light tracking-[0.2em] uppercase text-white/40 transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:text-[#F0F0F0]"
-                aria-label="Siguiente demo"
-              >
-                Siguiente →
-              </button>
+              <img
+                src={current.image}
+                alt={current.title}
+                className="h-56 w-full object-cover object-top grayscale transition-[filter,transform] duration-500 hover:scale-[1.02] hover:grayscale-0 motion-reduce:scale-100 motion-reduce:grayscale-0 sm:h-72 md:h-80 lg:h-[420px]"
+              />
             </div>
-          </nav>
+          </div>
         </div>
-      </div>
-    </section>
+
+        <nav
+          className="mt-12 flex flex-col gap-8 border-t border-white/[0.08] pt-8 md:mt-16 md:flex-row md:items-center md:justify-between"
+          aria-label="Navegación de demos"
+        >
+          <span className="font-mono text-[10px] font-light uppercase tracking-[0.2em] text-white/50 md:text-xs">
+            {current.id} / {String(total).padStart(2, "0")}
+          </span>
+
+          <div className="flex items-center justify-between gap-8 md:justify-end md:gap-12">
+            <button
+              type="button"
+              onClick={prev}
+              className="font-mono text-[10px] font-light uppercase tracking-[0.2em] text-white/40 transition-colors duration-500 hover:text-[#F0F0F0] md:text-xs"
+              aria-label="Demo anterior"
+            >
+              ← Anterior
+            </button>
+
+            <div className="flex items-center gap-3" role="tablist" aria-label="Seleccionar demo">
+              {DEMOS.map((demo, index) => (
+                <button
+                  key={demo.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={index === currentIndex}
+                  aria-label={`Ir a ${demo.title}`}
+                  onClick={() => goTo(index)}
+                  className={`h-px transition-all duration-500 ${
+                    index === currentIndex ? "w-10 bg-[#F0F0F0]" : "w-6 bg-white/25 hover:bg-white/50"
+                  }`}
+                />
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={next}
+              className="font-mono text-[10px] font-light uppercase tracking-[0.2em] text-white/40 transition-colors duration-500 hover:text-[#F0F0F0] md:text-xs"
+              aria-label="Siguiente demo"
+            >
+              Siguiente →
+            </button>
+          </div>
+        </nav>
+      </ExpandedContentPanel>
+    </ExpandedSection>
   );
 };
 

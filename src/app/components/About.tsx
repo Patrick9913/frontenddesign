@@ -1,16 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState, type MouseEvent } from "react";
+import { ExpandedContentPanel, ExpandedSection } from "./expanded/ExpandedSection";
+import { AboutSectionDecor } from "./expanded/SectionDecors";
 
 const SECTION_INDEX = "[ 01 ]";
 
 const COPY = {
   overline: "Sobre mí",
-  title: {
-    line1: "CÓDIGO QUE",
-    accent: "RESPIRA",
-    line2: "DISEÑO",
-  },
+  title: "CÓDIGO QUE",
+  accent: "RESPIRA DISEÑO",
   lead:
     "Mi perfil se construye en la intersección exacta entre la estructura analítica y la experiencia visual. Como estudiante de Ciencia de Datos y desarrollador web, entiendo la lógica profunda detrás del software, pero me apasiona obsesivamente cómo ese código se ve y se siente al usarlo.",
   paragraphs: [
@@ -22,108 +21,84 @@ const COPY = {
 export const About = () => {
   const [showCvNotice, setShowCvNotice] = useState(false);
 
-  const handleCvClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+  const handleCvClick = (e: MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     setShowCvNotice(true);
   };
 
   return (
-    <section
+    <ExpandedSection
       id="about"
-      className="py-32 lg:py-48 bg-black text-[#F0F0F0] font-sans border-t border-white/[0.08]"
+      decor={<AboutSectionDecor />}
+      index={SECTION_INDEX}
+      overline={COPY.overline}
+      title={COPY.title}
+      accent={COPY.accent}
+      lead={COPY.lead}
     >
-      <div className="max-w-7xl mx-auto px-8 md:px-16 lg:px-24">
-        <header className="mb-20 md:mb-28 lg:mb-32">
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-8 md:mb-10">
-            <span className="font-mono text-[10px] md:text-xs font-light tracking-[0.25em] uppercase text-white/50">
-              {SECTION_INDEX}
-            </span>
-            <span className="text-[10px] md:text-xs font-light tracking-[0.25em] uppercase text-white/50">
-              {COPY.overline}
-            </span>
-          </div>
-
-          <h2 className="text-5xl md:text-7xl lg:text-8xl font-light tracking-[-0.02em] text-[#F0F0F0] leading-[1.05] max-w-4xl">
-            {COPY.title.line1}
-            <br />
-            <span className="font-medium text-white/50">{COPY.title.accent}</span>{" "}
-            {COPY.title.line2}
-          </h2>
-
-          <div
-            className="w-8 md:w-12 h-px bg-white/[0.08] mt-8 md:mt-10"
-            aria-hidden
-          />
-        </header>
-
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-8 xl:gap-12 lg:items-center">
-          <div className="lg:col-span-5 flex flex-col gap-10 md:gap-12 text-left min-w-0">
-            <p className="text-base md:text-lg font-light text-[#F0F0F0] leading-[1.75] tracking-wide">
-              {COPY.lead}
-            </p>
-
-            <div className="space-y-8 border-t border-white/[0.08] pt-10">
-              {COPY.paragraphs.map((paragraph, index) => (
-                <div key={index} className="flex gap-6 md:gap-8">
-                  <span
-                    className="shrink-0 font-mono text-[10px] font-light tracking-[0.2em] text-white/50 pt-1"
-                    aria-hidden
-                  >
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
-                  <p className="text-sm md:text-base font-light text-white/50 leading-[1.75] tracking-wide transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:text-white/80">
-                    {paragraph}
-                  </p>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex flex-col gap-4 pt-4 border-t border-white/[0.08]">
-              <a
-                href="/cv.pdf"
-                onClick={handleCvClick}
-                className="group inline-flex w-fit items-center gap-4 px-8 py-4 border border-white/20 bg-transparent text-[10px] md:text-xs font-light tracking-[0.2em] uppercase text-white/50 rounded-none transition-[color,border-color] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:text-[#F0F0F0] hover:border-white/40"
-              >
-                Descargar CV
+      <div className="grid grid-cols-1 items-center gap-16 lg:grid-cols-12 lg:gap-12 xl:gap-16">
+        <ExpandedContentPanel className="lg:col-span-5">
+          <div className="space-y-8">
+            {COPY.paragraphs.map((paragraph, index) => (
+              <div key={index} className="flex gap-6 md:gap-8">
                 <span
-                  className="text-base transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1"
+                  className="shrink-0 pt-1 font-mono text-[10px] font-light tracking-[0.2em] text-white/50"
                   aria-hidden
                 >
-                  →
+                  {String(index + 1).padStart(2, "0")}
                 </span>
-              </a>
-              {showCvNotice && (
-                <p
-                  className="font-mono text-[10px] md:text-xs font-light tracking-[0.15em] uppercase text-white/25"
-                  role="status"
-                >
-                  Currículum actualizándose.
+                <p className="text-sm font-light leading-[1.75] tracking-wide text-white/50 transition-colors duration-500 hover:text-white/80 md:text-base">
+                  {paragraph}
                 </p>
-              )}
-            </div>
+              </div>
+            ))}
           </div>
 
-          <div className="lg:col-span-6 lg:col-start-7 relative w-full max-w-md mx-auto lg:max-w-none lg:mx-0 aspect-[4/5] min-h-[280px] sm:min-h-[340px] lg:min-h-[400px]">
-            <div className="absolute top-0 left-0 w-[58%] sm:w-[56%] h-[78%] z-[1] border border-white/[0.08] overflow-hidden">
-              <img
-                src="/wireone.png"
-                alt="Composición visual — capa posterior"
-                className="w-full h-full object-cover object-center grayscale contrast-[1.02] transition-[filter,transform] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:grayscale-0 hover:scale-[1.02] motion-reduce:grayscale-0 motion-reduce:scale-100 motion-reduce:transition-none"
-                loading="lazy"
-              />
-            </div>
-            <div className="absolute bottom-0 right-0 w-[58%] sm:w-[56%] h-[72%] z-[2] border border-white/[0.08] overflow-hidden">
-              <img
-                src="/wiretwo.png"
-                alt="Composición visual — capa frontal"
-                className="w-full h-full object-cover object-center grayscale contrast-[1.02] transition-[filter,transform] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:grayscale-0 hover:scale-[1.02] motion-reduce:grayscale-0 motion-reduce:scale-100 motion-reduce:transition-none"
-                loading="lazy"
-              />
-            </div>
+          <div className="mt-10 flex flex-col gap-4 border-t border-white/[0.08] pt-8">
+            <a
+              href="/cv.pdf"
+              onClick={handleCvClick}
+              className="group inline-flex w-fit items-center gap-4 border border-white/20 bg-transparent px-8 py-4 text-[10px] font-light uppercase tracking-[0.2em] text-white/50 transition-[color,border-color] duration-500 hover:border-white/40 hover:text-[#F0F0F0] md:text-xs"
+            >
+              Descargar CV
+              <span
+                className="text-base transition-transform duration-500 group-hover:translate-x-1"
+                aria-hidden
+              >
+                →
+              </span>
+            </a>
+            {showCvNotice ? (
+              <p
+                className="font-mono text-[10px] font-light uppercase tracking-[0.15em] text-white/25 md:text-xs"
+                role="status"
+              >
+                Currículum actualizándose.
+              </p>
+            ) : null}
+          </div>
+        </ExpandedContentPanel>
+
+        <div className="relative mx-auto aspect-[4/5] w-full min-h-[280px] max-w-md sm:min-h-[340px] lg:col-span-6 lg:col-start-7 lg:mx-0 lg:max-w-none lg:min-h-[400px]">
+          <div className="panel-preview-layer panel-preview-layer--back absolute left-0 top-0 z-[1] h-[78%] w-[58%] overflow-hidden border border-white/[0.08] sm:w-[56%]">
+            <img
+              src="/wireone.png"
+              alt="Composición visual — capa posterior"
+              className="h-full w-full object-cover object-center grayscale contrast-[1.02] transition-[filter,transform] duration-500 hover:scale-[1.02] hover:grayscale-0 motion-reduce:scale-100 motion-reduce:grayscale-0"
+              loading="lazy"
+            />
+          </div>
+          <div className="panel-preview-layer panel-preview-layer--front absolute bottom-0 right-0 z-[2] h-[72%] w-[58%] overflow-hidden border border-white/[0.08] sm:w-[56%]">
+            <img
+              src="/wiretwo.png"
+              alt="Composición visual — capa frontal"
+              className="h-full w-full object-cover object-center grayscale contrast-[1.02] transition-[filter,transform] duration-500 hover:scale-[1.02] hover:grayscale-0 motion-reduce:scale-100 motion-reduce:grayscale-0"
+              loading="lazy"
+            />
           </div>
         </div>
       </div>
-    </section>
+    </ExpandedSection>
   );
 };
 

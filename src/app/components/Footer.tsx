@@ -1,4 +1,7 @@
-import React from "react";
+"use client";
+
+import { ExpandedContentPanel, ExpandedSection } from "./expanded/ExpandedSection";
+import { FooterSectionDecor } from "./expanded/SectionDecors";
 
 const NAV_LINKS = [
   { name: "Inicio", href: "#hero" },
@@ -33,27 +36,27 @@ export const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <div id="footer" className="bg-black text-[#F0F0F0] py-16 md:py-24 lg:py-32 font-sans">
-      <div className="max-w-7xl mx-auto px-8 md:px-16 lg:px-24 mb-12 md:mb-16">
-        <span className="font-mono text-[10px] font-light tracking-[0.25em] uppercase text-white/40 block mb-4">
-          {SECTION_INDEX}
-        </span>
-        <h2 className="text-3xl md:text-4xl font-light tracking-[-0.02em] text-[#F0F0F0] uppercase">
-          Cierre
-        </h2>
-      </div>
-      <div className="max-w-7xl mx-auto px-8 md:px-16 lg:px-24">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-16 lg:gap-12 pb-16 md:pb-20 lg:pb-24 border-b border-white/[0.08]">
-          {/* Marca */}
+    <ExpandedSection
+      id="footer"
+      decor={<FooterSectionDecor />}
+      index={SECTION_INDEX}
+      overline="Cierre"
+      title="PATRICK"
+      accent="ORDOÑEZ"
+      lead="Navegación, servicios y redes. El cierre del portfolio en una última hoja del stack."
+    >
+      <ExpandedContentPanel>
+        <div className="grid grid-cols-1 gap-16 border-b border-white/[0.08] pb-16 md:grid-cols-12 lg:gap-12 md:pb-20 lg:pb-24">
           <div className="md:col-span-5 lg:col-span-4">
-            <span className="font-mono text-[10px] font-light tracking-[0.25em] uppercase text-white/50 block mb-6">
+            <span className="mb-6 block font-mono text-[10px] font-light uppercase tracking-[0.25em] text-white/50">
               Portfolio
             </span>
-            <h3 className="text-xl md:text-2xl font-light tracking-[0.1em] uppercase text-[#F0F0F0] mb-6">
+            <h3 className="mb-6 text-xl font-light uppercase tracking-[0.1em] text-[#F0F0F0] md:text-2xl">
               Patrick Ordoñez
             </h3>
-            <p className="text-sm md:text-base font-light text-white/50 leading-[1.75] tracking-wide max-w-sm mb-10">
-              Diseño interactivo y desarrollo Front End. Especializado en crear experiencias digitales excepcionales con un enfoque meticuloso en la estética y el rendimiento.
+            <p className="mb-10 max-w-sm text-sm font-light leading-[1.75] tracking-wide text-white/50 md:text-base">
+              Diseño interactivo y desarrollo Front End. Especializado en crear experiencias digitales
+              excepcionales con un enfoque meticuloso en la estética y el rendimiento.
             </p>
             <nav className="flex flex-wrap gap-6" aria-label="Redes sociales">
               {SOCIAL_LINKS.map((link) => (
@@ -63,7 +66,7 @@ export const Footer = () => {
                   {...(link.href.startsWith("mailto")
                     ? {}
                     : { target: "_blank", rel: "noopener noreferrer" })}
-                  className="font-mono text-[10px] md:text-xs font-light tracking-[0.15em] uppercase text-white/40 transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:text-[#F0F0F0]"
+                  className="font-mono text-[10px] font-light uppercase tracking-[0.15em] text-white/40 transition-colors duration-500 hover:text-[#F0F0F0] md:text-xs"
                 >
                   {link.label}
                 </a>
@@ -71,9 +74,8 @@ export const Footer = () => {
             </nav>
           </div>
 
-          {/* Navegación */}
-          <div className="md:col-span-3 lg:col-span-4 md:border-l md:border-white/[0.08] md:pl-10 lg:pl-12">
-            <h4 className="font-mono text-[10px] font-light tracking-[0.2em] uppercase text-white/50 mb-8">
+          <div className="md:col-span-3 md:border-l md:border-white/[0.08] md:pl-10 lg:col-span-4 lg:pl-12">
+            <h4 className="mb-8 font-mono text-[10px] font-light uppercase tracking-[0.2em] text-white/50">
               Navegación
             </h4>
             <ul className="space-y-5" role="list">
@@ -88,10 +90,10 @@ export const Footer = () => {
                         new CustomEvent("nav-to-section", { detail: { sectionId } })
                       );
                     }}
-                    className="group inline-flex items-center gap-3 text-sm md:text-base font-light tracking-wide text-white/50 transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:text-[#F0F0F0]"
+                    className="group inline-flex items-center gap-3 text-sm font-light tracking-wide text-white/50 transition-colors duration-500 hover:text-[#F0F0F0] md:text-base"
                   >
                     <span
-                      className="w-0 h-px bg-[#F0F0F0] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:w-4"
+                      className="h-px w-0 bg-[#F0F0F0] transition-all duration-500 group-hover:w-4"
                       aria-hidden
                     />
                     {item.name}
@@ -101,19 +103,18 @@ export const Footer = () => {
             </ul>
           </div>
 
-          {/* Servicios */}
-          <div className="md:col-span-4 lg:col-span-4 md:border-l md:border-white/[0.08] md:pl-10 lg:pl-12">
-            <h4 className="font-mono text-[10px] font-light tracking-[0.2em] uppercase text-white/50 mb-8">
+          <div className="md:col-span-4 md:border-l md:border-white/[0.08] md:pl-10 lg:col-span-4 lg:pl-12">
+            <h4 className="mb-8 font-mono text-[10px] font-light uppercase tracking-[0.2em] text-white/50">
               Servicios
             </h4>
             <ul className="space-y-5" role="list">
               {SERVICES.map((service, index) => (
                 <li
                   key={service}
-                  className="flex items-baseline gap-4 text-sm md:text-base font-light tracking-wide text-white/50"
+                  className="flex items-baseline gap-4 text-sm font-light tracking-wide text-white/50 md:text-base"
                 >
                   <span
-                    className="font-mono text-[10px] tracking-[0.15em] uppercase text-white/25 shrink-0"
+                    className="shrink-0 font-mono text-[10px] uppercase tracking-[0.15em] text-white/25"
                     aria-hidden
                   >
                     {String(index + 1).padStart(2, "0")}
@@ -125,16 +126,16 @@ export const Footer = () => {
           </div>
         </div>
 
-        <div className="pt-10 flex flex-col md:flex-row justify-between items-center gap-6">
-          <p className="font-mono text-[10px] tracking-[0.2em] uppercase font-light text-white/25 text-center md:text-left">
+        <div className="flex flex-col items-center justify-between gap-6 pt-10 md:flex-row">
+          <p className="text-center font-mono text-[10px] font-light uppercase tracking-[0.2em] text-white/25 md:text-left">
             © {currentYear} Patrick Ordoñez. Todos los derechos reservados.
           </p>
-          <p className="font-mono text-[10px] tracking-[0.2em] uppercase font-light text-white/25">
+          <p className="font-mono text-[10px] font-light uppercase tracking-[0.2em] text-white/25">
             Hecho con React
           </p>
         </div>
-      </div>
-    </div>
+      </ExpandedContentPanel>
+    </ExpandedSection>
   );
 };
 

@@ -1,4 +1,5 @@
-import React from "react";
+import { ExpandedContentPanel, ExpandedSection } from "./expanded/ExpandedSection";
+import { ExperienceSectionDecor } from "./expanded/SectionDecors";
 
 const SECTION_INDEX = "[ 02 ]";
 
@@ -37,40 +38,16 @@ const FORMATION = [
 
 export const Experience = () => {
   return (
-    <section
+    <ExpandedSection
       id="experience"
-      className="py-32 lg:py-48 bg-black text-[#F0F0F0] font-sans border-t border-white/[0.08] relative overflow-hidden"
+      decor={<ExperienceSectionDecor />}
+      index={SECTION_INDEX}
+      overline={COPY.overline}
+      title={COPY.title}
+      accent={COPY.accent}
     >
-      <div
-        className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-20"
-        style={{ backgroundImage: "url('/newbackimage.jpg')" }}
-        aria-hidden
-      />
-
-      <div className="max-w-7xl mx-auto px-8 md:px-16 lg:px-24 relative z-10">
-        <header className="mb-20 md:mb-28 lg:mb-32">
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-8 md:mb-10">
-            <span className="font-mono text-[10px] md:text-xs font-light tracking-[0.25em] uppercase text-white/50">
-              {SECTION_INDEX}
-            </span>
-            <span className="text-[10px] md:text-xs font-light tracking-[0.25em] uppercase text-white/50">
-              {COPY.overline}
-            </span>
-          </div>
-
-          <h2 className="text-4xl md:text-6xl lg:text-7xl font-light tracking-[-0.02em] text-[#F0F0F0] leading-[1.05] uppercase">
-            {COPY.title}
-            <br />
-            <span className="font-medium text-white/50">{COPY.accent}</span>
-          </h2>
-
-          <div
-            className="w-8 md:w-12 h-px bg-white/[0.08] mt-8 md:mt-10"
-            aria-hidden
-          />
-        </header>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-0 md:gap-8 lg:gap-12">
+      <ExpandedContentPanel>
+        <div className="grid grid-cols-1 gap-0 md:grid-cols-3 md:gap-8 lg:gap-12">
           {FORMATION.map((item, index) => (
             <article
               key={item.id}
@@ -78,37 +55,37 @@ export const Experience = () => {
                 index > 0 ? "md:border-l md:border-white/[0.08] md:pl-8 lg:pl-12" : ""
               }`}
             >
-              <div className="flex items-baseline justify-between gap-4 mb-6 md:mb-8">
-                <span className="font-mono text-[10px] md:text-xs font-light tracking-[0.2em] uppercase text-white/50 transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:text-white/80">
+              <div className="mb-6 flex items-baseline justify-between gap-4 md:mb-8">
+                <span className="font-mono text-[10px] font-light uppercase tracking-[0.2em] text-white/50 transition-colors duration-500 group-hover:text-white/80 md:text-xs">
                   {item.id}
                 </span>
-                <span className="font-mono text-[10px] md:text-xs font-light tracking-[0.15em] uppercase text-white/25">
+                <span className="font-mono text-[10px] font-light uppercase tracking-[0.15em] text-white/25 md:text-xs">
                   {item.period}
                 </span>
               </div>
 
-              <h3 className="text-xl md:text-2xl font-light tracking-wide text-[#F0F0F0] mb-3 leading-snug transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:text-white">
+              <h3 className="mb-3 text-xl font-light leading-snug tracking-wide text-[#F0F0F0] transition-colors duration-500 group-hover:text-white md:text-2xl">
                 {item.title}
                 <span
-                  className="inline-block ml-2 opacity-0 -translate-x-1 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:opacity-100 group-hover:translate-x-0 text-white/50"
+                  className="ml-2 inline-block -translate-x-1 text-white/50 opacity-0 transition-all duration-500 group-hover:translate-x-0 group-hover:opacity-100"
                   aria-hidden
                 >
                   →
                 </span>
               </h3>
 
-              <p className="text-[10px] md:text-xs font-light tracking-[0.2em] uppercase text-white/50 mb-6 md:mb-8">
+              <p className="mb-6 text-[10px] font-light uppercase tracking-[0.2em] text-white/50 md:mb-8 md:text-xs">
                 {item.institution}
               </p>
 
-              <p className="text-sm md:text-base font-light text-white/50 leading-[1.75] tracking-wide transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:text-white/70">
+              <p className="text-sm font-light leading-[1.75] tracking-wide text-white/50 transition-colors duration-500 group-hover:text-white/70 md:text-base">
                 {item.description}
               </p>
             </article>
           ))}
         </div>
-      </div>
-    </section>
+      </ExpandedContentPanel>
+    </ExpandedSection>
   );
 };
 

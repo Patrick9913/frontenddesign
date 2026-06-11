@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState, type ChangeEvent, type FormEvent } from "react";
 import emailjs from "@emailjs/browser";
+import { ExpandedContentPanel, ExpandedSection } from "./expanded/ExpandedSection";
+import { ContactSectionDecor } from "./expanded/SectionDecors";
 
 const SECTION_INDEX = "[ 05 ]";
 
@@ -52,10 +54,10 @@ const FORM_FIELDS = [
 ] as const;
 
 const inputClassName =
-  "w-full bg-transparent border-0 border-b border-white/[0.08] pb-4 text-[#F0F0F0] font-light text-sm md:text-base focus:outline-none focus:border-white/40 transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] placeholder:text-white/25 rounded-none";
+  "w-full rounded-none border-0 border-b border-white/[0.08] bg-transparent pb-4 text-sm font-light text-[#F0F0F0] transition-colors duration-500 placeholder:text-white/25 focus:border-white/40 focus:outline-none md:text-base";
 
 const labelClassName =
-  "block font-mono text-[10px] font-light tracking-[0.2em] uppercase text-white/50 mb-3";
+  "mb-3 block font-mono text-[10px] font-light uppercase tracking-[0.2em] text-white/50";
 
 export const Contact = () => {
   const [formData, setFormData] = useState({
@@ -68,14 +70,14 @@ export const Contact = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle");
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setSubmitStatus("idle");
@@ -85,13 +87,18 @@ export const Contact = () => {
       const templateId = "template_xf807za";
       const publicKey = "nIzwTNQpr1_X4EE_q";
 
-      await emailjs.send(serviceId, templateId, {
-        from_name: formData.name,
-        from_email: formData.email,
-        subject: formData.subject,
-        message: formData.message,
-        to_email: "patrickyoel13@gmail.com",
-      }, publicKey);
+      await emailjs.send(
+        serviceId,
+        templateId,
+        {
+          from_name: formData.name,
+          from_email: formData.email,
+          subject: formData.subject,
+          message: formData.message,
+          to_email: "patrickyoel13@gmail.com",
+        },
+        publicKey
+      );
 
       setSubmitStatus("success");
       setFormData({ name: "", email: "", subject: "", message: "" });
@@ -106,64 +113,43 @@ export const Contact = () => {
   };
 
   return (
-    <section
+    <ExpandedSection
       id="contact"
-      className="py-32 lg:py-48 bg-black text-[#F0F0F0] font-sans border-t border-white/[0.08]"
+      decor={<ContactSectionDecor />}
+      index={SECTION_INDEX}
+      overline={COPY.overline}
+      title={COPY.title}
+      accent={COPY.accent}
+      lead={COPY.lead}
     >
-      <div className="max-w-7xl mx-auto px-8 md:px-16 lg:px-24">
-        <header className="mb-16 md:mb-20 lg:mb-24">
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-8 md:mb-10">
-            <span className="font-mono text-[10px] md:text-xs font-light tracking-[0.25em] uppercase text-white/50">
-              {SECTION_INDEX}
-            </span>
-            <span className="text-[10px] md:text-xs font-light tracking-[0.25em] uppercase text-white/50">
-              {COPY.overline}
-            </span>
-          </div>
-
-          <h2 className="text-4xl md:text-6xl lg:text-7xl font-light tracking-[-0.02em] text-[#F0F0F0] leading-[1.05] uppercase">
-            {COPY.title}
-            <br />
-            <span className="font-medium text-white/50">{COPY.accent}</span>
-          </h2>
-
-          <div className="w-8 md:w-12 h-px bg-white/[0.08] mt-8 md:mt-10" aria-hidden />
-
-          <p className="mt-10 md:mt-12 text-sm md:text-base font-light text-white/50 leading-[1.75] tracking-wide max-w-xl">
-            {COPY.lead}
-          </p>
-        </header>
-
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-20 xl:gap-24 border-t border-white/[0.08] pt-12 md:pt-16">
-          {/* Información de contacto */}
-          <div className="lg:col-span-5 flex flex-col gap-10 md:gap-12">
+      <div className="grid grid-cols-1 gap-16 lg:grid-cols-12 lg:gap-20 xl:gap-24">
+        <ExpandedContentPanel className="lg:col-span-5">
+          <div className="flex flex-col gap-10 md:gap-12">
             {CONTACT_DETAILS.map((item) => (
               <div key={item.id} className="border-t border-white/[0.08] pt-8 first:border-t-0 first:pt-0">
-                <div className="flex items-baseline gap-4 mb-3">
-                  <span className="font-mono text-[10px] font-light tracking-[0.2em] uppercase text-white/50">
+                <div className="mb-3 flex items-baseline gap-4">
+                  <span className="font-mono text-[10px] font-light uppercase tracking-[0.2em] text-white/50">
                     {item.id}
                   </span>
-                  <h3 className="text-[10px] md:text-xs font-light tracking-[0.2em] uppercase text-white/50">
+                  <h3 className="text-[10px] font-light uppercase tracking-[0.2em] text-white/50 md:text-xs">
                     {item.label}
                   </h3>
                 </div>
                 {item.href ? (
                   <a
                     href={item.href}
-                    className="text-sm md:text-base font-light text-white/50 tracking-wide transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:text-[#F0F0F0]"
+                    className="text-sm font-light tracking-wide text-white/50 transition-colors duration-500 hover:text-[#F0F0F0] md:text-base"
                   >
                     {item.value}
                   </a>
                 ) : (
-                  <p className="text-sm md:text-base font-light text-white/50 tracking-wide">
-                    {item.value}
-                  </p>
+                  <p className="text-sm font-light tracking-wide text-white/50 md:text-base">{item.value}</p>
                 )}
               </div>
             ))}
 
             <div className="border-t border-white/[0.08] pt-8">
-              <h3 className="text-[10px] md:text-xs font-light tracking-[0.2em] uppercase text-white/50 mb-6">
+              <h3 className="mb-6 text-[10px] font-light uppercase tracking-[0.2em] text-white/50 md:text-xs">
                 Redes
               </h3>
               <nav className="flex flex-wrap gap-6" aria-label="Redes sociales">
@@ -173,7 +159,7 @@ export const Contact = () => {
                     href={link.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="font-mono text-[10px] md:text-xs font-light tracking-[0.15em] uppercase text-white/40 transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:text-[#F0F0F0]"
+                    className="font-mono text-[10px] font-light uppercase tracking-[0.15em] text-white/40 transition-colors duration-500 hover:text-[#F0F0F0] md:text-xs"
                   >
                     {link.label}
                   </a>
@@ -181,93 +167,92 @@ export const Contact = () => {
               </nav>
             </div>
           </div>
+        </ExpandedContentPanel>
 
-          {/* Formulario */}
-          <div className="lg:col-span-6 lg:col-start-7 border-t lg:border-t-0 lg:border-l border-white/[0.08] lg:pl-12 xl:pl-16 pt-12 lg:pt-0">
-            <form onSubmit={handleSubmit} className="flex flex-col gap-10 md:gap-12" noValidate>
-              {FORM_FIELDS.map((field) => (
-                <div key={field.id}>
-                  <label htmlFor={field.id} className={labelClassName}>
-                    {field.label}
-                  </label>
-                  <input
-                    type={field.type}
-                    id={field.id}
-                    name={field.name}
-                    required
-                    value={formData[field.name as keyof typeof formData]}
-                    onChange={handleChange}
-                    className={inputClassName}
-                    placeholder={field.placeholder}
-                  />
-                </div>
-              ))}
-
-              <div>
-                <label htmlFor="message" className={labelClassName}>
-                  Mensaje
+        <ExpandedContentPanel className="lg:col-span-6 lg:col-start-7 lg:border-l lg:pl-12 xl:pl-16">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-10 md:gap-12" noValidate>
+            {FORM_FIELDS.map((field) => (
+              <div key={field.id}>
+                <label htmlFor={field.id} className={labelClassName}>
+                  {field.label}
                 </label>
-                <textarea
-                  id="message"
-                  name="message"
+                <input
+                  type={field.type}
+                  id={field.id}
+                  name={field.name}
                   required
-                  rows={4}
-                  value={formData.message}
+                  value={formData[field.name as keyof typeof formData]}
                   onChange={handleChange}
-                  className={`${inputClassName} resize-none min-h-[120px]`}
-                  placeholder="Contame sobre tu proyecto..."
+                  className={inputClassName}
+                  placeholder={field.placeholder}
                 />
               </div>
+            ))}
 
-              {submitStatus === "success" && (
-                <p
-                  className="font-mono text-[10px] font-light tracking-[0.15em] uppercase text-[#F0F0F0]"
-                  role="status"
-                >
-                  Mensaje enviado exitosamente.
-                </p>
-              )}
-              {submitStatus === "error" && (
-                <p
-                  className="font-mono text-[10px] font-light tracking-[0.15em] uppercase text-white/50"
-                  role="alert"
-                >
-                  Ocurrió un error al enviar. Intentá de nuevo o escribime por email.
-                </p>
-              )}
+            <div>
+              <label htmlFor="message" className={labelClassName}>
+                Mensaje
+              </label>
+              <textarea
+                id="message"
+                name="message"
+                required
+                rows={4}
+                value={formData.message}
+                onChange={handleChange}
+                className={`${inputClassName} min-h-[120px] resize-none`}
+                placeholder="Contame sobre tu proyecto..."
+              />
+            </div>
 
-              <div className="pt-4 border-t border-white/[0.08]">
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="group inline-flex w-fit items-center gap-4 px-8 py-4 bg-[#F0F0F0] text-black text-[10px] md:text-xs font-medium tracking-[0.2em] uppercase rounded-none transition-opacity duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <span
-                        className="inline-block w-3 h-3 border border-black/20 border-t-black rounded-full animate-spin"
-                        aria-hidden
-                      />
-                      Enviando
-                    </>
-                  ) : (
-                    <>
-                      Enviar mensaje
-                      <span
-                        className="text-base transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1"
-                        aria-hidden
-                      >
-                        →
-                      </span>
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+            {submitStatus === "success" ? (
+              <p
+                className="font-mono text-[10px] font-light uppercase tracking-[0.15em] text-[#F0F0F0]"
+                role="status"
+              >
+                Mensaje enviado exitosamente.
+              </p>
+            ) : null}
+            {submitStatus === "error" ? (
+              <p
+                className="font-mono text-[10px] font-light uppercase tracking-[0.15em] text-white/50"
+                role="alert"
+              >
+                Ocurrió un error al enviar. Intentá de nuevo o escribime por email.
+              </p>
+            ) : null}
+
+            <div className="border-t border-white/[0.08] pt-4">
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="group inline-flex w-fit items-center gap-4 bg-[#F0F0F0] px-8 py-4 text-[10px] font-medium uppercase tracking-[0.2em] text-black transition-opacity duration-500 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 md:text-xs"
+              >
+                {isSubmitting ? (
+                  <>
+                    <span
+                      className="inline-block h-3 w-3 animate-spin rounded-full border border-black/20 border-t-black"
+                      aria-hidden
+                    />
+                    Enviando
+                  </>
+                ) : (
+                  <>
+                    Enviar mensaje
+                    <span
+                      className="text-base transition-transform duration-500 group-hover:translate-x-1"
+                      aria-hidden
+                    >
+                      →
+                    </span>
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+        </ExpandedContentPanel>
       </div>
-    </section>
+    </ExpandedSection>
   );
 };
 

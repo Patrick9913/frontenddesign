@@ -691,6 +691,36 @@ body {
   --constellation-py: var(--panel-py, 0);
 }
 
+/* Constelación solo a la derecha — el título queda libre a la izquierda */
+.skills-constellation-clip {
+  position: absolute;
+  top: -6%;
+  right: -10%;
+  bottom: -6%;
+  width: 72%;
+  overflow: hidden;
+  pointer-events: auto;
+  z-index: 1;
+}
+
+/* En placas CSS3D el texto debe ir delante de la órbita en profundidad */
+.three-card-dom .skills-constellation-preview .panel-preview-parallax-stage {
+  position: relative;
+  z-index: 12;
+  transform: translateZ(140px);
+  transform-style: flat;
+}
+
+.three-card-dom .skills-constellation-preview .panel-preview-layer--ui {
+  position: relative;
+  z-index: 12;
+  transform: translateZ(150px);
+}
+
+.three-card-dom .skills-constellation-clip {
+  transform: translateZ(20px);
+}
+
 .constellation-parallax-wrap {
   transform: translate3d(
     calc(var(--constellation-px) * 14px),
@@ -821,10 +851,6 @@ body {
   background: rgba(255, 255, 255, 0.55);
 }
 
-.constellation-copy {
-  transform: translate3d(calc(var(--constellation-px) * -6px), calc(var(--constellation-py) * 4px), 0);
-  pointer-events: none;
-}
 
 @keyframes constellation-spin {
   from {
@@ -845,6 +871,125 @@ body {
     opacity: 1;
     transform: translate(-50%, -50%) scale(1.15);
   }
+}
+
+/* --- Vistas expandidas (mismo lenguaje que paneles 3D) --- */
+.expanded-section {
+  min-height: 100%;
+}
+
+.expanded-content-panel {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.expanded-tech-tag {
+  display: inline-block;
+  padding: 0.4rem 0.65rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(5, 5, 5, 0.72);
+  font-family: ui-monospace, monospace;
+  font-size: 10px;
+  font-weight: 300;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.42);
+  backdrop-filter: blur(4px);
+  transition: color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+}
+
+.expanded-tech-tag:hover {
+  color: rgba(255, 255, 255, 0.85);
+  border-color: rgba(255, 255, 255, 0.22);
+  box-shadow: 0 0 16px rgba(255, 255, 255, 0.08);
+}
+
+.skills-constellation-field {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.skills-constellation-field--expanded .constellation-ring,
+.skills-constellation-field--expanded .constellation-core {
+  top: 50%;
+}
+
+.skills-constellation-field--expanded .constellation-ring--inner .constellation-node {
+  --ring-radius: clamp(96px, 16vw, 150px);
+}
+
+.skills-constellation-field--expanded .constellation-ring--mid .constellation-node {
+  --ring-radius: clamp(132px, 22vw, 210px);
+}
+
+.skills-constellation-field--expanded .constellation-ring--outer .constellation-node {
+  --ring-radius: clamp(168px, 28vw, 270px);
+}
+
+.skills-constellation-field--expanded .constellation-node-label {
+  font-size: 10px;
+  padding: 0.45rem 0.7rem;
+}
+
+.expanded-project-frame.projects-panel-window {
+  position: relative;
+  inset: auto;
+  transform: none;
+  animation: none;
+  opacity: 1;
+}
+
+.expanded-decor-about-venn {
+  right: 4%;
+  top: 10%;
+  width: min(44vw, 460px);
+  height: min(36vw, 380px);
+}
+
+.expanded-decor-about-wire {
+  opacity: 0.045;
+}
+
+.expanded-decor-experience-timeline {
+  right: 4%;
+  top: 12%;
+  bottom: 10%;
+  width: min(28vw, 280px);
+}
+
+.expanded-decor-projects-stack {
+  right: 3%;
+  top: 14%;
+  width: min(36vw, 380px);
+  height: min(32vw, 340px);
+  opacity: 0.55;
+}
+
+.expanded-decor-contact-radar {
+  right: 2%;
+  top: 16%;
+  width: min(34vw, 360px);
+}
+
+.expanded-decor-contact-terminal {
+  left: 6%;
+  bottom: 14%;
+}
+
+.expanded-decor-footer-watermark {
+  right: -2%;
+  top: 6%;
+}
+
+.expanded-decor-footer-orbit {
+  right: 8%;
+  top: 28%;
+  width: min(30vw, 320px);
+}
+
+.expanded-view {
+  background: linear-gradient(180deg, rgba(5, 5, 5, 0.98) 0%, rgba(0, 0, 0, 0.99) 100%);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -879,7 +1024,9 @@ body {
   .panel-preview-layer--ui,
   .constellation-parallax-wrap,
   .constellation-field,
-  .constellation-copy,
+  .three-card-dom .skills-constellation-preview .panel-preview-parallax-stage,
+  .three-card-dom .skills-constellation-preview .panel-preview-layer--ui,
+  .three-card-dom .skills-constellation-clip,
   .about-panel-venn,
   .about-panel-orbit--code,
   .about-panel-orbit--design,

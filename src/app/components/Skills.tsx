@@ -1,4 +1,5 @@
-import React from "react";
+import { ExpandedContentPanel, ExpandedSection } from "./expanded/ExpandedSection";
+import { SkillsConstellationField } from "./skills/SkillsConstellationField";
 
 const SECTION_INDEX = "[ 03 ]";
 
@@ -7,7 +8,7 @@ const COPY = {
   title: "STACK",
   accent: "TÉCNICO",
   lead:
-    "Especializado en el ecosistema React moderno. Combino tecnologías sólidas con diseño meticuloso para construir interfaces fluidas, escalables y visualmente excepcionales. El rendimiento y la atención al detalle guían cada línea de código.",
+    "Especializado en el ecosistema React moderno. Combino tecnologías sólidas con diseño meticuloso para construir interfaces fluidas, escalables y visualmente excepcionales.",
 } as const;
 
 const TECHNOLOGIES_BY_AREA = [
@@ -42,7 +43,7 @@ const TECHNOLOGIES_BY_AREA = [
 ] as const;
 
 const renderCategoryIcon = (icon: string) => {
-  const iconClass = "w-5 h-5 stroke-current";
+  const iconClass = "h-5 w-5 stroke-current";
 
   if (icon === "frontend") {
     return (
@@ -80,74 +81,57 @@ const renderCategoryIcon = (icon: string) => {
 
 export const Skills = () => {
   return (
-    <section
+    <ExpandedSection
       id="skills"
-      className="py-32 lg:py-48 bg-black text-[#F0F0F0] font-sans border-t border-white/[0.08]"
+      index={SECTION_INDEX}
+      overline={COPY.overline}
+      title={COPY.title}
+      accent={COPY.accent}
+      lead={COPY.lead}
     >
-      <div className="max-w-7xl mx-auto px-8 md:px-16 lg:px-24">
-        <header className="mb-16 md:mb-20 lg:mb-24">
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-8 md:mb-10">
-            <span className="font-mono text-[10px] md:text-xs font-light tracking-[0.25em] uppercase text-white/50">
-              {SECTION_INDEX}
-            </span>
-            <span className="text-[10px] md:text-xs font-light tracking-[0.25em] uppercase text-white/50">
-              {COPY.overline}
-            </span>
-          </div>
+      <div className="relative mb-12 h-[min(46vh,400px)] overflow-hidden border border-white/[0.08] bg-black/40 md:mb-16">
+        <SkillsConstellationField variant="expanded" className="absolute inset-0" />
+      </div>
 
-          <h2 className="text-4xl md:text-6xl lg:text-7xl font-light tracking-[-0.02em] text-[#F0F0F0] leading-[1.05] uppercase">
-            {COPY.title}
-            <br />
-            <span className="font-medium text-white/50">{COPY.accent}</span>
-          </h2>
-
-          <div className="w-8 md:w-12 h-px bg-white/[0.08] mt-8 md:mt-10" aria-hidden />
-
-          <p className="mt-10 md:mt-12 text-sm md:text-base font-light text-white/50 leading-[1.75] tracking-wide max-w-2xl">
-            {COPY.lead}
-          </p>
-        </header>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 lg:gap-x-12 xl:gap-x-16">
+      <ExpandedContentPanel>
+        <div className="grid grid-cols-1 gap-0 lg:grid-cols-2 lg:gap-x-12 xl:gap-x-16">
           {TECHNOLOGIES_BY_AREA.map((group, index) => (
             <article
               key={group.id}
               className={`group border-t border-white/[0.08] py-10 md:py-12 ${
                 index % 2 === 1 ? "lg:border-l lg:border-white/[0.08] lg:pl-12 xl:pl-16" : ""
-              } ${index >= 2 ? "lg:mt-0" : ""}`}
+              }`}
             >
-              <div className="flex items-start justify-between gap-6 mb-6">
-                <div className="flex items-baseline gap-4 min-w-0">
-                  <span className="shrink-0 font-mono text-[10px] font-light tracking-[0.2em] uppercase text-white/50">
+              <div className="mb-6 flex items-start justify-between gap-6">
+                <div className="flex min-w-0 items-baseline gap-4">
+                  <span className="shrink-0 font-mono text-[10px] font-light uppercase tracking-[0.2em] text-white/50">
                     {group.id}
                   </span>
-                  <h3 className="text-lg md:text-xl font-light tracking-wide text-[#F0F0F0] uppercase transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:text-white">
+                  <h3 className="text-lg font-light uppercase tracking-wide text-[#F0F0F0] transition-colors duration-500 group-hover:text-white md:text-xl">
                     {group.area}
                   </h3>
                 </div>
-                <span className="shrink-0 text-white/40 transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:text-white/60">
+                <span className="shrink-0 text-white/40 transition-colors duration-500 group-hover:text-white/60">
                   {renderCategoryIcon(group.icon)}
                 </span>
               </div>
 
-              <p className="text-sm font-light text-white/50 leading-[1.75] tracking-wide mb-8 max-w-md">
+              <p className="mb-8 max-w-md text-sm font-light leading-[1.75] tracking-wide text-white/50">
                 {group.description}
               </p>
 
               <ul className="flex flex-wrap gap-x-4 gap-y-3" role="list">
                 {group.techs.map((tech) => (
                   <li key={tech}>
-                    <span className="inline-block text-[10px] md:text-xs font-mono font-light tracking-[0.15em] uppercase text-white/40 border border-white/[0.08] px-3 py-2 transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:text-[#F0F0F0] hover:border-white/20">
-                      {tech}
-                    </span>
+                    <span className="expanded-tech-tag">{tech}</span>
                   </li>
                 ))}
               </ul>
             </article>
           ))}
         </div>
-      </div>
-    </section>
+      </ExpandedContentPanel>
+    </ExpandedSection>
   );
 };
 
