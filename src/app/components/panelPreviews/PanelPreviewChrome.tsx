@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { FiArrowUpRight } from "react-icons/fi";
 
 type PanelPreviewChromeProps = {
   rootClass: string;
@@ -17,7 +18,7 @@ export function PanelPreviewFooter() {
         CLIC PARA AMPLIAR HOJA
       </span>
       <div className="flex h-12 w-12 items-center justify-center border border-white/10 bg-white/5">
-        <span className="text-base text-white">↗</span>
+        <FiArrowUpRight className="h-5 w-5 text-white" />
       </div>
     </div>
   );

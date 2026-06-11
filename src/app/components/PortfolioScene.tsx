@@ -12,6 +12,8 @@ import {
 import { CARDS } from "./cardStackData";
 import { SECTION_CONFIGS } from "./sectionConfigs";
 import { IoMdClose } from "react-icons/io";
+import { Navbar } from "./Navbar";
+
 
 interface PortfolioSceneProps {
   setActiveSection: (index: number) => void;
@@ -413,6 +415,17 @@ export const PortfolioScene = ({
 }: PortfolioSceneProps) => {
   const [activeCardIndex, setActiveCardIndex] = useState(0);
   const [cardsDomReady, setCardsDomReady] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
 
   const bgContainerRef = useRef<HTMLDivElement>(null);
   const cardContainerRef = useRef<HTMLDivElement>(null);
@@ -446,19 +459,28 @@ export const PortfolioScene = ({
       const index = CARDS.findIndex((c) => c.id === sectionId);
       if (index === -1) return;
 
-      const scrollY = stackIndexToScrollY(index, stackContainerRef.current, window.innerHeight);
-      window.scrollTo({ top: scrollY, behavior: "smooth" });
-
-      if (sectionId !== "hero") {
-        setTimeout(() => setExpandedCardId(sectionId), 600);
+      if (isMobile) {
+        if (sectionId !== "hero") {
+          setExpandedCardId(sectionId);
+        } else {
+          setExpandedCardId(null);
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }
       } else {
-        setExpandedCardId(null);
+        const scrollY = stackIndexToScrollY(index, stackContainerRef.current, window.innerHeight);
+        window.scrollTo({ top: scrollY, behavior: "smooth" });
+
+        if (sectionId !== "hero") {
+          setTimeout(() => setExpandedCardId(sectionId), 600);
+        } else {
+          setExpandedCardId(null);
+        }
       }
     };
 
     window.addEventListener("nav-to-section", handleNav);
     return () => window.removeEventListener("nav-to-section", handleNav);
-  }, [setExpandedCardId]);
+  }, [setExpandedCardId, isMobile]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -476,7 +498,7 @@ export const PortfolioScene = ({
   }, [expandedCardId]);
 
   useEffect(() => {
-    if (!cardsDomReady) return;
+    if (isMobile || !cardsDomReady) return;
 
     const bgContainer = bgContainerRef.current;
     const cardContainer = cardContainerRef.current;
@@ -817,7 +839,7 @@ export const PortfolioScene = ({
       });
       rigsRef.current = [];
     };
-  }, [cardsDomReady, setExpandedCardId]);
+  }, [cardsDomReady, setExpandedCardId, isMobile]);
 
   const activeCard = expandedCardId ? CARDS.find((c) => c.id === expandedCardId) : null;
 
@@ -832,7 +854,7 @@ export const PortfolioScene = ({
 
   return (
     <>
-      {!expandedCardId ? (
+      {!expandedCardId && !isMobile ? (
         <div
           className="fixed top-5 right-5 md:top-6 md:right-8 z-[100] pointer-events-none select-none font-mono text-[10px] tracking-[0.2em] text-white/45 tabular-nums"
           aria-live="polite"
@@ -842,6 +864,12 @@ export const PortfolioScene = ({
         </div>
       ) : null}
 
+      {isMobile && !expandedCardId && (
+        <div className="fixed top-0 left-0 right-0 z-[100] bg-black/45 backdrop-blur-md border-b border-white/[0.04]">
+          <Navbar />
+        </div>
+      )}
+
       <div ref={bgContainerRef} className="fixed inset-0 z-0 pointer-events-none" aria-hidden />
 
       <div
@@ -850,16 +878,39 @@ export const PortfolioScene = ({
         aria-hidden
       />
 
-      {/* Track de scroll: 7 segmentos iguales (~14.29% cada uno) */}
-      <div
-        ref={stackContainerRef}
-        className="card-stack-container max-w-5xl mx-auto px-4 md:px-8 mt-4 relative z-[1]"
-        aria-hidden
-      >
-        {CARDS.map((card) => (
-          <div key={card.id} className="card-scroll-segment" />
-        ))}
-      </div>
+      {isMobile ? (
+        <div className="mobile-portfolio-view relative z-10">
+          {CARDS.map((card) => (
+            <div
+              key={card.id}
+              onClick={() => handleCardClick(card.id)}
+              className="mobile-card-item cursor-pointer overflow-hidden border border-white/[0.08] bg-[#050505]"
+              role="button"
+              tabIndex={0}
+              aria-label={`Abrir ${card.label}`}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  handleCardClick(card.id);
+                }
+              }}
+            >
+              <CardPanelContent card={card} />
+            </div>
+          ))}
+        </div>
+      ) : (
+        /* Track de scroll: 7 segmentos iguales (~14.29% cada uno) */
+        <div
+          ref={stackContainerRef}
+          className="card-stack-container max-w-5xl mx-auto px-4 md:px-8 mt-4 relative z-[1]"
+          aria-hidden
+        >
+          {CARDS.map((card) => (
+            <div key={card.id} className="card-scroll-segment" />
+          ))}
+        </div>
+      )}
 
       <div className="fixed -left-[200vw] top-0 w-0 h-0 overflow-visible pointer-events-none" aria-hidden>
         {CARDS.map((card, index) => (
