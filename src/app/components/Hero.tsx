@@ -120,7 +120,7 @@ export const Hero = () => {
       </div>
 
       <div
-        className="relative z-10 w-full h-px bg-white/[0.08]"
+        className="relative z-10 w-full h-px bg-white/[0.08] hidden lg:block"
         aria-hidden
       />
     </section>
