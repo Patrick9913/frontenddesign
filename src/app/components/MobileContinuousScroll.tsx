@@ -87,7 +87,7 @@ export const MobileContinuousScroll: React.FC<MobileContinuousScrollProps> = ({
                   : "min-h-[85vh]"
               }`}
               style={{
-                backgroundColor: isHero ? "transparent" : "#050505",
+                backgroundColor: "#050505",
               }}
             >
               {!isHero && (
