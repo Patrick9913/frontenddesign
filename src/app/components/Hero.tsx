@@ -40,7 +40,7 @@ export const Hero = () => {
           <div className="lg:col-span-7 xl:col-span-12 flex flex-col">
             <header className="mb-8 md:mb-10">
               <div className="mb-6 md:mb-8">
-                <span className="font-mono text-[10px] md:text-xs font-light tracking-[0.25em] uppercase text-white/50">
+                <span className="font-mono text-xs font-light tracking-[0.25em] uppercase text-white/50">
                   {SECTION_INDEX}
                 </span>
               </div>
@@ -54,14 +54,14 @@ export const Hero = () => {
               <div className="w-8 md:w-12 h-px bg-white/[0.08]" aria-hidden />
             </header>
 
-            <p className="text-sm md:text-base font-light text-white/50 leading-[1.75] tracking-wide max-w-xl mb-10 md:mb-14">
+            <p className="text-base md:text-lg font-light text-white/50 leading-[1.75] tracking-wide max-w-xl mb-10 md:mb-14">
               {COPY.body}
             </p>
 
-            <div className="flex flex-col sm:flex-row sm:items-center sm:hidden gap-4 sm:gap-6 pt-6 border-t border-white/[0.08]">
+            <div className="flex flex-col sm:flex-row sm:items-center xl:hidden gap-4 sm:gap-6 pt-6 border-t border-white/[0.08]">
               <a
                 href="#projects"
-                className="group inline-flex w-fit items-center gap-4 px-8 py-4 bg-[#F0F0F0] text-black text-[10px] md:text-xs font-medium tracking-[0.2em] uppercase rounded-none transition-opacity duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:opacity-90"
+                className="group inline-flex w-full sm:w-fit items-center justify-center gap-4 px-8 py-5 min-h-[44px] bg-[#F0F0F0] text-black text-xs font-medium tracking-[0.2em] uppercase rounded-none transition-opacity duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:opacity-90"
               >
                 Explorar Proyectos
                 <span
@@ -74,7 +74,7 @@ export const Hero = () => {
 
               <a
                 href="#contact"
-                className="inline-flex w-fit items-center gap-4 px-8 py-4 border border-white/20 bg-transparent text-[10px] md:text-xs font-light tracking-[0.2em] uppercase text-white/50 rounded-none transition-[color,border-color] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:text-[#F0F0F0] hover:border-white/40"
+                className="inline-flex w-full sm:w-fit items-center justify-center gap-4 px-8 py-5 min-h-[44px] border border-white/20 bg-transparent text-xs font-light tracking-[0.2em] uppercase text-white/50 rounded-none transition-[color,border-color] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:text-[#F0F0F0] hover:border-white/40"
               >
                 Contactar
                 <span className="text-base" aria-hidden>
@@ -97,7 +97,7 @@ export const Hero = () => {
                   {...(link.external
                     ? { target: "_blank", rel: "noopener noreferrer" }
                     : {})}
-                  className="font-mono text-[10px] md:text-xs font-light tracking-[0.2em] uppercase text-white/40 transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:text-[#F0F0F0]"
+                  className="font-mono text-xs font-light tracking-[0.2em] uppercase text-white/40 transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:text-[#F0F0F0] min-h-[44px] flex items-center"
                 >
                   {link.label}
                 </a>

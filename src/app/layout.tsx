@@ -97,7 +97,7 @@ export default function RootLayout({
         <meta name="theme-color" content="#111827" />
         <meta name="msapplication-TileColor" content="#111827" />
         <meta name="msapplication-TileImage" content="/android-chrome-192x192.png" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{

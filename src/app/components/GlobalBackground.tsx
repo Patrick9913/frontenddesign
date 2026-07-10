@@ -162,16 +162,19 @@ export const GlobalBackground = ({ activeSection, isPaused }: GlobalBackgroundPr
     camera.position.set(initialConfig.cameraPos.x, initialConfig.cameraPos.y, initialConfig.cameraPos.z);
     camera.lookAt(initialConfig.lookAtPos.x, initialConfig.lookAtPos.y, initialConfig.lookAtPos.z);
 
+    // Detectar dispositivos móviles para reducir calidad
+    const isMobile = window.matchMedia("(max-width: 768px)").matches || isTouchPrimary;
+    
     // Optimización: precision "mediump" rinde mucho mejor en GPUS integradas y de bajos recursos
     const renderer = new THREE.WebGLRenderer({
-      antialias: true,
+      antialias: !isMobile,
       alpha: true,
-      powerPreference: "high-performance",
+      powerPreference: isMobile ? "low-power" : "high-performance",
       precision: "mediump",
     });
     renderer.setSize(container.clientWidth, container.clientHeight);
-    // Limitamos el pixel ratio máximo a 1.5 en lugar de 2 para ahorrar fill-rate en pantallas retina/HiDPI de bajos recursos
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+    // Limitamos el pixel ratio en móviles para ahorrar batería y mejorar rendimiento
+    renderer.setPixelRatio(isMobile ? 1 : Math.min(window.devicePixelRatio, 1.5));
     renderer.setClearColor(0x000000, 0);
     container.appendChild(renderer.domElement);
 
@@ -188,8 +191,8 @@ export const GlobalBackground = ({ activeSection, isPaused }: GlobalBackgroundPr
     haloRig.position.set(initialConfig.haloPos.x, initialConfig.haloPos.y, initialConfig.haloPos.z);
     scene.add(haloRig);
 
-    // Reducimos partículas levemente en computadoras lentas
-    const particleCount = prefersReducedMotion ? 30 : 100;
+    // Reducimos partículas significativamente en móviles para mejor rendimiento
+    const particleCount = isMobile ? 30 : (prefersReducedMotion ? 50 : 100);
     const particlePositions = new Float32Array(particleCount * 3);
     for (let i = 0; i < particleCount; i++) {
       particlePositions[i * 3] = (Math.random() - 0.5) * 25;
@@ -204,7 +207,7 @@ export const GlobalBackground = ({ activeSection, isPaused }: GlobalBackgroundPr
     );
     const particleMaterial = new THREE.PointsMaterial({
       color: 0xc8d4e4,
-      size: 0.035,
+      size: isMobile ? 0.05 : 0.035,
       transparent: true,
       opacity: initialConfig.particleOpacity,
       sizeAttenuation: true,

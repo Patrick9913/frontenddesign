@@ -78,7 +78,7 @@ export const Navbar: React.FC = () => {
                 </div>
 
                 {/* Espaciador en móvil: el botón real vive en portal (fixed respecto al viewport). */}
-                <div className="h-11 w-11 md:hidden" aria-hidden />
+                <div className="h-12 w-12 md:hidden" aria-hidden />
             </div>
         </nav>
 
@@ -90,7 +90,7 @@ export const Navbar: React.FC = () => {
                       {!isMenuOpen ? (
                           <button
                               type="button"
-                              className="md:hidden fixed top-5 right-5 z-[1102] flex h-11 w-11 items-center justify-center border border-white/20 bg-black/70 text-white backdrop-blur-md transition-all duration-500 ease-[cubic-bezier(0.65,0.02,0.28,1)] hover:border-white/35 hover:bg-black/85 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                              className="md:hidden fixed top-5 right-5 z-[1102] flex h-12 w-12 items-center justify-center border border-white/20 bg-black/70 text-white backdrop-blur-md transition-all duration-500 ease-[cubic-bezier(0.65,0.02,0.28,1)] hover:border-white/35 hover:bg-black/85 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                               onClick={() => setIsMenuOpen(true)}
                               aria-expanded={false}
                               aria-controls="mobile-menu-panel"
@@ -124,13 +124,13 @@ export const Navbar: React.FC = () => {
                           onClick={(e) => e.stopPropagation()}
                       >
                           <div className="flex shrink-0 items-center justify-between gap-4 border-b border-white/10 bg-black px-6 pt-6 pb-5 md:px-8">
-                              <span className="text-[9px] font-light tracking-[0.4em] uppercase text-white/40">
+                              <span className="text-[11px] font-light tracking-[0.4em] uppercase text-white/40">
                                   Navegación
                               </span>
                               <button
                                   type="button"
                                   onClick={() => setIsMenuOpen(false)}
-                                  className="flex h-10 w-10 shrink-0 items-center justify-center border border-white/20 bg-black text-white transition-all duration-300 hover:border-white/40 hover:bg-neutral-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+                                  className="flex h-11 w-11 shrink-0 items-center justify-center border border-white/20 bg-black text-white transition-all duration-300 hover:border-white/40 hover:bg-neutral-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
                                   aria-label="Cerrar menú"
                               >
                                   <IoMdClose className="h-6 w-6" aria-hidden />
@@ -148,7 +148,7 @@ export const Navbar: React.FC = () => {
                                       >
                                           <a
                                               href={item.href}
-                                              className={`block bg-black py-5 text-[10px] tracking-[0.28em] uppercase text-gray-400 transition-all duration-500 hover:pl-1 hover:text-white ${
+                                              className={`block bg-black py-6 text-xs tracking-[0.28em] uppercase text-gray-400 transition-all duration-500 hover:pl-1 hover:text-white ${
                                                   isMenuOpen
                                                       ? 'opacity-100 translate-x-0'
                                                       : 'opacity-0 translate-x-3'
@@ -167,7 +167,7 @@ export const Navbar: React.FC = () => {
                               </ul>
                           </nav>
                           <div className="mt-auto shrink-0 border-t border-white/10 bg-black px-8 py-6">
-                              <p className="text-[9px] font-light tracking-[0.25em] uppercase text-white/30">
+                              <p className="text-[11px] font-light tracking-[0.25em] uppercase text-white/30">
                                   Portfolio · {year}
                               </p>
                           </div>

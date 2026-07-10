@@ -54,10 +54,10 @@ const FORM_FIELDS = [
 ] as const;
 
 const inputClassName =
-  "w-full rounded-none border-0 border-b border-white/[0.08] bg-transparent pb-4 text-sm font-light text-[#F0F0F0] transition-colors duration-500 placeholder:text-white/25 focus:border-white/40 focus:outline-none md:text-base";
+  "w-full rounded-none border-0 border-b border-white/[0.08] bg-transparent pb-4 text-base font-light text-[#F0F0F0] transition-colors duration-500 placeholder:text-white/25 focus:border-white/40 focus:outline-none md:text-lg";
 
 const labelClassName =
-  "mb-3 block font-mono text-[10px] font-light uppercase tracking-[0.2em] text-white/50";
+  "mb-3 block font-mono text-xs font-light uppercase tracking-[0.2em] text-white/50";
 
 export const Contact = () => {
   const [formData, setFormData] = useState({
@@ -128,28 +128,28 @@ export const Contact = () => {
             {CONTACT_DETAILS.map((item) => (
               <div key={item.id} className="border-t border-white/[0.08] pt-8 first:border-t-0 first:pt-0">
                 <div className="mb-3 flex items-baseline gap-4">
-                  <span className="font-mono text-[10px] font-light uppercase tracking-[0.2em] text-white/50">
+                  <span className="font-mono text-xs font-light uppercase tracking-[0.2em] text-white/50">
                     {item.id}
                   </span>
-                  <h3 className="text-[10px] font-light uppercase tracking-[0.2em] text-white/50 md:text-xs">
+                  <h3 className="text-xs font-light uppercase tracking-[0.2em] text-white/50">
                     {item.label}
                   </h3>
                 </div>
                 {item.href ? (
                   <a
                     href={item.href}
-                    className="text-sm font-light tracking-wide text-white/50 transition-colors duration-500 hover:text-[#F0F0F0] md:text-base"
+                    className="text-base font-light tracking-wide text-white/50 transition-colors duration-500 hover:text-[#F0F0F0] md:text-lg inline-block min-h-[44px] flex items-center"
                   >
                     {item.value}
                   </a>
                 ) : (
-                  <p className="text-sm font-light tracking-wide text-white/50 md:text-base">{item.value}</p>
+                  <p className="text-base font-light tracking-wide text-white/50 md:text-lg">{item.value}</p>
                 )}
               </div>
             ))}
 
             <div className="border-t border-white/[0.08] pt-8">
-              <h3 className="mb-6 text-[10px] font-light uppercase tracking-[0.2em] text-white/50 md:text-xs">
+              <h3 className="mb-6 text-xs font-light uppercase tracking-[0.2em] text-white/50">
                 Redes
               </h3>
               <nav className="flex flex-wrap gap-6" aria-label="Redes sociales">
@@ -159,7 +159,7 @@ export const Contact = () => {
                     href={link.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="font-mono text-[10px] font-light uppercase tracking-[0.15em] text-white/40 transition-colors duration-500 hover:text-[#F0F0F0] md:text-xs"
+                    className="font-mono text-xs font-light uppercase tracking-[0.15em] text-white/40 transition-colors duration-500 hover:text-[#F0F0F0] inline-block min-h-[44px] flex items-center"
                   >
                     {link.label}
                   </a>
@@ -207,7 +207,7 @@ export const Contact = () => {
 
             {submitStatus === "success" ? (
               <p
-                className="font-mono text-[10px] font-light uppercase tracking-[0.15em] text-[#F0F0F0]"
+                className="font-mono text-xs font-light uppercase tracking-[0.15em] text-[#F0F0F0]"
                 role="status"
               >
                 Mensaje enviado exitosamente.
@@ -215,7 +215,7 @@ export const Contact = () => {
             ) : null}
             {submitStatus === "error" ? (
               <p
-                className="font-mono text-[10px] font-light uppercase tracking-[0.15em] text-white/50"
+                className="font-mono text-xs font-light uppercase tracking-[0.15em] text-white/50"
                 role="alert"
               >
                 Ocurrió un error al enviar. Intentá de nuevo o escribime por email.
@@ -226,7 +226,7 @@ export const Contact = () => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="group inline-flex w-fit items-center gap-4 bg-[#F0F0F0] px-8 py-4 text-[10px] font-medium uppercase tracking-[0.2em] text-black transition-opacity duration-500 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 md:text-xs"
+                className="group inline-flex w-full sm:w-fit items-center justify-center gap-4 bg-[#F0F0F0] px-8 py-5 min-h-[44px] text-xs font-medium uppercase tracking-[0.2em] text-black transition-opacity duration-500 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {isSubmitting ? (
                   <>
