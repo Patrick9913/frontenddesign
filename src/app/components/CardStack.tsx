@@ -246,17 +246,17 @@ export const CardStack = ({ setActiveSection, expandedCardId, setExpandedCardId 
             }}
           >
             {/* Header (Always Visible at Top when Stacked) */}
-            <header className="h-12 border-b border-white/[0.08] flex items-center justify-between px-6 bg-[#0a0a0a] select-none">
+            <header className="h-14 md:h-12 border-b border-white/[0.08] flex items-center justify-between px-6 bg-[#0a0a0a] select-none">
               <div className="flex items-center gap-4">
-                <span className="font-mono text-[10px] font-light tracking-[0.2em] text-white/45">
+                <span className="font-mono text-xs font-light tracking-[0.2em] text-white/45">
                   [ {card.index} ]
                 </span>
-                <span className="font-mono text-[10px] font-light tracking-[0.2em] uppercase text-white/75">
+                <span className="font-mono text-xs font-light tracking-[0.2em] uppercase text-white/75">
                   {card.label}
                 </span>
               </div>
               {!isHero && (
-                <span className="font-mono text-[9px] font-light tracking-[0.15em] text-white/30 uppercase group-hover:text-white/60">
+                <span className="font-mono text-[10px] font-light tracking-[0.15em] text-white/30 uppercase group-hover:text-white/60">
                   [ VER DETALLES ]
                 </span>
               )}
@@ -265,12 +265,12 @@ export const CardStack = ({ setActiveSection, expandedCardId, setExpandedCardId 
             {/* Preview Body (Only shown when not expanded) */}
             {isHero ? (
               // Hero component handles its own full display
-              <div className="h-[calc(100%-3rem)] overflow-hidden">
+              <div className="h-[calc(100%-3.5rem)] md:h-[calc(100%-3rem)] overflow-hidden">
                 <Component />
               </div>
             ) : (
               // Structured Preview layout for internal sections
-              <div className="h-[calc(100%-3rem)] flex flex-col justify-between p-8 md:p-12 text-left relative z-10 bg-gradient-to-b from-[#050505] to-[#000000]">
+              <div className="h-[calc(100%-3.5rem)] md:h-[calc(100%-3rem)] flex flex-col justify-between p-6 md:p-8 lg:p-12 text-left relative z-10 bg-gradient-to-b from-[#050505] to-[#000000]">
                 {/* Floating graphic wireframe overlay in preview for visual style */}
                 <div 
                   className="absolute right-0 bottom-0 top-0 w-1/2 opacity-[0.03] pointer-events-none bg-cover bg-right bg-no-repeat"
@@ -279,10 +279,10 @@ export const CardStack = ({ setActiveSection, expandedCardId, setExpandedCardId 
                 />
 
                 <div className="max-w-xl">
-                  <span className="font-mono text-[10px] tracking-[0.25em] uppercase text-white/30 block mb-6">
+                  <span className="font-mono text-xs tracking-[0.25em] uppercase text-white/30 block mb-6">
                     Preview
                   </span>
-                  <h2 className="text-4xl md:text-6xl font-light tracking-[-0.02em] text-[#F0F0F0] leading-[1.05] uppercase mb-4">
+                  <h2 className="text-3xl md:text-5xl lg:text-6xl font-light tracking-[-0.02em] text-[#F0F0F0] leading-[1.05] uppercase mb-4">
                     {card.previewTitle}
                     <br />
                     <span className="font-medium text-white/40">{card.previewSubtitle}</span>
@@ -294,10 +294,10 @@ export const CardStack = ({ setActiveSection, expandedCardId, setExpandedCardId 
                 </div>
 
                 <div className="flex justify-between items-end">
-                  <span className="font-mono text-[10px] tracking-[0.2em] text-white/25">
+                  <span className="font-mono text-[11px] tracking-[0.2em] text-white/25">
                     CLIC PARA AMPLIAR HOJA
                   </span>
-                  <div className="flex h-12 w-12 items-center justify-center border border-white/10 hover:border-white/30 bg-white/5 transition-colors duration-300">
+                  <div className="flex h-12 w-12 min-w-[44px] min-h-[44px] items-center justify-center border border-white/10 hover:border-white/30 bg-white/5 transition-colors duration-300">
                     <span className="text-white text-base">↗</span>
                   </div>
                 </div>
@@ -316,8 +316,8 @@ export const CardStack = ({ setActiveSection, expandedCardId, setExpandedCardId 
         return (
           <div className="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-2xl overflow-y-auto expanded-content-scroll flex flex-col">
             {/* Header / Actions Panel */}
-            <div className="sticky top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-md border-b border-white/[0.08] px-8 py-4 flex justify-between items-center max-w-7xl mx-auto w-full">
-              <div className="flex items-center gap-4">
+            <div className="sticky top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-md border-b border-white/[0.08] px-4 md:px-8 py-4 flex justify-between items-center max-w-7xl mx-auto w-full">
+              <div className="flex items-center gap-3 md:gap-4">
                 <span className="font-mono text-xs text-white/40">
                   [ {activeCard.index} ]
                 </span>
@@ -332,11 +332,12 @@ export const CardStack = ({ setActiveSection, expandedCardId, setExpandedCardId 
                   e.stopPropagation();
                   setExpandedCardId(null);
                 }}
-                className="group flex items-center gap-3 px-4 py-2 border border-white/10 hover:border-white/30 bg-transparent text-[10px] font-mono tracking-[0.15em] uppercase text-white/60 hover:text-white transition-all duration-300"
+                className="group flex items-center gap-2 md:gap-3 px-3 md:px-4 py-3 min-h-[44px] border border-white/10 hover:border-white/30 bg-transparent text-[11px] font-mono tracking-[0.15em] uppercase text-white/60 hover:text-white transition-all duration-300"
                 aria-label="Cerrar detalles"
               >
-                <span>[ ESC ] CERRAR</span>
-                <IoMdClose className="h-4 w-4" />
+                <span className="hidden sm:inline">[ ESC ] CERRAR</span>
+                <span className="sm:hidden">CERRAR</span>
+                <IoMdClose className="h-5 w-5" />
               </button>
             </div>
 
