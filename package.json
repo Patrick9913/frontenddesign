@@ -10,7 +10,9 @@
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
+    "@react-pdf/renderer": "^4.9.0",
     "next": "^16.2.1",
+    "pixelarticons": "^2.4.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-icons": "^5.5.0",

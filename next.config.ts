@@ -4,6 +4,7 @@ const nextConfig: NextConfig = {
   // Optimizaciones SEO
   compress: true,
   poweredByHeader: false,
+  serverExternalPackages: ["@react-pdf/renderer"],
   
   // Optimización de imágenes
   images: {

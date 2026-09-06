@@ -37,11 +37,8 @@ export const Navbar: React.FC = () => {
     const navItems = [
         { name: 'Inicio', href: '#hero' },
         { name: 'Sobre mí', href: '#about' },
-        { name: 'Formación', href: '#experience' },
-        { name: 'Habilidades', href: '#skills' },
         { name: 'Proyectos', href: '#projects' },
         { name: 'Contacto', href: '#contact' },
-        { name: 'Cierre', href: '#footer' },
     ];
 
     const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
@@ -70,7 +67,7 @@ export const Navbar: React.FC = () => {
                         key={item.name}
                         href={item.href}
                         onClick={(e) => handleNavClick(e, item.href)}
-                        className="text-[10px] md:text-xs tracking-[0.25em] uppercase text-gray-400 hover:text-white transition-colors duration-300"
+                        className="text-[10px] md:text-xs tracking-[0.25em] uppercase text-white/70 hover:text-white transition-colors duration-300"
                     >
                         {item.name}
                     </a>
@@ -82,8 +79,7 @@ export const Navbar: React.FC = () => {
             </div>
         </nav>
 
-        {/* Portal a document.body: menú móvil y botón hamburguesa fuera del card stack (evita
-            que position:fixed quede preso por transform de las pestañas sticky). */}
+        {/* Portal a document.body: el menú móvil y el botón quedan fijos al viewport. */}
         {mounted
             ? createPortal(
                   <>
@@ -124,7 +120,7 @@ export const Navbar: React.FC = () => {
                           onClick={(e) => e.stopPropagation()}
                       >
                           <div className="flex shrink-0 items-center justify-between gap-4 border-b border-white/10 bg-black px-6 pt-6 pb-5 md:px-8">
-                              <span className="text-[11px] font-light tracking-[0.4em] uppercase text-white/40">
+                              <span className="text-[11px] font-light tracking-[0.4em] uppercase text-white/60">
                                   Navegación
                               </span>
                               <button
@@ -148,7 +144,7 @@ export const Navbar: React.FC = () => {
                                       >
                                           <a
                                               href={item.href}
-                                              className={`block bg-black py-6 text-xs tracking-[0.28em] uppercase text-gray-400 transition-all duration-500 hover:pl-1 hover:text-white ${
+                                              className={`block bg-black py-6 text-xs tracking-[0.28em] uppercase text-white/70 transition-all duration-500 hover:pl-1 hover:text-white ${
                                                   isMenuOpen
                                                       ? 'opacity-100 translate-x-0'
                                                       : 'opacity-0 translate-x-3'
@@ -167,7 +163,7 @@ export const Navbar: React.FC = () => {
                               </ul>
                           </nav>
                           <div className="mt-auto shrink-0 border-t border-white/10 bg-black px-8 py-6">
-                              <p className="text-[11px] font-light tracking-[0.25em] uppercase text-white/30">
+                              <p className="text-[11px] font-light tracking-[0.25em] uppercase text-white/50">
                                   Portfolio · {year}
                               </p>
                           </div>

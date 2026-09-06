@@ -1,10 +1,7 @@
 import { ExpandedContentPanel, ExpandedSection } from "./expanded/ExpandedSection";
 import { ExperienceSectionDecor } from "./expanded/SectionDecors";
 
-const SECTION_INDEX = "[ 02 ]";
-
 const COPY = {
-  overline: "Formación",
   title: "TRAYECTORIA",
   accent: "ACADÉMICA",
 } as const;
@@ -41,8 +38,6 @@ export const Experience = () => {
     <ExpandedSection
       id="experience"
       decor={<ExperienceSectionDecor />}
-      index={SECTION_INDEX}
-      overline={COPY.overline}
       title={COPY.title}
       accent={COPY.accent}
     >

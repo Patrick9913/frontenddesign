@@ -20,12 +20,7 @@
 }
 
 body {
-  background-color: #f3f4f6;
-  background-image: url("/fondoblanco.jpg");
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  background-repeat: no-repeat;
+  background-color: #050505;
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
   scroll-behavior: smooth;
@@ -62,75 +57,6 @@ body {
 
 .project-content-in {
   animation: project-content-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-/* --- Card Stack Styles --- */
-.card-stack-container {
-  position: relative;
-  width: 100%;
-  background: transparent;
-}
-
-/* Un segmento de scroll por tarjeta — 100% / 7 ≈ 14.29% del recorrido */
-.card-scroll-segment {
-  height: 100vh;
-  pointer-events: none;
-}
-
-.card-stack-item {
-  position: sticky;
-  width: 100%;
-  height: 92vh;
-  background-color: #000000;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: none;
-  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), 
-              opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-  transform-origin: center center;
-  overflow: hidden;
-}
-
-@media (min-width: 768px) {
-  .card-stack-item {
-    height: 85vh;
-  }
-}
-
-/* Placas 3D — shell WebGL + contenido CSS3D */
-.three-card-panel-scene {
-  overflow: hidden;
-}
-
-.three-card-css3d-layer .three-card-dom {
-  transform-origin: center center;
-  backface-visibility: hidden;
-  box-shadow: none;
-}
-
-.card-stack-item-visual,
-.three-card-dom {
-  transform-origin: center center;
-}
-
-/* Carta activa al frente */
-.three-card-dom[data-stack-role="active"] {
-  background-color: #050505;
-  border-color: rgba(255, 255, 255, 0.1);
-  z-index: 100;
-}
-
-.card-stack-item.is-expanded {
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 100vw !important;
-  height: 100vh !important;
-  z-index: 1000 !important;
-  transform: none !important;
-  opacity: 1 !important;
-  box-shadow: none !important;
-  border: none !important;
-  overflow-y: auto !important;
 }
 
 /* Ocultar barra de scroll global si es necesario */
@@ -710,24 +636,6 @@ body {
   z-index: 1;
 }
 
-/* En placas CSS3D el texto debe ir delante de la órbita en profundidad */
-.three-card-dom .skills-constellation-preview .panel-preview-parallax-stage {
-  position: relative;
-  z-index: 12;
-  transform: translateZ(140px);
-  transform-style: flat;
-}
-
-.three-card-dom .skills-constellation-preview .panel-preview-layer--ui {
-  position: relative;
-  z-index: 12;
-  transform: translateZ(150px);
-}
-
-.three-card-dom .skills-constellation-clip {
-  transform: translateZ(20px);
-}
-
 .constellation-parallax-wrap {
   transform: translate3d(
     calc(var(--constellation-px) * 14px),
@@ -899,7 +807,7 @@ body {
   font-weight: 300;
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.42);
+  color: rgba(255, 255, 255, 0.78);
   backdrop-filter: blur(4px);
   transition: color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
 }
@@ -995,8 +903,105 @@ body {
   width: min(30vw, 320px);
 }
 
-.expanded-view {
-  background: linear-gradient(180deg, rgba(5, 5, 5, 0.98) 0%, rgba(0, 0, 0, 0.99) 100%);
+/* Íconos sociales tipo sprite 8-bit */
+.social-pixel {
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+  color: #f0f0f0;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  animation: social-pixel-idle 0.7s steps(1, end) infinite;
+}
+
+.social-pixel-frame {
+  position: absolute;
+  inset: 0;
+  display: block;
+  shape-rendering: crispEdges;
+}
+
+.social-pixel-frame--idle {
+  opacity: 1;
+}
+
+.social-pixel-frame--hover {
+  opacity: 0;
+}
+
+.group:hover .social-pixel-frame--idle,
+.group:focus-visible .social-pixel-frame--idle {
+  opacity: 0;
+}
+
+.group:hover .social-pixel-frame--hover,
+.group:focus-visible .social-pixel-frame--hover {
+  opacity: 1;
+}
+
+.group:hover .social-pixel,
+.group:focus-visible .social-pixel {
+  animation: social-pixel-hop 0.36s steps(2, end) infinite;
+}
+
+.group:hover .social-pixel--github,
+.group:focus-visible .social-pixel--github {
+  color: #a371f7;
+}
+
+.group:hover .social-pixel--linkedin,
+.group:focus-visible .social-pixel--linkedin {
+  color: #0a66c2;
+}
+
+.group:hover .social-pixel--email,
+.group:focus-visible .social-pixel--email {
+  color: #ea4335;
+}
+
+.social-link--github:hover,
+.social-link--github:focus-visible {
+  color: #a371f7;
+}
+
+.social-link--linkedin:hover,
+.social-link--linkedin:focus-visible {
+  color: #0a66c2;
+}
+
+.social-link--email:hover,
+.social-link--email:focus-visible {
+  color: #ea4335;
+}
+
+@keyframes social-pixel-idle {
+  0%,
+  49% {
+    transform: translateY(0);
+  }
+  50%,
+  100% {
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes social-pixel-hop {
+  0%,
+  24% {
+    transform: translateY(0);
+  }
+  25%,
+  49% {
+    transform: translateY(-4px);
+  }
+  50%,
+  74% {
+    transform: translateY(-2px);
+  }
+  75%,
+  100% {
+    transform: translateY(0);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1012,7 +1017,8 @@ body {
   .contact-panel-radar-sweep,
   .contact-panel-terminal-cursor,
   .footer-panel-orbit,
-  .experience-panel-milestone {
+  .experience-panel-milestone,
+  .social-pixel {
     animation: none !important;
   }
 
@@ -1031,9 +1037,6 @@ body {
   .panel-preview-layer--ui,
   .constellation-parallax-wrap,
   .constellation-field,
-  .three-card-dom .skills-constellation-preview .panel-preview-parallax-stage,
-  .three-card-dom .skills-constellation-preview .panel-preview-layer--ui,
-  .three-card-dom .skills-constellation-clip,
   .about-panel-venn,
   .about-panel-orbit--code,
   .about-panel-orbit--design,
@@ -1051,67 +1054,8 @@ body {
   }
 }
 
-/* --- Mobile Responsiveness (iPhone 13, Pro, Max) --- */
+/* --- Mobile: atenuar decors para no tapar el texto --- */
 @media (max-width: 767px) {
-  /* Prevent scrolling segment from adding blank height on mobile */
-  .card-scroll-segment {
-    height: 0 !important;
-  }
-  .card-stack-container {
-    margin-top: 0 !important;
-    padding: 0 !important;
-  }
-
-  /* Make panels responsive and fit mobile viewport */
-  .mobile-portfolio-view {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    width: 100%;
-    max-width: 480px;
-    margin: 0 auto;
-    padding: 5rem 1.25rem 4rem 1.25rem;
-    box-sizing: border-box;
-  }
-
-  .mobile-card-item {
-    position: relative;
-    width: 100%;
-    height: 320px;
-    background-color: #050505;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    transition: transform 0.2s ease, border-color 0.2s ease;
-  }
-
-  .mobile-card-item:active {
-    transform: scale(0.98);
-    border-color: rgba(255, 255, 255, 0.16);
-  }
-
-  /* Adjust padding and font-size of PanelPreviewChrome on mobile */
-  .panel-preview > div.relative {
-    padding: 1.5rem !important; /* equivalent to p-6 */
-  }
-
-  /* Adjust padding in HeroPanelPreview */
-  .hero-panel-preview > div.relative {
-    padding: 1.5rem !important;
-  }
-
-  /* Adjust typography sizes for better mobile hierarchy */
-  .panel-preview-layer--back,
-  .hero-panel-layer--back {
-    font-size: 1.85rem !important;
-  }
-  .panel-preview-layer--mid,
-  .hero-panel-layer--mid {
-    font-size: 1.85rem !important;
-  }
-  
-  /* Lower opacity and put decorators in background to prevent text overlap */
   .about-panel-venn,
   .about-panel-wire,
   .experience-panel-timeline,

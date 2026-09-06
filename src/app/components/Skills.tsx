@@ -1,14 +1,9 @@
 import { ExpandedContentPanel, ExpandedSection } from "./expanded/ExpandedSection";
 import { SkillsConstellationField } from "./skills/SkillsConstellationField";
 
-const SECTION_INDEX = "[ 03 ]";
-
 const COPY = {
-  overline: "Tecnologías",
   title: "STACK",
   accent: "TÉCNICO",
-  lead:
-    "Especializado en el ecosistema React moderno. Combino tecnologías sólidas con diseño meticuloso para construir interfaces fluidas, escalables y visualmente excepcionales.",
 } as const;
 
 const TECHNOLOGIES_BY_AREA = [
@@ -83,11 +78,8 @@ export const Skills = () => {
   return (
     <ExpandedSection
       id="skills"
-      index={SECTION_INDEX}
-      overline={COPY.overline}
       title={COPY.title}
       accent={COPY.accent}
-      lead={COPY.lead}
     >
       <div className="relative mb-12 h-[min(46vh,400px)] overflow-hidden border border-white/[0.08] bg-black/40 md:mb-16">
         <SkillsConstellationField variant="expanded" className="absolute inset-0" />
