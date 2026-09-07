@@ -2,14 +2,14 @@
 
 import React, { useEffect, useState } from "react";
 import { CARDS } from "./components/cardStackData";
-import FloatingSidebars from "./components/FloatingSidebars";
 import GlobalBackground from "./components/GlobalBackground";
 import { Navbar } from "./components/Navbar";
 import Footer from "./components/Footer";
-import ProgressNavigation from "./components/ProgressNavigation";
+import SocialBottomBar from "./components/SocialBottomBar";
 
 export const App = () => {
   const [activeSection, setActiveSection] = useState(0);
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
     const ids = CARDS.map((card) => card.id);
@@ -34,11 +34,13 @@ export const App = () => {
       if (ticking) return;
       ticking = true;
       requestAnimationFrame(() => {
+        setScrolled(window.scrollY > 24);
         updateActiveSection();
         ticking = false;
       });
     };
 
+    setScrolled(window.scrollY > 24);
     updateActiveSection();
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll);
@@ -68,13 +70,18 @@ export const App = () => {
   return (
     <>
       <GlobalBackground activeSection={activeSection} isPaused={false} />
-      <FloatingSidebars activeSection={activeSection} />
 
-      <header className="sticky top-0 z-50 border-b border-white/[0.08] bg-black/80 backdrop-blur-md">
+      <header
+        className={`fixed inset-x-0 top-0 z-50 transition-[background-color,backdrop-filter] duration-500 ${
+          scrolled
+            ? "bg-black/30 backdrop-blur-xl"
+            : "bg-transparent backdrop-blur-md"
+        }`}
+      >
         <Navbar />
       </header>
 
-      <main className="relative z-10">
+      <main className="relative z-10 pb-16">
         {CARDS.map((card) => {
           const Component = card.component;
           return <Component key={card.id} />;
@@ -82,7 +89,7 @@ export const App = () => {
       </main>
 
       <Footer />
-      <ProgressNavigation activeSection={activeSection} />
+      <SocialBottomBar />
     </>
   );
 };

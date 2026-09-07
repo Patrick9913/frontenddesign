@@ -61,7 +61,7 @@ export const Navbar: React.FC = () => {
                 >
                     Patrick Ordoñez
                 </a>
-                <div className="hidden md:flex xl:hidden md:space-x-10 md:items-center">
+                <div className="hidden md:flex md:items-center md:gap-10 lg:gap-12">
                     {navItems.map((item) => (
                     <a
                         key={item.name}
@@ -86,7 +86,7 @@ export const Navbar: React.FC = () => {
                       {!isMenuOpen ? (
                           <button
                               type="button"
-                              className="md:hidden fixed top-5 right-5 z-[1102] flex h-12 w-12 items-center justify-center border border-white/20 bg-black/70 text-white backdrop-blur-md transition-all duration-500 ease-[cubic-bezier(0.65,0.02,0.28,1)] hover:border-white/35 hover:bg-black/85 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                              className="md:hidden fixed top-5 right-5 z-[1102] flex h-12 w-12 items-center justify-center bg-white/10 text-white backdrop-blur-xl transition-all duration-500 ease-[cubic-bezier(0.65,0.02,0.28,1)] hover:bg-white/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                               onClick={() => setIsMenuOpen(true)}
                               aria-expanded={false}
                               aria-controls="mobile-menu-panel"

@@ -12,11 +12,19 @@ export const Hero = () => {
   return (
     <section
       id="hero"
-      className="relative min-h-[calc(100dvh-4.75rem)] w-full flex flex-col bg-transparent text-[#F0F0F0] overflow-hidden font-sans scroll-mt-24"
+      className="relative min-h-dvh w-full flex flex-col bg-transparent text-[#F0F0F0] overflow-hidden font-sans scroll-mt-0"
     >
-      <div className="absolute inset-0 z-[1] bg-black/40" aria-hidden />
+      <div className="absolute inset-0 z-0" aria-hidden>
+        <img
+          src="/landscapefondo.png"
+          alt=""
+          className="h-full w-full object-cover object-center brightness-[1.18] contrast-[1.05] saturate-[1.08]"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/45 via-black/15 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#0a0a0a]/70" />
+      </div>
 
-      <div className="relative z-10 flex-grow flex items-center w-full px-8 md:px-16 lg:px-24 xl:px-36 py-8 md:py-12">
+      <div className="relative z-10 flex-grow flex items-center w-full px-8 md:px-16 lg:px-24 xl:px-36 pt-24 pb-8 md:pt-28 md:pb-12">
         <div className="w-full max-w-7xl mx-auto">
           <header className="mb-8 md:mb-10">
             <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-light tracking-[-0.03em] text-[#F0F0F0] leading-[0.92] mb-6 md:mb-8">

@@ -86,20 +86,13 @@ export function ProjectsSectionDecor() {
 
 export function ContactSectionDecor() {
   return (
-    <>
-      <div className="contact-panel-radar expanded-decor-contact-radar">
-        <div className="contact-panel-radar-ring contact-panel-radar-ring--1" />
-        <div className="contact-panel-radar-ring contact-panel-radar-ring--2" />
-        <div className="contact-panel-radar-ring contact-panel-radar-ring--3" />
-        <div className="contact-panel-radar-sweep" />
-        <div className="contact-panel-radar-core" />
-      </div>
-      <div className="contact-panel-terminal expanded-decor-contact-terminal">
-        <span className="contact-panel-terminal-prompt">{">"}</span>
-        <span className="contact-panel-terminal-text">open channel — contact.form</span>
-        <span className="contact-panel-terminal-cursor" />
-      </div>
-    </>
+    <div className="contact-panel-radar expanded-decor-contact-radar">
+      <div className="contact-panel-radar-ring contact-panel-radar-ring--1" />
+      <div className="contact-panel-radar-ring contact-panel-radar-ring--2" />
+      <div className="contact-panel-radar-ring contact-panel-radar-ring--3" />
+      <div className="contact-panel-radar-sweep" />
+      <div className="contact-panel-radar-core" />
+    </div>
   );
 }
 

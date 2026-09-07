@@ -44,7 +44,7 @@ export function ExpandedSection({
     <section
       id={id}
       ref={ref}
-      className={`expanded-section panel-preview relative overflow-hidden border-t border-white/[0.08] bg-gradient-to-b from-[#050505] via-black to-black text-[#F0F0F0] font-sans scroll-mt-24 ${className}`}
+      className={`expanded-section panel-preview relative overflow-hidden bg-gradient-to-b from-[#0a0a0a]/90 via-[#080808]/85 to-[#060606]/90 text-[#F0F0F0] font-sans scroll-mt-24 ${className}`}
     >
       {decor ? (
         <div className="expanded-section-decor pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
@@ -63,7 +63,7 @@ export function ExpandedSection({
 export function ExpandedContentPanel({ children, className = "" }: { children: ReactNode; className?: string }) {
   return (
     <div
-      className={`expanded-content-panel panel-preview-layer panel-preview-layer--front border-t border-white/[0.08] bg-black/35 pt-8 backdrop-blur-[2px] md:pt-10 ${className}`}
+      className={`expanded-content-panel panel-preview-layer panel-preview-layer--front bg-transparent pt-8 md:pt-10 ${className}`}
     >
       {children}
     </div>

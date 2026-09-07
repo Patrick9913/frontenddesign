@@ -20,7 +20,7 @@
 }
 
 body {
-  background-color: #050505;
+  background-color: #0a0a0a;
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
   scroll-behavior: smooth;
@@ -856,51 +856,60 @@ body {
 }
 
 .expanded-decor-about-venn {
-  right: 4%;
-  top: 10%;
-  width: min(44vw, 460px);
-  height: min(36vw, 380px);
+  right: -4%;
+  top: 8%;
+  width: min(36vw, 380px);
+  height: min(30vw, 320px);
+  opacity: 0.28;
 }
 
 .expanded-decor-about-wire {
-  opacity: 0.045;
+  opacity: 0.03;
 }
 
 .expanded-decor-experience-timeline {
-  right: 4%;
-  top: 12%;
-  bottom: 10%;
-  width: min(28vw, 280px);
+  right: -2%;
+  top: 18%;
+  bottom: 14%;
+  width: min(22vw, 220px);
+  opacity: 0.3;
 }
 
 .expanded-decor-projects-stack {
-  right: 3%;
-  top: 14%;
-  width: min(36vw, 380px);
-  height: min(32vw, 340px);
-  opacity: 0.55;
+  right: -6%;
+  top: 22%;
+  width: min(28vw, 300px);
+  height: min(26vw, 280px);
+  opacity: 0.22;
 }
 
 .expanded-decor-contact-radar {
-  right: 2%;
-  top: 16%;
-  width: min(34vw, 360px);
+  right: -8%;
+  bottom: 8%;
+  top: auto;
+  width: min(22vw, 220px);
+  opacity: 0.2;
 }
 
 .expanded-decor-contact-terminal {
-  left: 6%;
-  bottom: 14%;
+  display: none;
 }
 
 .expanded-decor-footer-watermark {
   right: -2%;
   top: 6%;
+  opacity: 0.2;
 }
 
 .expanded-decor-footer-orbit {
-  right: 8%;
-  top: 28%;
-  width: min(30vw, 320px);
+  right: 4%;
+  top: 36%;
+  width: min(24vw, 260px);
+  opacity: 0.22;
+}
+
+.expanded-section-decor {
+  opacity: 0.85;
 }
 
 /* Íconos sociales tipo sprite 8-bit */

@@ -21,49 +21,49 @@ const SECTION_CONFIGS: SectionConfig[] = [
     cameraPos: { x: 0, y: 0.3, z: 9 },
     lookAtPos: { x: 0.8, y: 0, z: -1.5 },
     particleOpacity: 0.45,
-    fogDensity: 0.045,
+    fogDensity: 0.028,
   },
   // 1: About (Sobre mí)
   {
     cameraPos: { x: -2.5, y: 1.0, z: 8.0 },
     lookAtPos: { x: 1.2, y: -0.2, z: -2.0 },
     particleOpacity: 0.6,
-    fogDensity: 0.05,
+    fogDensity: 0.03,
   },
   // 2: Experience (Formación)
   {
     cameraPos: { x: 2.2, y: -0.5, z: 8.5 },
     lookAtPos: { x: -1.0, y: 0.2, z: -1.0 },
     particleOpacity: 0.35,
-    fogDensity: 0.055,
+    fogDensity: 0.032,
   },
   // 3: Skills (Habilidades)
   {
     cameraPos: { x: 0, y: 3.5, z: 8.2 },
     lookAtPos: { x: 0, y: -0.8, z: -2.2 },
     particleOpacity: 0.5,
-    fogDensity: 0.045,
+    fogDensity: 0.028,
   },
   // 4: Projects (Proyectos)
   {
     cameraPos: { x: -3.0, y: -0.6, z: 7.2 },
     lookAtPos: { x: 1.5, y: 0.3, z: -2.2 },
     particleOpacity: 0.55,
-    fogDensity: 0.05,
+    fogDensity: 0.03,
   },
   // 5: Contact (Contacto)
   {
     cameraPos: { x: 0, y: 0.2, z: 11.5 },
     lookAtPos: { x: 0, y: 0, z: -4.5 },
     particleOpacity: 0.3,
-    fogDensity: 0.07,
+    fogDensity: 0.035,
   },
   // 6: Footer (Cierre)
   {
     cameraPos: { x: 1.8, y: -0.4, z: 10.0 },
     lookAtPos: { x: -0.6, y: 0.1, z: -3.2 },
     particleOpacity: 0.25,
-    fogDensity: 0.075,
+    fogDensity: 0.038,
   },
 ];
 
@@ -114,7 +114,7 @@ export const GlobalBackground = ({ activeSection, isPaused }: GlobalBackgroundPr
     ).matches;
 
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x000000, 0.045);
+    scene.fog = new THREE.FogExp2(0x0a0a0a, 0.028);
 
     const camera = new THREE.PerspectiveCamera(
       52,
@@ -143,12 +143,12 @@ export const GlobalBackground = ({ activeSection, isPaused }: GlobalBackgroundPr
     renderer.setClearColor(0x000000, 0);
     container.appendChild(renderer.domElement);
 
-    const particleCount = isMobile ? 90 : prefersReducedMotion ? 160 : 450;
+    const particleCount = isMobile ? 55 : prefersReducedMotion ? 90 : 220;
     const particlePositions = new Float32Array(particleCount * 3);
     for (let i = 0; i < particleCount; i++) {
-      particlePositions[i * 3] = (Math.random() - 0.5) * 28;
-      particlePositions[i * 3 + 1] = (Math.random() - 0.5) * 18;
-      particlePositions[i * 3 + 2] = (Math.random() - 0.5) * 18 - 4;
+      particlePositions[i * 3] = (Math.random() - 0.5) * 30;
+      particlePositions[i * 3 + 1] = (Math.random() - 0.5) * 20;
+      particlePositions[i * 3 + 2] = (Math.random() - 0.5) * 20 - 5;
     }
 
     const particleGeometry = new THREE.BufferGeometry();
@@ -165,12 +165,12 @@ export const GlobalBackground = ({ activeSection, isPaused }: GlobalBackgroundPr
       uniforms: {
         uMouse: { value: new THREE.Vector2(0, 0) },
         uHover: { value: 0 },
-        uRadius: { value: 0.32 },
+        uRadius: { value: 0.22 },
         uAspect: { value: container.clientWidth / Math.max(container.clientHeight, 1) },
         uPixelRatio: { value: renderer.getPixelRatio() },
-        uSize: { value: isMobile ? 16 : 13 },
-        uDim: { value: 0.055 },
-        uLit: { value: 0.95 },
+        uSize: { value: isMobile ? 12 : 10 },
+        uDim: { value: 0.028 },
+        uLit: { value: 0.55 },
       },
       vertexShader: `
         uniform vec2 uMouse;
@@ -197,7 +197,7 @@ export const GlobalBackground = ({ activeSection, isPaused }: GlobalBackgroundPr
           vLit = lit;
           vAlpha = mix(uDim, uLit, lit);
 
-          float size = uSize * mix(1.0, 2.6, lit);
+          float size = uSize * mix(1.0, 1.9, lit);
           gl_PointSize = size * uPixelRatio * (7.5 / max(-mvPosition.z, 0.15));
         }
       `,
@@ -209,8 +209,8 @@ export const GlobalBackground = ({ activeSection, isPaused }: GlobalBackgroundPr
           vec2 c = gl_PointCoord - vec2(0.5);
           float d = length(c);
           if (d > 0.5) discard;
-          float core = 1.0 - smoothstep(0.12, 0.5, d);
-          vec3 color = mix(vec3(0.38, 0.44, 0.52), vec3(0.92, 0.96, 1.0), vLit);
+          float core = 1.0 - smoothstep(0.14, 0.5, d);
+          vec3 color = mix(vec3(0.42, 0.46, 0.52), vec3(0.78, 0.82, 0.88), vLit);
           gl_FragColor = vec4(color * core, vAlpha * core);
         }
       `,
