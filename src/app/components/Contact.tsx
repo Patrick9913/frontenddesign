@@ -2,14 +2,6 @@
 
 import { useState, type ChangeEvent, type FormEvent } from "react";
 import emailjs from "@emailjs/browser";
-import { ExpandedContentPanel, ExpandedSection } from "./expanded/ExpandedSection";
-import { ContactSectionDecor } from "./expanded/SectionDecors";
-
-const inputClassName =
-  "w-full rounded-none border-0 border-b border-white/[0.08] bg-transparent pb-4 text-base font-light text-[#F0F0F0] transition-colors duration-500 placeholder:text-white/40 focus:border-white/40 focus:outline-none md:text-lg";
-
-const labelClassName =
-  "mb-3 block font-mono text-xs font-light uppercase tracking-[0.2em] text-white/65";
 
 export const Contact = () => {
   const [formData, setFormData] = useState({
@@ -17,11 +9,14 @@ export const Contact = () => {
     email: "",
     message: "",
   });
-
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle");
+  const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">(
+    "idle"
+  );
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     setFormData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
@@ -34,13 +29,9 @@ export const Contact = () => {
     setSubmitStatus("idle");
 
     try {
-      const serviceId = "service_kjmlf1a";
-      const templateId = "template_xf807za";
-      const publicKey = "nIzwTNQpr1_X4EE_q";
-
       await emailjs.send(
-        serviceId,
-        templateId,
+        "service_kjmlf1a",
+        "template_xf807za",
         {
           from_name: formData.name,
           from_email: formData.email,
@@ -48,7 +39,7 @@ export const Contact = () => {
           message: formData.message,
           to_email: "patrickyoel13@gmail.com",
         },
-        publicKey
+        "nIzwTNQpr1_X4EE_q"
       );
 
       setSubmitStatus("success");
@@ -64,123 +55,141 @@ export const Contact = () => {
   };
 
   return (
-    <ExpandedSection
+    <section
       id="contact"
-      decor={<ContactSectionDecor />}
-      title="HABLEMOS"
-      accent="AHORA"
+      className="relative w-full overflow-hidden border-t border-white/[0.02] bg-[#050505] px-8 py-32 font-sans sm:px-16 lg:px-24"
     >
-      <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-16">
-        <div className="lg:col-span-4">
-          <p className="text-sm font-light leading-[1.75] tracking-wide text-white/75 md:text-base">
-            Un proyecto, un equipo o una idea. Escribime.
+      <div className="relative z-10 mx-auto flex max-w-7xl flex-col gap-16 md:flex-row md:gap-24">
+        <div className="flex w-full flex-col md:w-5/12">
+          <div className="mb-12 flex flex-col items-start">
+            <h2 className="mb-4 text-xs font-light uppercase tracking-[0.4em] text-white/50 sm:text-sm">
+              Contacto
+            </h2>
+            <h3 className="text-4xl font-extralight uppercase tracking-widest text-white drop-shadow-xl md:text-5xl lg:text-6xl">
+              Hablemos
+            </h3>
+          </div>
+
+          <p className="mb-12 text-sm font-light leading-relaxed tracking-wide text-white/60 md:text-base">
+            Si estás buscando integrar a alguien a tu equipo o simplemente
+            querés intercambiar ideas sobre diseño y desarrollo web, escribime.
           </p>
-          <a
-            href="mailto:patrickyoel13@gmail.com"
-            className="mt-6 inline-flex min-h-[44px] items-center text-sm font-light tracking-wide text-[#F0F0F0] transition-colors duration-500 hover:text-white md:text-base"
-          >
-            patrickyoel13@gmail.com
-          </a>
+
+          <div className="flex flex-col gap-8">
+            <div className="flex flex-col">
+              <span className="mb-2 text-[9px] uppercase tracking-[0.3em] text-white/40">
+                Email
+              </span>
+              <a
+                href="mailto:patrickyoel13@gmail.com"
+                className="text-sm font-light tracking-widest text-white/80 transition-colors hover:text-white"
+              >
+                patrickyoel13@gmail.com
+              </a>
+            </div>
+            <div className="flex flex-col">
+              <span className="mb-2 text-[9px] uppercase tracking-[0.3em] text-white/40">
+                Ubicación
+              </span>
+              <span className="text-sm font-light tracking-widest text-white/80">
+                Buenos Aires, Argentina (Remoto)
+              </span>
+            </div>
+            <div className="flex flex-col">
+              <span className="mb-2 text-[9px] uppercase tracking-[0.3em] text-white/40">
+                Redes
+              </span>
+              <div className="flex gap-6">
+                <a
+                  href="https://www.linkedin.com/in/patrick-ord%C3%B3%C3%B1ez-14904221a/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm font-light tracking-widest text-white/80 transition-colors hover:text-white"
+                >
+                  LinkedIn
+                </a>
+                <a
+                  href="https://github.com/Patrick9913"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm font-light tracking-widest text-white/80 transition-colors hover:text-white"
+                >
+                  GitHub
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <ExpandedContentPanel className="lg:col-span-7 lg:col-start-6">
+        <div className="mt-4 flex w-full flex-col md:mt-24 md:w-7/12">
           <form onSubmit={handleSubmit} className="flex flex-col gap-10" noValidate>
-            <div>
-              <label htmlFor="name" className={labelClassName}>
-                Nombre
-              </label>
+            <div className="group relative">
               <input
                 type="text"
-                id="name"
                 name="name"
                 required
                 value={formData.name}
                 onChange={handleChange}
-                className={inputClassName}
-                placeholder="Tu nombre"
+                placeholder="Nombre"
+                className="peer w-full border-b border-white/20 bg-transparent py-4 font-light tracking-wide text-white/80 transition-colors duration-500 placeholder-transparent focus:border-white/60 focus:outline-none"
               />
-            </div>
-
-            <div>
-              <label htmlFor="email" className={labelClassName}>
-                Email
+              <label className="absolute left-0 top-4 text-sm font-light tracking-widest text-white/30 transition-all duration-500 peer-valid:-top-4 peer-valid:text-[10px] peer-valid:text-white/60 peer-focus:-top-4 peer-focus:text-[10px] peer-focus:text-white/60">
+                Nombre Completo
               </label>
+            </div>
+            <div className="group relative">
               <input
                 type="email"
-                id="email"
                 name="email"
                 required
                 value={formData.email}
                 onChange={handleChange}
-                className={inputClassName}
-                placeholder="tu@email.com"
+                placeholder="Email"
+                className="peer w-full border-b border-white/20 bg-transparent py-4 font-light tracking-wide text-white/80 transition-colors duration-500 placeholder-transparent focus:border-white/60 focus:outline-none"
               />
-            </div>
-
-            <div>
-              <label htmlFor="message" className={labelClassName}>
-                Mensaje
+              <label className="absolute left-0 top-4 text-sm font-light tracking-widest text-white/30 transition-all duration-500 peer-valid:-top-4 peer-valid:text-[10px] peer-valid:text-white/60 peer-focus:-top-4 peer-focus:text-[10px] peer-focus:text-white/60">
+                Correo Electrónico
               </label>
+            </div>
+            <div className="group relative">
               <textarea
-                id="message"
                 name="message"
                 required
                 rows={4}
                 value={formData.message}
                 onChange={handleChange}
-                className={`${inputClassName} min-h-[120px] resize-none`}
-                placeholder="Contame sobre tu proyecto..."
+                placeholder="Mensaje"
+                className="peer w-full resize-none border-b border-white/20 bg-transparent py-4 font-light tracking-wide text-white/80 transition-colors duration-500 placeholder-transparent focus:border-white/60 focus:outline-none"
               />
+              <label className="absolute left-0 top-4 text-sm font-light tracking-widest text-white/30 transition-all duration-500 peer-valid:-top-4 peer-valid:text-[10px] peer-valid:text-white/60 peer-focus:-top-4 peer-focus:text-[10px] peer-focus:text-white/60">
+                Tu Mensaje
+              </label>
             </div>
 
             {submitStatus === "success" ? (
-              <p
-                className="font-mono text-xs font-light uppercase tracking-[0.15em] text-[#F0F0F0]"
-                role="status"
-              >
+              <p className="text-xs font-light uppercase tracking-[0.15em] text-white/80" role="status">
                 Mensaje enviado.
               </p>
             ) : null}
             {submitStatus === "error" ? (
-              <p
-                className="font-mono text-xs font-light uppercase tracking-[0.15em] text-white/70"
-                role="alert"
-              >
+              <p className="text-xs font-light uppercase tracking-[0.15em] text-white/60" role="alert">
                 No se pudo enviar. Probá de nuevo o escribime por email.
               </p>
             ) : null}
 
-            <div className="border-t border-white/[0.08] pt-4">
+            <div className="mt-4 flex">
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="group inline-flex w-full sm:w-fit items-center justify-center gap-4 bg-[#F0F0F0] px-8 py-5 min-h-[44px] text-xs font-medium uppercase tracking-[0.2em] text-black transition-opacity duration-500 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+                className="inline-block bg-white/90 px-12 py-4 text-xs font-medium uppercase tracking-[0.2em] text-black transition-all duration-500 hover:bg-white disabled:cursor-not-allowed disabled:opacity-40"
               >
-                {isSubmitting ? (
-                  <>
-                    <span
-                      className="inline-block h-3 w-3 animate-spin rounded-full border border-black/20 border-t-black"
-                      aria-hidden
-                    />
-                    Enviando
-                  </>
-                ) : (
-                  <>
-                    Enviar
-                    <span
-                      className="text-base transition-transform duration-500 group-hover:translate-x-1"
-                      aria-hidden
-                    >
-                      →
-                    </span>
-                  </>
-                )}
+                {isSubmitting ? "Enviando..." : "Enviar Mensaje"}
               </button>
             </div>
           </form>
-        </ExpandedContentPanel>
+        </div>
       </div>
-    </ExpandedSection>
+    </section>
   );
 };
 
