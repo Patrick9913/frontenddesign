@@ -20,25 +20,6 @@ const FOOTER_ORBIT = [
   { label: String(new Date().getFullYear()), angle: 290 },
 ] as const;
 
-export function AboutSectionDecor() {
-  return (
-    <>
-      <div className="about-panel-venn expanded-decor-about-venn">
-        <div className="about-panel-orbit about-panel-orbit--code">
-          <span className="about-panel-orbit-label">{"{ }"}</span>
-          <span className="about-panel-orbit-label about-panel-orbit-label--alt">DATA</span>
-        </div>
-        <div className="about-panel-orbit about-panel-orbit--design">
-          <span className="about-panel-orbit-label">◯</span>
-          <span className="about-panel-orbit-label about-panel-orbit-label--alt">UX</span>
-        </div>
-        <div className="about-panel-intersect" />
-      </div>
-      <div className="about-panel-wire expanded-decor-about-wire" />
-    </>
-  );
-}
-
 export function ExperienceSectionDecor() {
   return (
     <div className="experience-panel-timeline expanded-decor-experience-timeline">

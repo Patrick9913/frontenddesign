@@ -17,7 +17,7 @@ export const Footer = () => {
   return (
     <footer
       id="site-footer"
-      className="relative z-10 bg-black/90 px-8 py-10 md:px-16 lg:px-24 xl:px-36"
+      className="relative z-10 border-t border-white/[0.08] bg-[#0a0a0a] px-8 py-8 md:px-16 lg:px-24 xl:px-36"
     >
       <div className="mx-auto flex max-w-7xl flex-col gap-6 md:flex-row md:items-center md:justify-between">
         <p className="font-mono text-[10px] font-light uppercase tracking-[0.2em] text-white/55 md:text-xs">

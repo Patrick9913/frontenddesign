@@ -1,7 +1,6 @@
 "use client";
 
 import { ExpandedContentPanel, ExpandedSection } from "./expanded/ExpandedSection";
-import { AboutSectionDecor } from "./expanded/SectionDecors";
 
 const COPY = {
   title: "CÓDIGO QUE",
@@ -22,7 +21,6 @@ export const About = () => {
   return (
     <ExpandedSection
       id="about"
-      decor={<AboutSectionDecor />}
       title={COPY.title}
       accent={COPY.accent}
     >
