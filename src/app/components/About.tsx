@@ -1,93 +1,101 @@
 "use client";
 
-import { ExpandedContentPanel, ExpandedSection } from "./expanded/ExpandedSection";
+import { parallaxStyle, useMouseParallax } from "./useMouseParallax";
 
-const COPY = {
-  title: "CÓDIGO QUE",
-  accent: "RESPIRA DISEÑO",
-  body:
-    "Estudio Ciencia de Datos en la UBA y diseño interfaces. Me interesa el punto donde el código y el diseño se encuentran: que se vea bien y se sienta claro al usarlo.",
-} as const;
-
-const FORMATION = [
-  { title: "Ciencia de Datos", meta: "UBA · Actualidad" },
-  { title: "Desarrollo de Software", meta: "Coderhouse · Completado" },
-  { title: "Autodidacta", meta: "Visual y técnico · Continuo" },
+const ABOUT_IMAGES = [
+  {
+    src: "/exapone.jpg",
+    alt: "Código en pantalla — desarrollo front end",
+    depth: 10,
+    className:
+      "absolute top-0 left-[5%] z-10 h-[35%] w-[45%] shadow-[0_0_40px_rgba(0,0,0,0.5)] transition-[z-index] duration-700 hover:z-40",
+    imgClass:
+      "h-full w-full border border-white/5 object-cover opacity-100 transition-all duration-500 md:opacity-60 md:grayscale md:hover:opacity-100 md:hover:grayscale-0",
+  },
+  {
+    src: "/exaptwo.jpg",
+    alt: "Editor de código en entorno oscuro",
+    depth: 22,
+    className:
+      "absolute top-[20%] right-0 z-20 h-[55%] w-[45%] shadow-[0_0_40px_rgba(0,0,0,0.8)] transition-[z-index] duration-700 hover:z-40",
+    imgClass:
+      "h-full w-full border border-white/10 object-cover opacity-100 transition-all duration-500 md:opacity-80 md:grayscale md:hover:opacity-100 md:hover:grayscale-0",
+  },
+  {
+    src: "/exapthree.jpg",
+    alt: "Diseño de interfaz y prototipo UI",
+    depth: 34,
+    className:
+      "absolute bottom-[5%] left-0 z-30 h-[40%] w-[55%] shadow-[0_0_50px_rgba(0,0,0,0.9)] transition-[z-index] duration-700 hover:z-40",
+    imgClass:
+      "h-full w-full border border-white/20 object-cover opacity-100 transition-all duration-500 md:grayscale md:hover:grayscale-0",
+  },
 ] as const;
 
-const STACK = ["React", "Next.js", "TypeScript", "Tailwind CSS"] as const;
-
 export const About = () => {
+  const pointer = useMouseParallax();
+
   return (
-    <ExpandedSection
+    <section
       id="about"
-      title={COPY.title}
-      accent={COPY.accent}
+      className="relative w-full overflow-hidden bg-[#050505] px-8 py-32 font-sans sm:px-16 lg:px-24"
     >
-      <div className="grid grid-cols-1 items-start gap-14 lg:grid-cols-12 lg:gap-12 xl:gap-16">
-        <ExpandedContentPanel className="lg:col-span-5">
-          <p className="text-sm font-light leading-[1.75] tracking-wide text-white/75 md:text-base">
-            {COPY.body}
-          </p>
+      <div className="pointer-events-none absolute left-1/2 top-1/2 h-[800px] w-[800px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/[0.015] blur-3xl" />
 
-          <ul className="mt-10 space-y-5 border-t border-white/[0.08] pt-8" role="list">
-            {FORMATION.map((item) => (
-              <li key={item.title} className="flex flex-col gap-1">
-                <span className="text-sm font-light tracking-wide text-[#F0F0F0] md:text-base">
-                  {item.title}
-                </span>
-                <span className="font-mono text-[10px] font-light uppercase tracking-[0.18em] text-white/55 md:text-xs">
-                  {item.meta}
-                </span>
-              </li>
-            ))}
-          </ul>
-
-          <ul className="mt-8 flex flex-wrap gap-x-4 gap-y-3" role="list">
-            {STACK.map((tech) => (
-              <li key={tech}>
-                <span className="expanded-tech-tag">{tech}</span>
-              </li>
-            ))}
-          </ul>
-
-          <div className="mt-10 flex flex-col gap-4 border-t border-white/[0.08] pt-8">
+      <div className="relative z-10 mx-auto grid max-w-7xl grid-cols-1 items-center gap-20 lg:grid-cols-2 lg:gap-12">
+        <div className="order-2 flex flex-col gap-8 lg:order-1">
+          <div>
+            <h2 className="mb-6 text-xs font-light uppercase tracking-[0.4em] text-white/50 sm:text-sm">
+              Detrás de la interfaz
+            </h2>
+            <h3 className="text-4xl font-extralight leading-tight tracking-wide text-white md:text-5xl lg:text-6xl">
+              Sobre Mí
+            </h3>
+          </div>
+          <div className="flex max-w-xl flex-col gap-6 text-base font-light leading-relaxed text-white/70 md:text-lg">
+            <p>
+              Estudio Ciencia de Datos en la UBA y diseño interfaces. Me interesa
+              el punto donde el código y el diseño se encuentran: que se vea bien
+              y se sienta claro al usarlo.
+            </p>
+            <p>
+              Trabajo con React, Next.js y TypeScript en productos reales:
+              plataformas de gestión, sitios institucionales y experiencias web
+              con atención al detalle.
+            </p>
+          </div>
+          <div className="mt-4 flex flex-col items-start gap-4">
             <a
               href="/cv"
               download="Patrick-Ordonez-CV.pdf"
-              className="group inline-flex w-fit items-center gap-4 border border-white/20 bg-transparent px-8 py-4 text-[10px] font-light uppercase tracking-[0.2em] text-white/75 transition-[color,border-color] duration-500 hover:border-white/40 hover:text-[#F0F0F0] md:text-xs"
+              className="w-fit border border-white/20 bg-transparent px-10 py-3 text-xs font-light uppercase tracking-[0.2em] text-white/80 transition-all duration-500 hover:border-white hover:bg-white hover:text-black"
             >
               Descargar CV
-              <span
-                className="text-base transition-transform duration-500 group-hover:translate-x-1"
-                aria-hidden
-              >
-                →
-              </span>
+            </a>
+            <a
+              href="#works"
+              className="w-fit border border-white/20 bg-transparent px-10 py-3 text-xs font-light uppercase tracking-[0.2em] text-white/80 transition-all duration-500 hover:border-white hover:bg-white hover:text-black"
+            >
+              Ver Proyectos
             </a>
           </div>
-        </ExpandedContentPanel>
+        </div>
 
-        <div className="relative mx-auto aspect-[4/5] w-full min-h-[280px] max-w-md sm:min-h-[340px] lg:col-span-6 lg:col-start-7 lg:mx-0 lg:max-w-none lg:min-h-[400px]">
-          <div className="panel-preview-layer panel-preview-layer--back absolute left-0 top-0 z-[1] h-[78%] w-[58%] overflow-hidden border border-white/[0.08] sm:w-[56%]">
-            <img
-              src="/wireone.png"
-              alt="Composición visual — capa posterior"
-              className="h-full w-full object-cover object-center grayscale contrast-[1.02] transition-[filter,transform] duration-500 hover:scale-[1.02] hover:grayscale-0 motion-reduce:scale-100 motion-reduce:grayscale-0"
-              loading="lazy"
-            />
-          </div>
-          <div className="panel-preview-layer panel-preview-layer--front absolute bottom-0 right-0 z-[2] h-[72%] w-[58%] overflow-hidden border border-white/[0.08] sm:w-[56%]">
-            <img
-              src="/wiretwo.png"
-              alt="Composición visual — capa frontal"
-              className="h-full w-full object-cover object-center grayscale contrast-[1.02] transition-[filter,transform] duration-500 hover:scale-[1.02] hover:grayscale-0 motion-reduce:scale-100 motion-reduce:grayscale-0"
-              loading="lazy"
-            />
+        <div className="relative order-1 flex aspect-square w-full items-center justify-center lg:order-2 lg:aspect-auto lg:h-[650px]">
+          <div className="relative mx-auto aspect-[4/5] w-full max-w-[500px]">
+            {ABOUT_IMAGES.map((item) => (
+              <div
+                key={item.src}
+                className={`${item.className} will-change-transform`}
+                style={parallaxStyle(pointer.x, pointer.y, item.depth)}
+              >
+                <img src={item.src} alt={item.alt} className={item.imgClass} />
+              </div>
+            ))}
           </div>
         </div>
       </div>
-    </ExpandedSection>
+    </section>
   );
 };
 
