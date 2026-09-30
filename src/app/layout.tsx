@@ -15,17 +15,18 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Patrick Ordoñez - Desarrollador Front End | React, Next.js, TypeScript",
-    template: "%s | Patrick Ordoñez - Desarrollador Front End"
+    default: "Patrick Ordoñez - Desarrollador Full Stack | React, Next.js, TypeScript",
+    template: "%s | Patrick Ordoñez - Desarrollador Full Stack"
   },
-  description: "Desarrollador Front End especializado en React, Next.js y TypeScript. Más de 3 años de experiencia creando aplicaciones web modernas y responsivas. Portfolio con proyectos destacados en desarrollo web.",
+  description: "Desarrollador Full Stack especializado en React, Next.js y TypeScript. Más de 3 años de experiencia creando aplicaciones web modernas y responsivas. Portfolio con proyectos destacados en desarrollo web.",
   keywords: [
-    "desarrollador front end",
+    "desarrollador full stack",
+    "full stack developer",
     "react developer",
     "nextjs developer", 
     "typescript developer",
     "desarrollador web",
-    "programador frontend",
+    "programador full stack",
     "desarrollo web argentina",
     "portfolio desarrollador",
     "react portfolio",
@@ -47,22 +48,22 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'es_AR',
     url: 'https://patrick-portfolio.vercel.app',
-    title: 'Patrick Ordoñez - Desarrollador Front End',
-    description: 'Desarrollador Front End especializado en React, Next.js y TypeScript. Portfolio con proyectos destacados en desarrollo web moderno.',
+    title: 'Patrick Ordoñez - Desarrollador Full Stack',
+    description: 'Desarrollador Full Stack especializado en React, Next.js y TypeScript. Portfolio con proyectos destacados en desarrollo web moderno.',
     siteName: 'Patrick Ordoñez Portfolio',
     images: [
       {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'Patrick Ordoñez - Desarrollador Front End',
+        alt: 'Patrick Ordoñez - Desarrollador Full Stack',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Patrick Ordoñez - Desarrollador Front End',
-    description: 'Desarrollador Front End especializado en React, Next.js y TypeScript. Portfolio con proyectos destacados.',
+    title: 'Patrick Ordoñez - Desarrollador Full Stack',
+    description: 'Desarrollador Full Stack especializado en React, Next.js y TypeScript. Portfolio con proyectos destacados.',
     images: ['/og-image.png'],
     creator: '@patrick_dev',
   },
@@ -106,8 +107,8 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "Person",
               "name": "Patrick Ordoñez",
-              "jobTitle": "Desarrollador Front End",
-              "description": "Desarrollador Front End especializado en React, Next.js y TypeScript",
+              "jobTitle": "Desarrollador Full Stack",
+              "description": "Desarrollador Full Stack especializado en React, Next.js y TypeScript",
               "url": "https://patrick-portfolio.vercel.app",
               "image": "https://patrick-portfolio.vercel.app/og-image.png",
               "sameAs": [

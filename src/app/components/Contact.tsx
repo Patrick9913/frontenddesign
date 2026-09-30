@@ -1,7 +1,14 @@
 "use client";
 
-import { useState, type ChangeEvent, type FormEvent } from "react";
+import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import emailjs from "@emailjs/browser";
+import {
+  buildDemoMessage,
+  CONTACT_DEMO_EVENT,
+  CONTACT_DEMO_STORAGE_KEY,
+  focusContactMessageField,
+  readDemoTitleFromUrl,
+} from "./contactDemo";
 
 export const Contact = () => {
   const [formData, setFormData] = useState({
@@ -13,6 +20,36 @@ export const Contact = () => {
   const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">(
     "idle"
   );
+
+  useEffect(() => {
+    const applyDemoMessage = (message: string) => {
+      setFormData((prev) => ({ ...prev, message }));
+      focusContactMessageField();
+    };
+
+    const demoTitle = readDemoTitleFromUrl();
+    if (demoTitle && window.location.hash === "#contact") {
+      applyDemoMessage(buildDemoMessage({ title: demoTitle }));
+    }
+
+    const stored = sessionStorage.getItem(CONTACT_DEMO_STORAGE_KEY);
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored) as { message?: string };
+        if (parsed.message) applyDemoMessage(parsed.message);
+      } finally {
+        sessionStorage.removeItem(CONTACT_DEMO_STORAGE_KEY);
+      }
+    }
+
+    const onDemoPrefill = (event: Event) => {
+      const { message } = (event as CustomEvent<{ message: string }>).detail;
+      if (message) applyDemoMessage(message);
+    };
+
+    window.addEventListener(CONTACT_DEMO_EVENT, onDemoPrefill);
+    return () => window.removeEventListener(CONTACT_DEMO_EVENT, onDemoPrefill);
+  }, []);
 
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -153,6 +190,7 @@ export const Contact = () => {
             </div>
             <div className="group relative">
               <textarea
+                id="contact-message"
                 name="message"
                 required
                 rows={4}

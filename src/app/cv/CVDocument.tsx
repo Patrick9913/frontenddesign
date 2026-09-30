@@ -1,6 +1,6 @@
 import { Document, Page, Text, View, StyleSheet, Link, Font } from "@react-pdf/renderer";
 import type { ReactNode } from "react";
-import { cv } from "./cvData";
+import { cv, type CvContent } from "./cvData";
 
 Font.registerHyphenationCallback((word) => [word]);
 
@@ -113,45 +113,51 @@ const Section = ({ title, children }: { title: string; children: ReactNode }) =>
   </View>
 );
 
-export function CVDocument() {
+export function CVDocument({
+  data = cv,
+  language = "es",
+}: {
+  data?: CvContent;
+  language?: "es" | "en";
+}) {
   return (
     <Document
-      title={`${cv.name} — CV`}
-      author={cv.name}
-      subject="Front End Developer CV"
-      language="es"
+      title={`${data.name} — CV`}
+      author={data.name}
+      subject="Full Stack Developer CV"
+      language={language}
     >
       <Page size="A4" style={styles.page}>
-        <Text style={styles.name}>{cv.name}</Text>
-        <Text style={styles.role}>{cv.role}</Text>
+        <Text style={styles.name}>{data.name}</Text>
+        <Text style={styles.role}>{data.role}</Text>
         <Text style={styles.meta}>
-          {cv.location}
+          {data.location}
           {"  |  "}
-          <Link src={`mailto:${cv.email}`} style={styles.link}>
-            {cv.email}
+          <Link src={`mailto:${data.email}`} style={styles.link}>
+            {data.email}
           </Link>
           {"  |  "}
-          {cv.phone}
+          {data.phone}
           {"  |  "}
-          <Link src={cv.github} style={styles.link}>
+          <Link src={data.github} style={styles.link}>
             GitHub
           </Link>
           {"  |  "}
-          <Link src={cv.linkedin} style={styles.link}>
+          <Link src={data.linkedin} style={styles.link}>
             LinkedIn
           </Link>
           {"  |  "}
-          <Link src={cv.website} style={styles.link}>
+          <Link src={data.website} style={styles.link}>
             Portfolio
           </Link>
         </Text>
 
         <Section title="Summary">
-          <Text style={styles.profile}>{cv.profile}</Text>
+          <Text style={styles.profile}>{data.profile}</Text>
         </Section>
 
         <Section title="Experience">
-          {cv.experience.map((item) => (
+          {data.experience.map((item) => (
             <View key={item.org} style={styles.job} wrap={false}>
               <View style={styles.row}>
                 <Text style={styles.org}>{item.org}</Text>
@@ -171,11 +177,11 @@ export function CVDocument() {
         </Section>
 
         <Section title="Skills">
-          <Text style={styles.skills}>{cv.skills.join(", ")}</Text>
+          <Text style={styles.skills}>{data.skills.join(", ")}</Text>
         </Section>
 
         <Section title="Education">
-          {cv.education.map((item) => (
+          {data.education.map((item) => (
             <View key={item.title} style={[styles.row, { marginBottom: 4 }]} wrap={false}>
               <Text style={styles.eduTitle}>
                 {item.title}

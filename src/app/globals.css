@@ -89,9 +89,49 @@ body {
   }
 }
 
+@keyframes whatsapp-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.42;
+  }
+  100% {
+    transform: scale(1.65);
+    opacity: 0;
+  }
+}
+
+.whatsapp-pulse-ring {
+  border: 1px solid rgba(37, 211, 102, 0.55);
+  animation: whatsapp-pulse 2.6s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+
+.whatsapp-pulse-ring--delay {
+  animation-delay: 1.3s;
+}
+
+@keyframes whatsapp-fab-nudge {
+  0%,
+  88%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  92% {
+    transform: translate3d(0, -2px, 0);
+  }
+  96% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.whatsapp-fab--attention {
+  animation: whatsapp-fab-nudge 4.5s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .hero-scroll-indicator,
-  .hero-type-cursor {
+  .hero-type-cursor,
+  .whatsapp-pulse-ring,
+  .whatsapp-fab--attention {
     animation: none !important;
   }
 

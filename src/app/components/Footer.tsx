@@ -1,3 +1,5 @@
+import { CvDownloadTrigger } from "./CvDownloadTrigger";
+
 const year = new Date().getFullYear();
 
 export const Footer = () => {
@@ -14,7 +16,7 @@ export const Footer = () => {
             Patrick Ordoñez
           </h3>
           <p className="mb-2 text-xs font-light leading-relaxed tracking-wider text-white/40 sm:text-sm">
-            Front End Developer. Interfaces claras, producto real y atención al
+            Full Stack Developer. Interfaces claras, producto real y atención al
             detalle en cada pantalla.
           </p>
           <div className="flex items-center gap-5">
@@ -96,12 +98,7 @@ export const Footer = () => {
             >
               Escribime
             </a>
-            <a
-              href="/cv"
-              className="w-fit text-xs font-light tracking-widest text-white/60 transition-colors duration-300 hover:text-white"
-            >
-              Descargar CV
-            </a>
+            <CvDownloadTrigger variant="link" />
           </div>
         </div>
       </div>

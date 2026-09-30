@@ -1,3 +1,5 @@
+import { TOOL_GROUP_DOT, TOOL_GROUP_TITLE } from "./portfolioAccents";
+
 const TOOL_GROUPS = [
   {
     title: "Frameworks",
@@ -27,28 +29,32 @@ export const Tools = () => {
 
       <div className="relative z-10 mx-auto flex max-w-7xl flex-col items-center">
         <div className="mb-20 text-center">
-          <h2 className="mb-4 text-xs font-light uppercase tracking-[0.4em] text-white/50 sm:text-sm">
+          <h2 className="mb-4 text-xs font-light uppercase tracking-[0.4em] text-[#6eb0d4]/70 sm:text-sm">
             Arsenal Técnico
           </h2>
           <h3 className="text-4xl font-extralight uppercase tracking-widest text-white drop-shadow-xl md:text-5xl lg:text-6xl">
             Herramientas
           </h3>
-          <div className="mx-auto mt-8 h-px w-12 bg-white/30" />
+          <div className="mx-auto mt-8 h-px w-12 bg-gradient-to-r from-transparent via-[#a992d4]/50 to-transparent" />
         </div>
 
         <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-          {TOOL_GROUPS.map((group) => (
+          {TOOL_GROUPS.map((group, groupIndex) => (
             <div
               key={group.title}
               className="group relative flex flex-col gap-6 overflow-hidden border border-white/5 bg-white/[0.01] p-8 transition-all duration-700 hover:-translate-y-1 hover:bg-white/[0.03]"
             >
-              <h4 className="text-[10px] font-light uppercase tracking-[0.3em] text-white/50 md:text-xs">
+              <h4
+                className={`text-[10px] font-light uppercase tracking-[0.3em] md:text-xs ${TOOL_GROUP_TITLE[groupIndex]}`}
+              >
                 {group.title}
               </h4>
               <div className="flex flex-col gap-3">
                 {group.items.map((item) => (
                   <div key={item} className="flex items-center gap-4">
-                    <div className="h-1 w-1 rounded-full bg-white/20 transition-colors duration-500 group-hover:bg-white/60" />
+                    <div
+                      className={`h-1 w-1 rounded-full transition-colors duration-500 ${TOOL_GROUP_DOT[groupIndex]}`}
+                    />
                     <span className="text-sm font-light tracking-wide text-white/80 transition-colors duration-500 group-hover:text-white md:text-base">
                       {item}
                     </span>

@@ -10,7 +10,7 @@ const COPY = {
 
 const PHRASES = [
   { line1: "Patrick", line2: "Ordoñez" },
-  { line1: "Front End", line2: "Developer" },
+  { line1: "Full Stack", line2: "Developer" },
 ] as const;
 
 const INTRO_DELAY_MS = 900;
@@ -108,7 +108,7 @@ function HeroHeadline({ active }: { active: boolean }) {
   if (reducedMotion) {
     return (
       <h1 className="mb-6 text-5xl font-extralight uppercase leading-tight tracking-widest text-white md:text-7xl lg:text-8xl">
-        Front End{" "}
+        Full Stack{" "}
         <br className="hidden md:block" />
         <span className="font-normal text-white/90">Developer</span>
       </h1>
@@ -182,15 +182,27 @@ export const Hero = () => {
           className="will-change-transform"
           style={parallaxStyle(pointer.x, pointer.y, 10)}
         >
-          <h2
-            className={`mb-6 text-xs font-light uppercase tracking-[0.4em] text-white/50 transition-[opacity,transform] duration-1000 sm:text-sm ${
+          <div
+            className={`mb-6 flex flex-col gap-4 transition-[opacity,transform] duration-1000 sm:flex-row sm:items-center sm:gap-6 ${
               contentReady
                 ? "translate-y-0 opacity-100"
                 : "translate-y-3 opacity-0"
             }`}
           >
-            {COPY.eyebrow}
-          </h2>
+            <h2 className="text-xs font-light uppercase tracking-[0.4em] text-white/50 sm:text-sm">
+              {COPY.eyebrow}
+            </h2>
+            <p className="inline-flex w-fit items-center gap-2 border border-[#25D366]/25 bg-[#25D366]/[0.06] px-3 py-1.5 font-mono text-[9px] uppercase tracking-[0.18em] text-[#9ef0b8]/90">
+              <span
+                className="relative flex h-2 w-2 shrink-0 items-center justify-center"
+                aria-hidden
+              >
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#25D366]/40 opacity-60" />
+                <span className="relative h-1.5 w-1.5 rounded-full bg-[#25D366]" />
+              </span>
+              Disponible para proyectos · respuesta ~24h
+            </p>
+          </div>
         </div>
 
         <div

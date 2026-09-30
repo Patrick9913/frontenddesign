@@ -1,39 +1,114 @@
 "use client";
 
+import { CvDownloadTrigger } from "./CvDownloadTrigger";
+import { TrustedBy } from "./TrustedBy";
 import { parallaxStyle, useMouseParallax } from "./useMouseParallax";
 
-const ABOUT_IMAGES = [
+type AboutPreview = {
+  src: string;
+  alt: string;
+  label: string;
+  meta: string;
+  href: string;
+  objectPosition: string;
+  frameClassName: string;
+  depth: number;
+};
+
+const ABOUT_PREVIEWS: AboutPreview[] = [
   {
-    src: "/exapone.jpg",
-    alt: "Código en pantalla — desarrollo front end",
+    src: "/about-bns.png",
+    alt: "BNS Abogados — sitio institucional",
+    label: "BNS Abogados",
+    meta: "Sitio · 2025",
+    href: "https://bnsabogados.vercel.app/",
+    objectPosition: "center 22%",
+    frameClassName: "absolute left-0 top-[6%] z-10 w-[82%]",
+    depth: 6,
+  },
+  {
+    src: "/about-calingasta.png",
+    alt: "Municipalidad de Calingasta — portal institucional",
+    label: "Calingasta",
+    meta: "Gobierno · 2024",
+    href: "https://www.calingasta.gob.ar/",
+    objectPosition: "center 28%",
+    frameClassName: "absolute right-0 top-0 z-[12] w-[62%]",
+    depth: 7,
+  },
+  {
+    src: "/about-marga.png",
+    alt: "Escuela Margarita — portal educativo",
+    label: "Escuela Margarita",
+    meta: "Institucional · 2025",
+    href: "https://margaweb.vercel.app/",
+    objectPosition: "center 42%",
+    frameClassName: "absolute bottom-[4%] right-0 z-20 w-[72%]",
     depth: 10,
-    className:
-      "absolute top-0 left-[5%] z-10 h-[35%] w-[45%] shadow-[0_0_40px_rgba(0,0,0,0.5)] transition-[z-index] duration-700 hover:z-40",
-    imgClass:
-      "h-full w-full border border-white/5 object-cover opacity-100 transition-all duration-500 md:opacity-60 md:grayscale md:hover:opacity-100 md:hover:grayscale-0",
   },
-  {
-    src: "/exaptwo.jpg",
-    alt: "Editor de código en entorno oscuro",
-    depth: 22,
-    className:
-      "absolute top-[20%] right-0 z-20 h-[55%] w-[45%] shadow-[0_0_40px_rgba(0,0,0,0.8)] transition-[z-index] duration-700 hover:z-40",
-    imgClass:
-      "h-full w-full border border-white/10 object-cover opacity-100 transition-all duration-500 md:opacity-80 md:grayscale md:hover:opacity-100 md:hover:grayscale-0",
-  },
-  {
-    src: "/exapthree.jpg",
-    alt: "Diseño de interfaz y prototipo UI",
-    depth: 34,
-    className:
-      "absolute bottom-[5%] left-0 z-30 h-[40%] w-[55%] shadow-[0_0_50px_rgba(0,0,0,0.9)] transition-[z-index] duration-700 hover:z-40",
-    imgClass:
-      "h-full w-full border border-white/20 object-cover opacity-100 transition-all duration-500 md:grayscale md:hover:grayscale-0",
-  },
-] as const;
+];
+
+function PreviewChrome({
+  preview,
+  pointerX,
+  pointerY,
+}: {
+  preview: AboutPreview;
+  pointerX: number;
+  pointerY: number;
+}) {
+  return (
+    <a
+      href={preview.href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`group block ${preview.frameClassName} will-change-transform transition-transform duration-700 md:hover:scale-[1.012]`}
+      style={parallaxStyle(pointerX, pointerY, preview.depth)}
+    >
+      <div className="overflow-hidden border border-white/10 bg-[#0a0a0a] shadow-[0_28px_60px_-32px_rgba(0,0,0,0.95)]">
+        <div
+          className="flex items-center gap-1.5 border-b border-white/10 bg-[#0c0c0c] px-3 py-2.5"
+          aria-hidden
+        >
+          <span className="h-1.5 w-1.5 rounded-full bg-white/25" />
+          <span className="h-1.5 w-1.5 rounded-full bg-white/15" />
+          <span className="h-1.5 w-1.5 rounded-full bg-white/15" />
+          <span className="ml-2 truncate font-mono text-[8px] uppercase tracking-[0.18em] text-white/35">
+            {preview.label}
+          </span>
+        </div>
+
+        <div className="relative aspect-[16/10] overflow-hidden bg-[#111]">
+          <img
+            src={preview.src}
+            alt={preview.alt}
+            className="h-full w-full object-cover transition-[filter,transform] duration-700 ease-out md:group-hover:scale-[1.02]"
+            style={{
+              objectPosition: preview.objectPosition,
+              filter: "saturate(0.88) contrast(1.04) brightness(0.94)",
+            }}
+          />
+          <div
+            className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#050505]/50 via-transparent to-transparent"
+            aria-hidden
+          />
+        </div>
+
+        <div className="border-t border-white/10 bg-[#080808] px-3 py-2.5">
+          <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-white/55 transition-colors duration-300 group-hover:text-white/80">
+            {preview.label}
+          </p>
+          <p className="mt-0.5 font-mono text-[8px] uppercase tracking-[0.16em] text-white/35">
+            {preview.meta}
+          </p>
+        </div>
+      </div>
+    </a>
+  );
+}
 
 export const About = () => {
-  const pointer = useMouseParallax();
+  const pointer = useMouseParallax(0.45);
 
   return (
     <section
@@ -64,14 +139,9 @@ export const About = () => {
               con atención al detalle.
             </p>
           </div>
-          <div className="mt-4 flex flex-col items-start gap-4">
-            <a
-              href="/cv"
-              download="Patrick-Ordonez-CV.pdf"
-              className="w-fit border border-white/20 bg-transparent px-10 py-3 text-xs font-light uppercase tracking-[0.2em] text-white/80 transition-all duration-500 hover:border-white hover:bg-white hover:text-black"
-            >
-              Descargar CV
-            </a>
+          <TrustedBy />
+          <div className="mt-2 flex flex-col items-start gap-4">
+            <CvDownloadTrigger variant="button" />
             <a
               href="#works"
               className="w-fit border border-white/20 bg-transparent px-10 py-3 text-xs font-light uppercase tracking-[0.2em] text-white/80 transition-all duration-500 hover:border-white hover:bg-white hover:text-black"
@@ -81,18 +151,17 @@ export const About = () => {
           </div>
         </div>
 
-        <div className="relative order-1 flex aspect-square w-full items-center justify-center lg:order-2 lg:aspect-auto lg:h-[650px]">
-          <div className="relative mx-auto aspect-[4/5] w-full max-w-[500px]">
-            {ABOUT_IMAGES.map((item) => (
-              <div
-                key={item.src}
-                className={`${item.className} will-change-transform`}
-                style={parallaxStyle(pointer.x, pointer.y, item.depth)}
-              >
-                <img src={item.src} alt={item.alt} className={item.imgClass} />
-              </div>
+        <div className="relative order-1 flex aspect-square w-full items-center justify-center lg:order-2 lg:aspect-auto lg:h-[580px]">
+          <figure className="relative mx-auto aspect-[4/5] w-full max-w-[480px] lg:max-w-[520px]">
+            {ABOUT_PREVIEWS.map((preview) => (
+              <PreviewChrome
+                key={preview.src}
+                preview={preview}
+                pointerX={pointer.x}
+                pointerY={pointer.y}
+              />
             ))}
-          </div>
+          </figure>
         </div>
       </div>
     </section>
