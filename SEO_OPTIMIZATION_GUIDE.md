@@ -49,9 +49,9 @@ Necesitas crear estos archivos en la carpeta `public/`:
 
 ### 3. **Configurar Google Search Console**
 1. Ve a [Google Search Console](https://search.google.com/search-console)
-2. Agrega tu dominio: `https://patrick-portfolio.vercel.app`
+2. Agrega tu dominio: `https://www.patrickyoeldevs.com`
 3. Verifica la propiedad (usa el código en metadata.verification.google)
-4. Envía el sitemap: `https://patrick-portfolio.vercel.app/sitemap.xml`
+4. Envía el sitemap: `https://www.patrickyoeldevs.com/sitemap.xml`
 
 ### 4. **Configurar Google Analytics**
 ```typescript

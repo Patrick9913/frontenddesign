@@ -29,7 +29,7 @@ export const cv: CvContent = {
   location: "Buenos Aires, Argentina",
   email: "patrickyoel13@gmail.com",
   phone: "+54 11 4046 8176",
-  website: "https://patrick-portfolio.vercel.app",
+  website: "https://www.patrickyoeldevs.com",
   github: "https://github.com/Patrick9913",
   linkedin: "https://www.linkedin.com/in/patrick-ord%C3%B3%C3%B1ez-14904221a/",
   profile:
@@ -126,7 +126,7 @@ export const cvEn: CvContent = {
   location: "Buenos Aires, Argentina",
   email: "patrickyoel13@gmail.com",
   phone: "+54 11 4046 8176",
-  website: "https://patrick-portfolio.vercel.app",
+  website: "https://www.patrickyoeldevs.com",
   github: "https://github.com/Patrick9913",
   linkedin: "https://www.linkedin.com/in/patrick-ord%C3%B3%C3%B1ez-14904221a/",
   profile:

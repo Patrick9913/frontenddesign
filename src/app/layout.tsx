@@ -40,14 +40,14 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL('https://patrick-portfolio.vercel.app'),
+  metadataBase: new URL('https://www.patrickyoeldevs.com'),
   alternates: {
     canonical: '/',
   },
   openGraph: {
     type: 'website',
     locale: 'es_AR',
-    url: 'https://patrick-portfolio.vercel.app',
+    url: 'https://www.patrickyoeldevs.com',
     title: 'Patrick Ordoñez - Desarrollador Full Stack',
     description: 'Desarrollador Full Stack especializado en React, Next.js y TypeScript. Portfolio con proyectos destacados en desarrollo web moderno.',
     siteName: 'Patrick Ordoñez Portfolio',
@@ -109,8 +109,8 @@ export default function RootLayout({
               "name": "Patrick Ordoñez",
               "jobTitle": "Desarrollador Full Stack",
               "description": "Desarrollador Full Stack especializado en React, Next.js y TypeScript",
-              "url": "https://patrick-portfolio.vercel.app",
-              "image": "https://patrick-portfolio.vercel.app/og-image.png",
+              "url": "https://www.patrickyoeldevs.com",
+              "image": "https://www.patrickyoeldevs.com/og-image.png",
               "sameAs": [
                 "https://github.com/Patrick9913",
                 "https://www.linkedin.com/in/patrick-ord%C3%B3%C3%B1ez-14904221a/"
