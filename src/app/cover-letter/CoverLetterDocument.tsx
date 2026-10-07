@@ -1,11 +1,6 @@
 import { Document, Page, Text, View, StyleSheet, Font } from "@react-pdf/renderer";
 import { cv, cvEn } from "../cv/cvData";
-import {
-  applyPlaceholders,
-  formatLetterDate,
-  salutation,
-  signOff,
-} from "./templates";
+import { formatLetterDate, salutation, signOff } from "./templates";
 import type { CoverLetterPdfPayload } from "./types";
 
 Font.registerHyphenationCallback((word) => [word]);
@@ -78,9 +73,9 @@ export function CoverLetterDocument({ payload }: { payload: CoverLetterPdfPayloa
   const company = payload.company.trim();
   const role = payload.role.trim();
 
-  const opening = applyPlaceholders(payload.opening, company, role);
-  const motivation = applyPlaceholders(payload.motivation, company, role);
-  const closing = applyPlaceholders(payload.closing, company, role);
+  const opening = payload.opening;
+  const motivation = payload.motivation;
+  const closing = payload.closing;
 
   return (
     <Document

@@ -1,34 +1,38 @@
 import type { CoverLetterLanguage } from "./types";
+import {
+  DEFAULT_LETTER_MODEL_ID,
+  getModelParagraphs,
+} from "./letterModels";
+
+export type PlaceholderContext = {
+  company: string;
+  role: string;
+  hook: string;
+  context: string;
+  portfolio: string;
+  referral: string;
+};
 
 export function defaultOpening(language: CoverLetterLanguage): string {
-  if (language === "en") {
-    return "I am writing to express my interest in the {{role}} position at {{company}}. With experience building production web platforms in React, Next.js, and TypeScript, I believe I can contribute meaningfully to your team from day one.";
-  }
-  return "Me dirijo a ustedes para expresar mi interés en el puesto de {{role}} en {{company}}. Cuento con experiencia desarrollando plataformas web en producción con React, Next.js y TypeScript, y creo poder aportar valor al equipo desde el inicio.";
+  return getModelParagraphs(DEFAULT_LETTER_MODEL_ID, language).opening;
 }
 
 export function defaultMotivation(language: CoverLetterLanguage): string {
-  if (language === "en") {
-    return "What draws me to this opportunity is the chance to work on products with real operational impact—translating complex workflows into clear, reliable interfaces, the same approach I have applied across education, hospitality, industry, and public-sector projects.";
-  }
-  return "Lo que me motiva de esta oportunidad es poder trabajar en productos con impacto operativo real: traducir procesos complejos en interfaces claras y confiables, el mismo enfoque que aplico en proyectos de educación, gastronomía, industria y sector público.";
+  return getModelParagraphs(DEFAULT_LETTER_MODEL_ID, language).motivation;
 }
 
 export function defaultClosing(language: CoverLetterLanguage): string {
-  if (language === "en") {
-    return "Thank you for considering my application. I would welcome the opportunity to discuss how my experience aligns with your needs.";
-  }
-  return "Agradezco su tiempo y consideración. Quedo a disposición para conversar sobre cómo mi experiencia puede alinearse con lo que buscan.";
+  return getModelParagraphs(DEFAULT_LETTER_MODEL_ID, language).closing;
 }
 
-export function applyPlaceholders(
-  text: string,
-  company: string,
-  role: string
-): string {
+export function applyPlaceholders(text: string, ctx: PlaceholderContext): string {
   return text
-    .replaceAll("{{company}}", company.trim() || "—")
-    .replaceAll("{{role}}", role.trim() || "—");
+    .replaceAll("{{company}}", ctx.company.trim() || "—")
+    .replaceAll("{{role}}", ctx.role.trim() || "—")
+    .replaceAll("{{hook}}", ctx.hook)
+    .replaceAll("{{context}}", ctx.context)
+    .replaceAll("{{portfolio}}", ctx.portfolio)
+    .replaceAll("{{referral}}", ctx.referral);
 }
 
 export function formatLetterDate(language: CoverLetterLanguage, date = new Date()): string {
